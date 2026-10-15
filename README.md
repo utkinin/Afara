@@ -44,3 +44,7 @@ npm run test:e2e
 - `compose.yaml` — только development; `compose.production.yaml`, `Dockerfile` — переносимое размещение.
 
 Детали и границы готовности: [QA_REPORT.md](QA_REPORT.md), [DEPLOYMENT.md](DEPLOYMENT.md), [CONTENT_REQUIRED.md](CONTENT_REQUIRED.md), [ADMIN_GUIDE.md](ADMIN_GUIDE.md).
+
+## Предпросмотр для владельца
+
+Публичная версия для проверки интерфейса: **https://utkinin.github.io/Afara/**. Страницы и меню работают, отправка заявок отключена; админка и серверные API не публикуются. Размещение GitHub Pages подтверждено. Способ обновления и границы проверки — [PREVIEW.md](PREVIEW.md).

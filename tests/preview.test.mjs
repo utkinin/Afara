@@ -1,0 +1,40 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {chromium} from '@playwright/test'
+const origin=process.env.PREVIEW_TEST_ORIGIN||'http://localhost:3100'
+const base=process.env.PREVIEW_BASE||'/Afara'
+test('static preview has real pages, local assets, keyboard menu and readonly form',async()=>{
+ const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||'/usr/bin/chromium',args:['--no-sandbox']})
+ try{
+  const page=await browser.newPage({viewport:{width:390,height:844}}),external=[],errors=[]
+  page.on('request',r=>{if(new URL(r.url()).origin!==origin)external.push(r.url())})
+  page.on('pageerror',e=>errors.push(e.message))
+  let response=await page.goto(origin+base+'/',{waitUntil:'networkidle'})
+  assert.equal(response.status(),200);assert.match(await page.locator('h1').textContent(),/Сложные портьеры/)
+  assert.equal(await page.locator('main img').first().evaluate(e=>e.complete&&e.naturalWidth>0),true)
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true)
+  await page.getByRole('button',{name:'Открыть меню'}).click()
+  assert.equal(await page.locator('dialog').evaluate(e=>e.open),true)
+  await page.keyboard.press('Escape')
+  assert.equal(await page.locator('dialog').evaluate(e=>e.open),false)
+  await page.getByLabel('Тип пространства').selectOption({index:1})
+  await page.getByLabel('Город / страна').fill('Санкт-Петербург')
+  await page.getByLabel('Что вы хотите решить?').fill('Проверка предпросмотра сайта AFARA')
+  await page.getByRole('button',{name:'Продолжить',exact:true}).click()
+  await page.getByLabel('Ваше имя').waitFor()
+  assert.equal(await page.getByRole('button',{name:'Отправить заявку',exact:true}).isDisabled(),true)
+  await page.getByLabel('Удобный способ связи').selectOption('email')
+  assert.equal(await page.locator('input[type=email]').count(),1)
+  await page.getByRole('button',{name:'Назад',exact:false}).click()
+  assert.equal(await page.getByLabel('Город / страна').inputValue(),'Санкт-Петербург')
+  await page.getByRole('button',{name:'Открыть меню'}).click()
+  await page.locator('dialog').getByRole('link',{name:'Все частные интерьеры'}).click()
+  await page.waitForURL(origin+base+'/chastnye-interery/')
+  assert.match(await page.locator('h1').textContent(),/частных интерьеров/)
+  for(const pathname of ['chastnye-interery/zagorodnye-doma/','chastnye-interery/kvartiry/','obshchestvennye-prostranstva/','obshchestvennye-prostranstva/oteli/','obshchestvennye-prostranstva/restorany/']){
+   response=await page.goto(origin+base+'/'+pathname);assert.equal(response.status(),200);assert.equal(await page.locator('h1').count(),1)
+  }
+  for(const pathname of ['admin/','api/leads/','preview/'])assert.equal((await page.request.get(origin+base+'/'+pathname)).status(),404)
+  assert.deepEqual(external,[]);assert.deepEqual(errors,[])
+ }finally{await browser.close()}
+})

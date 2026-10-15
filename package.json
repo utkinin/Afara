@@ -21,7 +21,9 @@
     "db:migrate:create": "npm run payload -- migrate:create",
     "seed:dev": "tsx --env-file-if-exists=.env.local scripts/seed.ts",
     "create:admin": "tsx --env-file-if-exists=.env.local scripts/create-admin.ts",
-    "worker": "tsx --env-file-if-exists=.env.local scripts/worker.ts"
+    "worker": "tsx --env-file-if-exists=.env.local scripts/worker.ts",
+    "preview:build": "node scripts/build-preview.mjs",
+    "test:preview": "node --test tests/preview.test.mjs"
   },
   "dependencies": {
     "@fontsource-variable/cormorant-garamond": "5.3.0",
