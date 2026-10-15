@@ -1,0 +1,13 @@
+/* Keep Payload's native forms; constrain its mobile breadcrumb row to the viewport. */
+@media (max-width: 767px) {
+  .app-header__step-nav-wrapper {
+    min-width: 0;
+    flex: 1;
+    overflow-x: auto;
+  }
+  .app-header__step-nav { min-width: 0; }
+  .nav__header { max-width: calc(100vw - 32px); }
+  .nav__header-content { width: 100%; max-width: 100%; }
+}
+.afara-share-controls { max-width: 100%; overflow-wrap: anywhere; }
+.afara-share-controls .btn { min-height: 44px; font-size: 16px; margin: 0; }

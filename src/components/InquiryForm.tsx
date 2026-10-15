@@ -2,6 +2,7 @@
 import { useRef, useState } from 'react'
 import type { Site } from '@/payload-types'
 import styles from './site.module.css'
+import { ArrowIcon } from './ArrowIcon'
 type Labels=Site['form']
 export function InquiryForm({labels,source,consent,policy}:{labels:Labels,source:string,consent:{url:string,version:string}|null,policy:string|null}){
   const [step,setStep]=useState(1),[busy,setBusy]=useState(false),[done,setDone]=useState(false),[failure,setFailure]=useState('')
@@ -21,7 +22,7 @@ export function InquiryForm({labels,source,consent,policy}:{labels:Labels,source
       setDone(true)
     }catch{setFailure(labels?.error||'Не удалось отправить. Попробуйте ещё раз.')}finally{setBusy(false)}
   }
-  if(done)return <div className={styles.formSuccess} role="status"><span className={styles.successMark}>✓</span><h3>{labels.success}</h3><button className={styles.textButton} type="button" onClick={()=>{setDone(false);setStep(1);setValues({space:'',city:'',description:'',budget:'',name:'',channel:'phone',contact:'',consent:false,website:''});key.current=null}}>{labels.again} ↗</button></div>
+  if(done)return <div className={styles.formSuccess} role="status"><span className={styles.successMark}>✓</span><h3>{labels.success}</h3><button className={styles.textButton} type="button" onClick={()=>{setDone(false);setStep(1);setValues({space:'',city:'',description:'',budget:'',name:'',channel:'phone',contact:'',consent:false,website:''});key.current=null}}>{labels.again} <ArrowIcon/></button></div>
   return <form ref={form} className={styles.form} onSubmit={send} onInvalid={e=>{(e.target as HTMLElement).focus()}}>
     <div className={styles.formStep}><span>0{step} / 02</span><span>{step===1?labels.stepOne:labels.stepTwo}</span><div className={styles.stepTrack}><i style={{width:step===1?'50%':'100%'}}/></div></div>
     {step===1?<div className={styles.formGrid}>
@@ -38,6 +39,6 @@ export function InquiryForm({labels,source,consent,policy}:{labels:Labels,source
     <div className={styles.honeypot} aria-hidden="true"><label>Website<input tabIndex={-1} autoComplete="off" value={values.website} onChange={e=>update('website',e.target.value)}/></label></div>
     {failure&&<p className={styles.formError} role="alert">{failure}</p>}
     {disabled&&<p className={styles.formNote}>Приём заявок включится после публикации документов об обработке данных.</p>}
-    <div className={styles.formActions}>{step===2&&<button type="button" className={styles.textButton} onClick={()=>setStep(1)} disabled={busy}>← {labels.back}</button>}<button className={styles.button} disabled={busy||(step===2&&disabled)} type="submit">{busy?'Отправляем…':step===1?labels.next:labels.submit}<span aria-hidden="true">↗</span></button></div>
+    <div className={styles.formActions}>{step===2&&<button type="button" className={styles.textButton} onClick={()=>setStep(1)} disabled={busy}>← {labels.back}</button>}<button className={styles.button} disabled={busy||(step===2&&disabled)} type="submit">{busy?'Отправляем…':step===1?labels.next:labels.submit}<span aria-hidden="true"><ArrowIcon/></span></button></div>
   </form>
 }

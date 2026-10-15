@@ -1,6 +1,6 @@
-import type { Field } from 'payload'
+import type { Field, ArrayField } from 'payload'
 export const picture: Field = { name: 'image', label: 'Изображение', type: 'upload', relationTo: 'media' }
-export const sections: Field = {
+export const sections: ArrayField = {
   name: 'sections', label: 'Содержательные блоки (порядок отображения)', type: 'array', fields: [
     { name: 'kind', label: 'Шаблон', type: 'select', required: true, options: [
       {label:'Пространства',value:'spaces'}, {label:'Композиции',value:'compositions'}, {label:'Разбор решения',value:'details'},

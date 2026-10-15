@@ -1,0 +1,60 @@
+{
+  "routes": [
+    "/",
+    "/chastnye-interery/",
+    "/chastnye-interery/detskie/",
+    "/chastnye-interery/gostinye/",
+    "/chastnye-interery/kabinety/",
+    "/chastnye-interery/kuhni-i-stolovye/",
+    "/chastnye-interery/kvartiry/",
+    "/chastnye-interery/spalni/",
+    "/chastnye-interery/vannye/",
+    "/chastnye-interery/zagorodnye-doma/",
+    "/chastnye-yahty/",
+    "/kontakty/",
+    "/obshchestvennye-prostranstva/",
+    "/obshchestvennye-prostranstva/ofisy/",
+    "/obshchestvennye-prostranstva/oteli/",
+    "/obshchestvennye-prostranstva/restorany/",
+    "/obshchestvennye-prostranstva/sceny/",
+    "/obshchestvennye-prostranstva/shkoly-i-detskie-sady/"
+  ],
+  "viewports": [
+    360,
+    1440
+  ],
+  "checks": [
+    {
+      "question": "Сколько стоит проект?",
+      "source": "/#answer-7",
+      "mode": "sources"
+    },
+    {
+      "question": "Работаете ли вы с частными яхтами?",
+      "source": "/chastnye-yahty/#answer-17",
+      "mode": "sources"
+    }
+  ],
+  "typography": [
+    {
+      "width": 360,
+      "h1": "42.12px",
+      "h2": "36px",
+      "body": "18px"
+    },
+    {
+      "width": 1440,
+      "h1": "87.84px",
+      "h2": "60px",
+      "body": "20px"
+    }
+  ],
+  "network": {
+    "encodedJS": 587400,
+    "encodedImages": 237240,
+    "heroURL": "http://localhost:3000/api/media/file/dc2615a7-b13f-4eb5-8ca2-6083f6fe6e69.webp",
+    "initialResources": 19,
+    "heroBytes": 218522,
+    "consultantOnlyAfterOpen": true
+  }
+}

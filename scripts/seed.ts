@@ -16,7 +16,7 @@ const processSection:NonNullable<Page['sections']>[number]={kind:'process',visib
   {title:'Изготавливаем и проверяем',body:'Работаем по согласованной спецификации, проверяем крой и детали.'},
   {title:'Монтируем и оформляем',body:'Устанавливаем систему и настраиваем композицию в пространстве.'},
 ]}
-const createPage=async(data:Omit<Page,'id'|'createdAt'|'updatedAt'>)=>p.create({collection:'pages',data:{...data,_status:'published'}})
+const createPage=async(data:Omit<Page,'id'|'createdAt'|'updatedAt'>)=>p.create({collection:'pages',data:{...data,serviceConfirmed:true,_status:'published'}})
 const privatePage=await createPage({title:'Частные интерьеры',path:'chastnye-interery',type:'overview',h1:'Текстильное оформление частных интерьеров',intro:'Отдельное окно или резиденция целиком: текстильное решение начинается с архитектуры, света и сценариев жизни.',hero:imageId,conceptLabel:'ИИ-визуализация · концепция',cta:'Обсудить проект',sections:[]})
 const publicPage=await createPage({title:'Общественные пространства',path:'obshchestvennye-prostranstva',type:'overview',h1:'Текстильные решения для HoReCa',intro:'Отель и ресторан требуют выразительной композиции и продуманной инженерии: от светового сценария до управления высокими портьерами.',hero:imageId,conceptLabel:'ИИ-визуализация · концепция',cta:'Обсудить проект',sections:[]})
 const directions=[

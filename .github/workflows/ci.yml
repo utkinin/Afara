@@ -19,11 +19,15 @@ jobs:
       - name: Prepare isolated development services
         run: |
           docker compose up -d --wait
+          docker compose exec -T db createdb -U postgres afara_ci_acceptance
           node --input-type=module <<'JS'
           import fs from 'node:fs'; import crypto from 'node:crypto';
-          fs.writeFileSync('.env.local', 'DATABASE_URL=postgresql://postgres@127.0.0.1:5432/afara\nPAYLOAD_SECRET='+crypto.randomBytes(32).toString('hex')+'\nAPP_URL=http://localhost:3000\nAFARA_STAGE=development\nSMTP_HOST=127.0.0.1\nSMTP_PORT=1025\nSMTP_FROM=afara@example.test\n',{mode:0o600})
+          const values = ['DATABASE_URL=postgresql://postgres@127.0.0.1:5432/afara_ci_acceptance', 'PAYLOAD_SECRET='+crypto.randomBytes(32).toString('hex'), 'APP_URL=http://localhost:3000', 'AFARA_STAGE=development', 'AFARA_DB_PUSH=false', 'MEDIA_DIR=./media', 'SMTP_HOST=127.0.0.1', 'SMTP_PORT=1025', 'SMTP_FROM=afara@example.test', ''];
+          fs.writeFileSync('.env.local', values.join('\n'), {mode:0o600});
           JS
+          AFARA_STAGE=build npm run db:migrate
           npm run seed:dev
+          npx tsx --env-file-if-exists=.env.local tests/bootstrap.ts
       - run: npm run typecheck && npm run lint && npm run build
       - name: Start and validate
         run: |

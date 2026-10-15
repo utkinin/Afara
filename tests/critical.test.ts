@@ -16,6 +16,7 @@ test('validation rejects mass assignment and invalid contacts; CSV neutralizes f
 
 test('real PostgreSQL: roles, drafts, private media, transactional inquiry and SMTP outbox',async()=>{
   assert.equal(process.env.AFARA_STAGE,'development','This test must never run against production')
+  assert.match(new URL(process.env.DATABASE_URL!).pathname, /_acceptance$/, 'Only an isolated acceptance database may be used')
   const p=await cms(),tag=randomUUID(),password=randomBytes(24).toString('base64url')
   const admin=await p.create({collection:'users',data:{email:`qa-admin-${tag}@example.test`,password,role:'ADMIN'}})
   const editor=await p.create({collection:'users',data:{email:`qa-editor-${tag}@example.test`,password,role:'EDITOR'}})
@@ -25,11 +26,11 @@ test('real PostgreSQL: roles, drafts, private media, transactional inquiry and S
   try{
     await assert.rejects(()=>p.find({collection:'leads',user,overrideAccess:false}))
     await assert.rejects(()=>p.update({collection:'users',id:editor.id,data:{role:'ADMIN'},user,overrideAccess:false}))
-    const page=await p.create({collection:'pages',user,overrideAccess:false,data:{title:`QA ${tag}`,path:`qa-${tag}`,type:'direction',h1:'Проверяемый черновик',cta:'Обсудить проект',_status:'draft'}})
+    const page=await p.create({collection:'pages',user,overrideAccess:false,data:{title:`QA ${tag}`,path:`qa-${tag}`,type:'direction',intro:'Содержательное описание синтетической страницы для проверки публикации.',serviceConfirmed:true,h1:'Проверяемый черновик',cta:'Обсудить проект',_status:'draft'}})
     created.push({collection:'pages',id:page.id})
     assert.equal((await p.find({collection:'pages',where:{id:{equals:page.id}},overrideAccess:false})).totalDocs,0)
     await assert.rejects(()=>p.update({collection:'pages',id:page.id,data:{_status:'published'},user,overrideAccess:false}))
-    await p.update({collection:'pages',id:page.id,data:{_status:'published'},user:owner,overrideAccess:false})
+    await p.update({collection:'pages',id:page.id,data:{serviceConfirmed:true,_status:'published'},user:owner,overrideAccess:false})
     assert.equal((await p.findByID({collection:'pages',id:page.id,overrideAccess:false})).h1,'Проверяемый черновик')
     await assert.rejects(()=>p.update({collection:'pages',id:page.id,data:{h1:'Попытка изменения без draft'},user,overrideAccess:false}))
     await p.update({collection:'pages',id:page.id,draft:true,data:{h1:'Непубличное изменение',_status:'draft'},user,overrideAccess:false})

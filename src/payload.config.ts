@@ -8,6 +8,8 @@ import path from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { admin, staff, published, publicationGuard, globalGuard } from './cms/access'
 import { sections, seo } from './cms/fields'
+import { Knowledge, ShortLinks, Works } from './cms/public-collections'
+import { publicContactText } from './cms/contact-knowledge'
 
 const drafts = { drafts: true, maxPerDoc: 30 } as const
 const preview = (data: Record<string, unknown>) => `${process.env.APP_URL || 'http://localhost:3000'}/preview?page=${data.id}`
@@ -80,8 +82,10 @@ const Pages: CollectionConfig = {
   fields:[
     {name:'title',label:'Название в меню',type:'text',required:true},
     {name:'path',label:'Путь (home для главной)',type:'text',required:true,unique:true,index:true,validate:(v: string | null | undefined)=>Boolean(v && /^(home|[a-z0-9-]+(?:\/[a-z0-9-]+)*)$/.test(v))||'Латинские буквы, цифры, дефис; без начального /'},
-    {name:'type',label:'Шаблон',type:'select',required:true,options:['home','overview','direction']},
-    {name:'parent',label:'Родительская страница',type:'relationship',relationTo:'pages'},
+    {name:'type',label:'Шаблон',type:'select',required:true,options:['home','overview','direction','contacts']},
+    {name:'serviceConfirmed',label:'Оказание услуги подтверждено владельцем',type:'checkbox',defaultValue:false,access:{create:admin,update:admin},admin:{description:'Для новых направлений обязательно перед публикацией. Существующие страницы не перезаписываются.'}},
+    {name:'navOrder',label:'Порядок в меню пространств',type:'number',defaultValue:0},
+    {name:'parent',label:'Родительская страница',type:'relationship',relationTo:'pages',filterOptions:{type:{equals:'overview'}}},
     {name:'h1',label:'Основной заголовок',type:'text',required:true},
     {name:'intro',label:'Вводный текст',type:'textarea'},
     {name:'hero',label:'Первый экран',type:'upload',relationTo:'media'},
@@ -93,9 +97,17 @@ const Pages: CollectionConfig = {
     {name:'conceptLabel',label:'Статус иллюстрации',type:'text'},sections,seo,
   ],
   hooks:{beforeChange:[publicationGuard,async ({data,req,originalDoc})=>{
-    if(data.path&&data.path!=='home'&&/^(admin|api|preview|documents|robots\.txt|sitemap\.xml)(\/|$)/.test(data.path))throw new APIError('Этот путь зарезервирован приложением',400)
+    if(data.path&&data.path!=='home'&&/^(admin|api|s|preview|documents|robots\.txt|sitemap\.xml)(\/|$)/.test(data.path))throw new APIError('Этот путь зарезервирован приложением',400)
     if(data.path&&data.path!==originalDoc?.path){const alias=await req.payload.find({collection:'redirects',where:{from:{equals:data.path}},req,depth:0,limit:1});if(alias.docs.length&&alias.docs[0].target!==originalDoc?.id)throw new APIError('Этот адрес уже принадлежит другой странице',409)}
+    const parentId=data.parent!==undefined?data.parent:originalDoc?.parent
+    if(parentId){
+      const parent=await req.payload.findByID({collection:'pages',id:parentId,depth:0,req,overrideAccess:false})
+      if(parent.type!=='overview'||parent.id===originalDoc?.id)throw new APIError('Родителем может быть только обзор направления',400)
+      if(data._status==='published'&&parent._status!=='published')throw new APIError('Сначала опубликуйте родительское направление',400)
+    }
     if(data._status==='published') {
+      if(['direction','overview'].includes(data.type??originalDoc?.type)&&!(data.serviceConfirmed??originalDoc?.serviceConfirmed))throw new APIError('Подтвердите, что AFARA оказывает эту услугу',400)
+      if(!(data.intro??originalDoc?.intro)?.trim())throw new APIError('Добавьте содержательное введение',400)
       const ids=new Set<number>()
       const add=(value:unknown)=>{if(typeof value==='number')ids.add(value);else if(value&&typeof value==='object'&&'id' in value)ids.add(Number(value.id))}
       add(data.hero);add(data.heroMobile)
@@ -147,10 +159,45 @@ const RateLimits: CollectionConfig = {slug:'rate-limits',admin:{hidden:true},acc
   {name:'key',type:'text',unique:true,required:true},{name:'count',type:'number',defaultValue:1},{name:'expiresAt',type:'date',required:true},
 ]}
 const Site: GlobalConfig = {
-  slug:'site',label:'Сайт и контакты',versions:{drafts:true,max:30},access:{read:staff,update:staff},hooks:{beforeChange:[globalGuard],afterChange:[async({req,doc})=>{if(req.user)await req.payload.create({collection:'audit',req,data:{actor:String(req.user.id),action:'update-global',object:'site',version:doc.updatedAt}})}]},
+  slug:'site',label:'Сайт и контакты',versions:{drafts:true,max:30},access:{read:staff,update:staff},hooks:{beforeChange:[globalGuard,async({data,originalDoc,req})=>{
+    if(data._status==='published'){
+      const ids=new Set<number>()
+      const add=(v:unknown)=>{if(typeof v==='number')ids.add(v);else if(v&&typeof v==='object'&&'id' in v)ids.add(Number(v.id))}
+      add((data.studio??originalDoc?.studio)?.photo)
+      for(const s of data.trust??originalDoc?.trust??[]){add(s.image);for(const c of s.cards??[])add(c.image)}
+      for(const id of ids){const m=await req.payload.findByID({collection:'media',id,req,depth:0,overrideAccess:false});if(m._status!=='published'||!m.rightsConfirmed)throw new APIError('Сначала опубликуйте изображения с подтверждёнными правами',400)}
+    }
+    return data
+  }],afterChange:[async({req,doc})=>{
+    if(req.user)await req.payload.create({collection:'audit',req,data:{actor:String(req.user.id),action:'update-global',object:'site',version:doc.updatedAt}})
+    if(doc._status==='published'){
+      const text=publicContactText(doc)
+      const records=await req.payload.find({collection:'knowledge',where:{and:[{topic:{equals:'contacts'}},{approved:{equals:true}},{_status:{equals:'published'}}]},depth:0,limit:20,req})
+      for(const record of records.docs)if(record.page&&record.answer!==text)await req.payload.update({collection:'knowledge',id:record.id,draft:false,req,data:text?{answer:text,approved:true,_status:'published'}:{_status:'draft'}})
+    }
+  }]},
   fields:[{name:'brand',label:'Название',type:'text',required:true,defaultValue:'AFARA'}, {name:'tagline',label:'Подпись бренда',type:'text',defaultValue:'BESPOKE ATELIER'},
     {name:'phone',label:'Публичный телефон',type:'text'}, {name:'email',label:'Публичная почта',type:'email'}, {name:'address',label:'Адрес',type:'textarea'},
     {name:'geography',label:'География работы',type:'text'}, {name:'hours',label:'Режим работы',type:'text'},
+    {name:'timezone',label:'Часовой пояс режима связи',type:'text'},
+    {name:'meeting',label:'Фактический формат встреч',type:'textarea'},
+    {name:'legalDetails',label:'Публичные сведения оператора и реквизиты',type:'textarea'},
+    {name:'messengers',label:'Подтверждённые мессенджеры',type:'array',fields:[{name:'label',label:'Название',type:'text',required:true},{name:'url',label:'Публичная HTTPS-ссылка',type:'text',required:true,validate:(v:string|null|undefined)=>{try{const u=new URL(v||'');return u.protocol==='https:'&&!u.username&&!u.password&&['t.me','wa.me','max.ru','vk.com'].includes(u.hostname)||'Разрешены HTTPS-ссылки t.me, wa.me, max.ru и vk.com'}catch{return 'Укажите корректную ссылку'}}}]},
+    {name:'studio',label:'О студии и специалисте',type:'group',fields:[
+      {name:'heading',label:'Заголовок',type:'text'}, {name:'body',label:'Подтверждённое описание студии',type:'textarea'},
+      {name:'name',label:'Имя ответственного специалиста',type:'text'}, {name:'role',label:'Роль',type:'text'},
+      {name:'photo',label:'Фотография специалиста с правом публикации',type:'upload',relationTo:'media'},
+      {name:'verified',label:'Сведения и фото проверены для публикации',type:'checkbox',defaultValue:false,access:{create:admin,update:admin}},
+    ]},
+    {...sections,name:'trust',label:'Содержание доверия на главной (согласования, состав, расчёт, FAQ)'},
+    {name:'worksHeading',label:'Заголовок реальных работ (скрыт без опубликованных кейсов)',type:'text'},
+    {name:'contactsLabel',label:'Подпись ссылки на контакты',type:'text',defaultValue:'Контакты'},
+    {name:'assistant',label:'Консультант',type:'group',fields:[
+      {name:'enabled',label:'Показывать виджет',type:'checkbox',defaultValue:false,access:{create:admin,update:admin}},
+      {name:'title',label:'Заголовок и кнопка',type:'text',defaultValue:'Задать вопрос'},
+      {name:'intro',label:'Пояснение',type:'textarea',defaultValue:'Ответы по опубликованным материалам AFARA со ссылками на источники. Не вводите личные данные. Чтобы передать контакт, воспользуйтесь формой заявки.'},
+      {name:'placeholder',label:'Подсказка вопроса',type:'text',defaultValue:'Что вы хотите узнать о работе AFARA?'},
+    ]},
     {name:'menu',label:'Якорное меню',type:'array',fields:[{name:'label',label:'Подпись',type:'text',required:true},{name:'anchor',label:'Якорь',type:'text',required:true,validate:(v: string | null | undefined)=>Boolean(v&&/^[a-z][a-z0-9-]*$/.test(v))||'Латиница и дефис'}]},
     {name:'form',label:'Форма',type:'group',fields:[
       ...['heading','intro','stepOne','stepTwo','space','city','description','budget','name','channel','phone','email','next','back','submit','success','again','consentLabel','error'].map(name=>({name,label:name,type:'text' as const,required:true})),
@@ -166,8 +213,8 @@ export default buildConfig({
   secret:process.env.PAYLOAD_SECRET||'', serverURL:process.env.APP_URL||'http://localhost:3000',
   admin:{user:'users',avatar:'default',importMap:{baseDir:path.resolve('.')},meta:{titleSuffix:' — AFARA'}, livePreview:{breakpoints:[{label:'Телефон',name:'mobile',width:390,height:844},{label:'Планшет',name:'tablet',width:768,height:1024},{label:'Компьютер',name:'desktop',width:1440,height:900}]}},
   i18n:{supportedLanguages:{ru},fallbackLanguage:'ru'},
-  collections:[Users,Media,Pages,Redirects,Documents,Leads,Audit,RateLimits], globals:[Site,Notifications],
-  db:postgresAdapter({pool:{connectionString:process.env.DATABASE_URL,connectionTimeoutMillis:3000,query_timeout:10000,max:10},push:process.env.AFARA_STAGE==='development',migrationDir:path.resolve('src/migrations')}),
+  collections:[Users,Media,Pages,Redirects,Documents,Leads,Audit,RateLimits,...[Knowledge,ShortLinks,Works].map(c=>({...c,hooks:{...c.hooks,afterChange:[...(c.hooks?.afterChange||[]),...(auditHook||[])]}}))], globals:[Site,Notifications],
+  db:postgresAdapter({pool:{connectionString:process.env.DATABASE_URL,connectionTimeoutMillis:3000,query_timeout:10000,max:10},push:process.env.AFARA_STAGE==='development'&&process.env.AFARA_DB_PUSH!=='false',migrationDir:path.resolve('src/migrations')}),
   typescript:{outputFile:path.resolve('src/payload-types.ts')},
   email:nodemailerAdapter({defaultFromAddress:process.env.SMTP_FROM||'afara@example.test',defaultFromName:'AFARA',skipVerify:process.env.AFARA_STAGE==='build',transport:nodemailer.createTransport({host:process.env.SMTP_HOST||'127.0.0.1',port:Number(process.env.SMTP_PORT||1025),secure:process.env.SMTP_PORT==='465',requireTLS:process.env.AFARA_STAGE==='production',auth:process.env.SMTP_USER?{user:process.env.SMTP_USER,pass:process.env.SMTP_PASSWORD}:undefined})}),
   sharp, graphQL:{disable:true}, cors:[],csrf:[process.env.APP_URL||'http://localhost:3000'],

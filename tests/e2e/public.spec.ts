@@ -8,9 +8,15 @@ test('public pages, responsive layout, menu and honest form state',async({page})
     await page.setViewportSize({width,height});await page.goto('/');await expect(page.locator('h1')).toHaveText('Сложные портьеры по индивидуальному проекту')
     await page.locator('h1').evaluate(()=>document.fonts.ready)
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)
-    if(width===360||width===390){const cta=await page.locator('main section').first().getByRole('link',{name:'Обсудить проект'}).boundingBox();expect(cta!.y+cta!.height).toBeLessThanOrEqual(height)}
+    const hero=page.locator('main section').first();const cta=hero.getByRole('link',{name:'Обсудить проект'});await expect(cta).toBeVisible();const bounds=await cta.boundingBox(),heroBounds=await hero.boundingBox();expect(bounds!.y+bounds!.height).toBeLessThanOrEqual(heroBounds!.y+heroBounds!.height)
     if([1440,768,390].includes(width))await page.screenshot({path:`docs/screenshots/home-${width}.png`,fullPage:true})
   }
+  // Equivalent effective viewport/DPR for 200% desktop zoom; not a physical-device test.
+  const cdp=await page.context().newCDPSession(page)
+  await cdp.send('Emulation.setDeviceMetricsOverride',{width:720,height:500,deviceScaleFactor:2,mobile:false})
+  await page.goto('/');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)
+  await page.screenshot({path:'docs/screenshots/home-zoom-200.png',fullPage:true})
+  await cdp.send('Emulation.clearDeviceMetricsOverride');await cdp.detach()
   await page.setViewportSize({width:390,height:844})
   await page.getByRole('button',{name:'Открыть меню'}).click();await expect(page.getByRole('dialog')).toBeVisible()
   await page.screenshot({path:'docs/screenshots/menu-390.png',fullPage:true})

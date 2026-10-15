@@ -11,6 +11,9 @@ test('static preview has real pages, local assets, keyboard menu and readonly fo
   page.on('pageerror',e=>errors.push(e.message))
   let response=await page.goto(origin+base+'/',{waitUntil:'networkidle'})
   assert.equal(response.status(),200);assert.match(await page.locator('h1').textContent(),/Сложные портьеры/)
+  assert.equal(await page.getByRole('button',{name:'Задать вопрос',exact:true}).count(),0)
+  const routes=[...new Set(await page.locator('a[href]').evaluateAll((elements,prefix)=>elements.map(e=>new URL(e.href).pathname).filter(p=>p.startsWith(prefix+'/')),base))]
+  assert.ok(routes.includes(base+'/kontakty/'));assert.ok(routes.includes(base+'/chastnye-yahty/'))
   assert.equal(await page.locator('main img').first().evaluate(e=>e.complete&&e.naturalWidth>0),true)
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true)
   await page.getByRole('button',{name:'Открыть меню'}).click()
@@ -31,10 +34,10 @@ test('static preview has real pages, local assets, keyboard menu and readonly fo
   await page.locator('dialog').getByRole('link',{name:'Все частные интерьеры'}).click()
   await page.waitForURL(origin+base+'/chastnye-interery/')
   assert.match(await page.locator('h1').textContent(),/частных интерьеров/)
-  for(const pathname of ['chastnye-interery/zagorodnye-doma/','chastnye-interery/kvartiry/','obshchestvennye-prostranstva/','obshchestvennye-prostranstva/oteli/','obshchestvennye-prostranstva/restorany/']){
-   response=await page.goto(origin+base+'/'+pathname);assert.equal(response.status(),200);assert.equal(await page.locator('h1').count(),1)
+  for(const pathname of routes){
+   response=await page.goto(origin+pathname);assert.equal(response.status(),200);assert.equal(await page.locator('h1').count(),1)
   }
-  for(const pathname of ['admin/','api/leads/','preview/'])assert.equal((await page.request.get(origin+base+'/'+pathname)).status(),404)
+  for(const pathname of ['admin/','api/leads/','api/consultant/','s/yahta/','preview/'])assert.equal((await page.request.get(origin+base+'/'+pathname)).status(),404)
   assert.deepEqual(external,[]);assert.deepEqual(errors,[])
  }finally{await browser.close()}
 })

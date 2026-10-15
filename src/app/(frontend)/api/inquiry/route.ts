@@ -24,7 +24,7 @@ export async function POST(req:Request){
     const source=await p.find({collection:'pages',where:{and:[{path:{equals:input.source}},{_status:{equals:'published'}}]},depth:0,limit:1,overrideAccess:false})
     if(!source.docs.length)return reply(400)
     const site=await p.findGlobal({slug:'site',draft:false,depth:0})
-    if(!site.form?.spaces?.some(s=>s.label===input.space))return reply(400)
+    if(site._status!=='published'||!site.form?.spaces?.some(s=>s.label===input.space))return reply(400)
     const bucket=`inquiries:${Math.floor(Date.now()/600000)}`
     const counter=await p.db.pool.query(`INSERT INTO rate_limits (key,count,expires_at,created_at,updated_at) VALUES ($1,1,NOW()+INTERVAL '20 minutes',NOW(),NOW()) ON CONFLICT (key) DO UPDATE SET count=rate_limits.count+1,updated_at=NOW() RETURNING count`,[bucket])
     if(counter.rows[0].count>30)return reply(429)

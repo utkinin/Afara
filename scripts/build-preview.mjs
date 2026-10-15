@@ -79,7 +79,7 @@ try{
     const replacements=Object.fromEntries(mapping)
     await page.evaluate(({origin,base,replacements})=>{
       const convert=input=>replacements[new URL(input,origin).href]
-      for(const e of document.querySelectorAll('script,link[rel="preload"],link[rel="modulepreload"],link[rel="prefetch"],meta[http-equiv="Content-Security-Policy"],link[rel="canonical"],#next-route-announcer,#__next-route-announcer__'))e.remove()
+      for(const e of document.querySelectorAll('[data-server-only],script,link[rel="preload"],link[rel="modulepreload"],link[rel="prefetch"],meta[http-equiv="Content-Security-Policy"],link[rel="canonical"],#next-route-announcer,#__next-route-announcer__'))e.remove()
       for(const e of document.querySelectorAll('link[rel="stylesheet"]'))e.setAttribute('href',convert(e.getAttribute('href')))
       for(const e of document.querySelectorAll('img[src]'))e.setAttribute('src',convert(e.getAttribute('src')))
       for(const e of document.querySelectorAll('img[srcset],source[srcset]'))e.setAttribute('srcset',e.getAttribute('srcset').split(',').map(part=>{const [url,size]=part.trim().split(/\s+/);return `${convert(url)} ${size||''}`}).join(', '))
@@ -96,7 +96,7 @@ try{
       const script=document.createElement('script');script.src=base+'/preview-controls.js';script.defer=true;document.head.append(script)
       document.title='Предпросмотр · '+document.title
       const form=document.querySelector('#consultation form');if(form){form.dataset.preview='true';form.setAttribute('aria-label','Форма предпросмотра — отправка отключена')}
-      const marker=document.createElement('p');marker.textContent='Предпросмотр AFARA · приём заявок отключён';marker.style.cssText='font:12px sans-serif;text-align:center;padding:10px;margin:0;background:#4a2f3f;color:#f7f3ea';document.querySelector('footer')?.prepend(marker)
+      const marker=document.createElement('p');marker.textContent='Статический предпросмотр AFARA · отправка заявок и консультант отключены';marker.style.cssText='font:12px sans-serif;text-align:center;padding:10px;margin:0;background:#4a2f3f;color:#f7f3ea';document.querySelector('footer')?.prepend(marker)
       for(const attr of document.querySelectorAll('[nonce]'))attr.removeAttribute('nonce')
     },{origin:new URL(origin).origin,base,replacements})
     const target=path.join(output,pathname.replace(/^\//,''),'index.html')

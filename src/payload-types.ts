@@ -75,6 +75,9 @@ export interface Config {
     leads: Lead;
     audit: Audit;
     'rate-limits': RateLimit;
+    knowledge: Knowledge;
+    'short-links': ShortLink;
+    works: Work;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,6 +93,9 @@ export interface Config {
     leads: LeadsSelect<false> | LeadsSelect<true>;
     audit: AuditSelect<false> | AuditSelect<true>;
     'rate-limits': RateLimitsSelect<false> | RateLimitsSelect<true>;
+    knowledge: KnowledgeSelect<false> | KnowledgeSelect<true>;
+    'short-links': ShortLinksSelect<false> | ShortLinksSelect<true>;
+    works: WorksSelect<false> | WorksSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -221,7 +227,12 @@ export interface Page {
   id: number;
   title: string;
   path: string;
-  type: 'home' | 'overview' | 'direction';
+  type: 'home' | 'overview' | 'direction' | 'contacts';
+  /**
+   * Для новых направлений обязательно перед публикацией. Существующие страницы не перезаписываются.
+   */
+  serviceConfirmed?: boolean | null;
+  navOrder?: number | null;
   parent?: (number | null) | Page;
   h1: string;
   intro?: string | null;
@@ -346,6 +357,68 @@ export interface RateLimit {
   createdAt: string;
 }
 /**
+ * Только проверенные публичные ответы. Они показываются на связанной странице и доступны консультанту после одобрения и публикации ADMIN.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "knowledge".
+ */
+export interface Knowledge {
+  id: number;
+  question: string;
+  /**
+   * Служебная тема contacts обновляется из опубликованных настроек «Сайт и контакты»; не дублируйте контакты в других ответах.
+   */
+  answer: string;
+  /**
+   * Например cost или bedroom-darkness. Разные ответы с одним ключом считаются противоречием: консультант попросит уточнить.
+   */
+  topic: string;
+  keywords?: string | null;
+  page: number | Page;
+  approved?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Управляемые ссылки /s/имя. Только внутренние опубликованные страницы; временное перенаправление 302.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "short-links".
+ */
+export interface ShortLink {
+  id: number;
+  slug: string;
+  /**
+   * Обязательна для включённой ссылки. После удаления страницы ссылка перестаёт перенаправлять, и назначение можно выбрать заново.
+   */
+  target?: (number | null) | Page;
+  enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Подтверждённые выполненные работы AFARA. Концепции остаются в блоках страниц и не становятся кейсами.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "works".
+ */
+export interface Work {
+  id: number;
+  title: string;
+  task: string;
+  space: string;
+  solution: string;
+  photos: {
+    image: number | Media;
+    id?: string | null;
+  }[];
+  verified?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -400,6 +473,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'rate-limits';
         value: number | RateLimit;
+      } | null)
+    | ({
+        relationTo: 'knowledge';
+        value: number | Knowledge;
+      } | null)
+    | ({
+        relationTo: 'short-links';
+        value: number | ShortLink;
+      } | null)
+    | ({
+        relationTo: 'works';
+        value: number | Work;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -533,6 +618,8 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   path?: T;
   type?: T;
+  serviceConfirmed?: T;
+  navOrder?: T;
   parent?: T;
   h1?: T;
   intro?: T;
@@ -655,6 +742,52 @@ export interface RateLimitsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "knowledge_select".
+ */
+export interface KnowledgeSelect<T extends boolean = true> {
+  question?: T;
+  answer?: T;
+  topic?: T;
+  keywords?: T;
+  page?: T;
+  approved?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "short-links_select".
+ */
+export interface ShortLinksSelect<T extends boolean = true> {
+  slug?: T;
+  target?: T;
+  enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "works_select".
+ */
+export interface WorksSelect<T extends boolean = true> {
+  title?: T;
+  task?: T;
+  space?: T;
+  solution?: T;
+  photos?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  verified?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -706,6 +839,56 @@ export interface Site {
   address?: string | null;
   geography?: string | null;
   hours?: string | null;
+  timezone?: string | null;
+  meeting?: string | null;
+  legalDetails?: string | null;
+  messengers?:
+    | {
+        label: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  studio?: {
+    heading?: string | null;
+    body?: string | null;
+    name?: string | null;
+    role?: string | null;
+    photo?: (number | null) | Media;
+    verified?: boolean | null;
+  };
+  trust?:
+    | {
+        kind: 'spaces' | 'compositions' | 'details' | 'materials' | 'process' | 'conditions' | 'faq';
+        visible?: boolean | null;
+        anchor?: string | null;
+        kicker?: string | null;
+        heading: string;
+        body?: string | null;
+        image?: (number | null) | Media;
+        imageAlt?: string | null;
+        cards?:
+          | {
+              title: string;
+              body?: string | null;
+              image?: (number | null) | Media;
+              imageAlt?: string | null;
+              page?: (number | null) | Page;
+              linkLabel?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  worksHeading?: string | null;
+  contactsLabel?: string | null;
+  assistant?: {
+    enabled?: boolean | null;
+    title?: string | null;
+    intro?: string | null;
+    placeholder?: string | null;
+  };
   menu?:
     | {
         label: string;
@@ -767,6 +950,60 @@ export interface SiteSelect<T extends boolean = true> {
   address?: T;
   geography?: T;
   hours?: T;
+  timezone?: T;
+  meeting?: T;
+  legalDetails?: T;
+  messengers?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  studio?:
+    | T
+    | {
+        heading?: T;
+        body?: T;
+        name?: T;
+        role?: T;
+        photo?: T;
+        verified?: T;
+      };
+  trust?:
+    | T
+    | {
+        kind?: T;
+        visible?: T;
+        anchor?: T;
+        kicker?: T;
+        heading?: T;
+        body?: T;
+        image?: T;
+        imageAlt?: T;
+        cards?:
+          | T
+          | {
+              title?: T;
+              body?: T;
+              image?: T;
+              imageAlt?: T;
+              page?: T;
+              linkLabel?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  worksHeading?: T;
+  contactsLabel?: T;
+  assistant?:
+    | T
+    | {
+        enabled?: T;
+        title?: T;
+        intro?: T;
+        placeholder?: T;
+      };
   menu?:
     | T
     | {
