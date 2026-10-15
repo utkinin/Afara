@@ -1,0 +1,22 @@
+name: afara
+services:
+  db:
+    image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
+    container_name: afara-postgres
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: afara
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: ["database:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d afara"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  mail:
+    image: axllent/mailpit:v1.27.10@sha256:b1f1be18af530d939a11ee8820b379e0c88eeec204d904bfad68862adced3a5a
+    container_name: afara-mail
+    ports: ["127.0.0.1:1025:1025", "127.0.0.1:8025:8025"]
+volumes:
+  database:
+    name: afara-postgres

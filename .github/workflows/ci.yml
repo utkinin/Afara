@@ -1,0 +1,43 @@
+name: Validate AFARA
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Prepare isolated development services
+        run: |
+          docker compose up -d --wait
+          node --input-type=module <<'JS'
+          import fs from 'node:fs'; import crypto from 'node:crypto';
+          fs.writeFileSync('.env.local', 'DATABASE_URL=postgresql://postgres@127.0.0.1:5432/afara\nPAYLOAD_SECRET='+crypto.randomBytes(32).toString('hex')+'\nAPP_URL=http://localhost:3000\nAFARA_STAGE=development\nSMTP_HOST=127.0.0.1\nSMTP_PORT=1025\nSMTP_FROM=afara@example.test\n',{mode:0o600})
+          JS
+          npm run seed:dev
+      - run: npm run typecheck && npm run lint && npm run build
+      - name: Start and validate
+        run: |
+          npm run start > /tmp/afara.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/api/health; then break; fi
+            sleep 1
+          done
+          curl -fsS http://localhost:3000/api/health
+          export PLAYWRIGHT_CHROMIUM_EXECUTABLE="$(node --input-type=module -e 'import {chromium} from "@playwright/test"; console.log(chromium.executablePath())')"
+          npm test
+          npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: afara-screenshots
+          path: docs/screenshots

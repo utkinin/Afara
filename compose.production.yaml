@@ -1,0 +1,38 @@
+name: afara-production
+x-runtime: &runtime
+  image: afara:local
+  build: .
+  env_file: .env.production
+  environment:
+    NODE_ENV: production
+    AFARA_STAGE: production
+    MEDIA_DIR: /app/media
+  volumes: ["media:/app/media"]
+  restart: unless-stopped
+services:
+  db:
+    image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
+    environment:
+      POSTGRES_DB: afara
+      POSTGRES_USER: afara
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a unique database password}
+    volumes: ["database:/var/lib/postgresql/data"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U afara -d afara"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  web:
+    <<: *runtime
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on:
+      db: {condition: service_healthy}
+  worker:
+    <<: *runtime
+    command: ["node", "--import", "tsx", "scripts/worker.ts"]
+    depends_on:
+      db: {condition: service_healthy}
+volumes:
+  database:
+  media:

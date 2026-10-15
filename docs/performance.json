@@ -1,0 +1,8 @@
+{
+  "lcp": 628,
+  "cls": 0.0027756503575235886,
+  "ttfb": 332.8000000002794,
+  "scriptBytes": 586013,
+  "imageBytes": 18718,
+  "conditions": "Single local Chromium run, 390x844, no throttling; not field Core Web Vitals"
+}
