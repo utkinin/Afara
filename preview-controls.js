@@ -12,3 +12,10 @@ function remember(){for(const field of form.querySelectorAll('input,textarea,sel
 function render(next){remember();step=next;form.innerHTML=templates[step===1?'step1':'step2'];for(const field of form.querySelectorAll('input,textarea,select')){const label=field.closest('label')?.childNodes[0]?.textContent||field.id;if(label in values){if(field.type==='checkbox')field.checked=values[label];else field.value=values[label]}}if(step===2){const submit=form.querySelector('button[type="submit"]');submit.disabled=true;const contact=form.querySelector('input[type="tel"],input[type="email"]');const channel=form.querySelector('select');channel?.addEventListener('change',()=>{contact.type=channel.value==='email'?'email':'tel';contact.autocomplete=contact.type;contact.closest('label').childNodes[0].textContent=channel.value==='email'?'Email':'Телефон';contact.value=''})}form.querySelector('input,select,textarea')?.focus()}
 form?.addEventListener('submit',e=>{e.preventDefault();if(step===1&&form.reportValidity())render(2)});
 form?.addEventListener('click',e=>{const button=e.target.closest('button');if(step===2&&button?.type==='button')render(1)});
+for(const container of document.querySelectorAll('[data-save-idea]'))container.querySelector('button')?.addEventListener('click',async()=>{
+ const url=new URL(location.href);url.search='';url.hash=container.dataset.saveIdea;
+ const status=container.querySelector('[role="status"]');
+ try{await navigator.clipboard.writeText(url.href);status.textContent='Ссылка скопирована'}
+ catch{status.textContent='Скопируйте ссылку из поля';let input=container.querySelector('input');if(!input){const label=document.createElement('label');label.textContent='Ссылка на идею';input=document.createElement('input');input.readOnly=true;label.append(input);container.append(label)}input.value=url.href;input.focus();input.select()}
+});
+
