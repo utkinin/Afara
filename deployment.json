@@ -1,16 +1,23 @@
 {
-  "sourceCommit": "c8e6b3e64e19f19b6a8b31a6ec64f0966771e683",
-  "cmsPublishedAt": "2026-10-16T10:14:05.879Z",
-  "pages": 19,
-  "editorialGalleryImages": 16,
-  "editorialPagesPublished": 15,
-  "editorialMediaPublished": 32,
-  "editorialKnowledgePublished": 8,
+  "release": "afara-services-20261016-73fa2c0",
+  "sourceCommit": "73fa2c0bb5cf6e41a725c0d90ed31203478eaf57",
+  "previewUpdatedAt": "2026-10-16T16:34:11.265Z",
+  "pages": 20,
   "mode": "static-preview",
-  "package": "downloads/AFARA_Editorial_2026-10-16_v2.zip",
-  "packageSHA256": "ee81f6718fcb812137b13caf8cebe134d7c212eeaff49cb6ff0707acaa1a8f61",
-  "previewUpdatedAt": "2026-10-16T13:28:07.543Z",
-  "release": "afara-partners-20261016",
-  "cmsUpdate": "pending-execution-in-existing-CMS",
-  "note": "Editorial preview overlay from prepared CMS content; prior cmsPublishedAt belongs to the previous release. No live CMS write is asserted."
+  "cmsUpdate": "published-and-verified",
+  "cmsPublishedKnowledge": 33,
+  "cmsPreservedDraftKnowledge": 9,
+  "cmsPublishedMedia": 40,
+  "mainCardImagesDistinct": 8,
+  "servicePages": [
+    "/partneram/",
+    "/poshiv-po-eskizam/"
+  ],
+  "previousPartnerURL": "/partnyoram/",
+  "previousPartnerURLMode": "static-html-transition",
+  "preservedPartnerFAQs": 5,
+  "semantics": "downloads/AFARA_Semantics_2026-10-16.md",
+  "historicalPackage": "downloads/AFARA_Editorial_2026-10-16_v2.zip",
+  "historicalPackageSHA256": "ee81f6718fcb812137b13caf8cebe134d7c212eeaff49cb6ff0707acaa1a8f61",
+  "serverFunctions": "not-included"
 }
