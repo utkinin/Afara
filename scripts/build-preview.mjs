@@ -130,10 +130,17 @@ for(const container of document.querySelectorAll('[data-save-idea]'))container.q
 await writeFile(path.join(output,'preview-controls.js'),controls)
 await writeFile(path.join(output,'.nojekyll'),'')
 await writeFile(path.join(output,'robots.txt'),'User-agent: *\nDisallow: /\n')
+// Keep the URL used by the earlier standalone preview. GitHub Pages has no
+// server redirects; this same-origin HTML transition is not a 302 short link.
+if(pages.has('/partneram/')){
+ const target=base+'/partneram/'
+ await mkdir(path.join(output,'partnyoram'),{recursive:true})
+ await writeFile(path.join(output,'partnyoram','index.html'),`<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><meta http-equiv="refresh" content="0;url=${target}"><title>Партнёрам — AFARA</title></head><body><p>Страница обновлена: <a href="${target}">Партнёрам — AFARA</a></p></body></html>`)
+}
 await mkdir(path.join(output,'licenses'),{recursive:true})
 for(const name of ['cormorant-garamond','manrope']){
  const folder=path.join('node_modules','@fontsource-variable',name)
  await cp(path.join(folder,'LICENSE'),path.join(output,'licenses',name+'.txt'))
 }
-await writeFile(path.join(output,'PREVIEW.md'),'# AFARA preview\n\nGenerated public review copy. CMS, private APIs and lead submission are excluded. No tracking or external requests. Photos are labelled AI concepts. Source: utkinin/Afara. Font licenses in licenses/.\n')
+await writeFile(path.join(output,'PREVIEW.md'),'# AFARA preview\n\nGenerated public review copy. CMS, private APIs and lead submission are excluded. No tracking or external requests. Images are illustrative concepts, not completed work. Source: utkinin/Afara. Font licenses in licenses/. The previous /partnyoram/ URL uses a static HTML transition to /partneram/; it is not a server 302.\n')
 console.log('Preview generated:',pages.size,'pages,',mapping.size,'public assets at',output)

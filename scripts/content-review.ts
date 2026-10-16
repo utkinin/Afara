@@ -1,3 +1,4 @@
+import serviceCopy from '../content/service-copy.json'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { cms } from '../src/lib/payload'
@@ -70,7 +71,7 @@ try {
   const latestSite = await p.findGlobal({ slug: 'site', draft: true, depth: 0 })
   const hasSiteDraft = latestSite.updatedAt !== siteBefore.updatedAt
   const sitePatch: Partial<Site> = {}
-  if (!latestSite.studio?.body) sitePatch.studio = { ...latestSite.studio, heading: 'О студии AFARA', body: 'AFARA — текстильный дизайн и инженерная студия. Специализация — комплектация сложных частных резиденций и HoReCa: второй свет, эркеры, многослойность, Wave, blackout и моторизация. Работаем по всему миру; российское отделение — в Санкт-Петербурге.', verified: false }
+  if (!latestSite.studio?.body) sitePatch.studio = { ...latestSite.studio, heading: 'О студии AFARA', body: serviceCopy.positioning, verified: false }
   if (!latestSite.trust?.length) sitePatch.trust = [
     { kind: 'compositions', anchor: 'scope', heading: 'Что входит в индивидуальный проект', body: 'Состав определяется задачей. Конкретный перечень работ и согласований фиксируется в предложении; отдельные позиции не следует считать включёнными автоматически.', cards: [
       { title: 'Подбор и композиция', body: 'Материалы, слои, пластика и отделка рассматриваются вместе со светом и пропорциями окна.' },

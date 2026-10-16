@@ -58,7 +58,7 @@ export function Website({ page, pages, site, documents, knowledge = [], works = 
         const candidates = page.type === 'home' ? pages.filter(p => p.type === 'overview' || p.type === 'direction' && !p.parent) : children
         const existing = section.cards || []
         const missing = candidates.filter(p => !existing.some(c => (typeof c.page === 'object' ? c.page?.id : c.page) === p.id))
-        return <ContentSection key={section.id || i} pages={pages} section={{ ...section, cards: [...existing, ...missing.map(p => ({ title: p.title, body: p.intro, page: p.id }))] }} />
+        return <ContentSection key={section.id || i} pages={pages} section={{ ...section, cards: [...existing, ...missing.map(p => ({ title: p.title, body: p.intro, page: p.id, image: p.hero, imageAlt: p.heroAlt }))] }} />
       })}
       {page.type === 'home' && <>
         {studio?.verified && studio.body && <section id="studio" className={styles.section}><div className={styles.container}><h2>{studio.heading}</h2><div className={styles.studioGrid}><div><p className={styles.sectionBody}>{studio.body}</p>{studio.name && <h3>{studio.name}</h3>}{studio.role && <p>{studio.role}</p>}</div>{media(studio.photo) && <div className={styles.materialImage}><Photo image={media(studio.photo)} /></div>}</div></div></section>}

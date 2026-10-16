@@ -39,11 +39,11 @@ export function InquiryForm({labels,source,consent,policy}:{labels:Labels,source
       <label>{labels.space}<select required value={values.space} onChange={e=>update('space',e.target.value)}><option value="">Выберите пространство</option>{labels.spaces?.map(s=><option key={s.id} value={s.label}>{s.label}</option>)}</select></label>
       <label>{labels.city}<input required autoComplete="address-level2" maxLength={120} value={values.city} onChange={e=>update('city',e.target.value)}/></label>
       <label className={styles.full}>{labels.description}<textarea required minLength={10} maxLength={3000} rows={3} value={values.description} onChange={e=>update('description',e.target.value)}/></label>
-      <label className={styles.full}>{labels.budget}<input maxLength={120} value={values.budget} onChange={e=>update('budget',e.target.value)} placeholder="Пока не определён"/></label>
     </div>:<div className={styles.formGrid}>
       <label className={styles.full}>{labels.name}<input id="inquiry-name" required autoComplete="name" minLength={2} maxLength={100} value={values.name} onChange={e=>update('name',e.target.value)}/></label>
       <label>{labels.channel}<select value={values.channel} onChange={e=>{update('channel',e.target.value);update('contact','')}}><option value="phone">{labels.phone}</option><option value="email">{labels.email}</option></select></label>
       <label>{values.channel==='phone'?labels.phone:labels.email}<input required autoComplete={values.channel==='phone'?'tel':'email'} type={values.channel==='phone'?'tel':'email'} minLength={values.channel==='phone'?7:5} maxLength={200} value={values.contact} onChange={e=>update('contact',e.target.value)}/></label>
+      <label className={styles.full}>{labels.budget}<input maxLength={120} value={values.budget} onChange={e=>update('budget',e.target.value)} placeholder="Пока не определён"/></label>
       <label className={`${styles.full} ${styles.consent}`}><input required type="checkbox" checked={values.consent} onChange={e=>update('consent',e.target.checked)}/><span>{labels.consentLabel} {consent&&<a href={consent.url} target="_blank" rel="noreferrer">Согласие</a>}{policy&&<> и <a href={policy} target="_blank" rel="noreferrer">политика обработки данных</a></>}.</span></label>
     </div>}
     <div className={styles.honeypot} aria-hidden="true"><label>Website<input tabIndex={-1} autoComplete="off" value={values.website} onChange={e=>update('website',e.target.value)}/></label></div>

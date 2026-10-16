@@ -45,6 +45,11 @@ test('static preview has real pages, local assets, keyboard menu and readonly fo
    }
   }
   for(const pathname of ['admin/','api/leads/','api/consultant/','s/yahta/','preview/'])assert.equal((await page.request.get(origin+base+'/'+pathname)).status(),404)
+  if(routes.includes(base+'/partneram/')){
+   await page.goto(origin+base+'/partnyoram/');await page.waitForURL(origin+base+'/partneram/')
+   assert.equal(await page.locator('h1').count(),1)
+   assert.equal(await page.locator('summary').filter({hasText:'Нужен ли готовый дизайн-проект для первого обращения?'}).count(),1)
+  }
   assert.deepEqual(external,[]);assert.deepEqual(errors,[])
  }finally{await browser.close()}
 })

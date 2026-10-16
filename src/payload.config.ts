@@ -82,7 +82,7 @@ const Pages: CollectionConfig = {
   fields:[
     {name:'title',label:'Название в меню',type:'text',required:true},
     {name:'path',label:'Путь (home для главной)',type:'text',required:true,unique:true,index:true,validate:(v: string | null | undefined)=>Boolean(v && /^(home|[a-z0-9-]+(?:\/[a-z0-9-]+)*)$/.test(v))||'Латинские буквы, цифры, дефис; без начального /'},
-    {name:'type',label:'Шаблон',type:'select',required:true,options:['home','overview','direction','contacts']},
+    {name:'type',label:'Шаблон',type:'select',required:true,options:['home','overview','direction','contacts','service']},
     {name:'serviceConfirmed',label:'Оказание услуги подтверждено владельцем',type:'checkbox',defaultValue:false,access:{create:admin,update:admin},admin:{description:'Для новых направлений обязательно перед публикацией. Существующие страницы не перезаписываются.'}},
     {name:'navOrder',label:'Порядок в меню пространств',type:'number',defaultValue:0},
     {name:'parent',label:'Родительская страница',type:'relationship',relationTo:'pages',filterOptions:{type:{equals:'overview'}}},
@@ -106,7 +106,7 @@ const Pages: CollectionConfig = {
       if(data._status==='published'&&parent._status!=='published')throw new APIError('Сначала опубликуйте родительское направление',400)
     }
     if(data._status==='published') {
-      if(['direction','overview'].includes(data.type??originalDoc?.type)&&!(data.serviceConfirmed??originalDoc?.serviceConfirmed))throw new APIError('Подтвердите, что AFARA оказывает эту услугу',400)
+      if(['direction','overview','service'].includes(data.type??originalDoc?.type)&&!(data.serviceConfirmed??originalDoc?.serviceConfirmed))throw new APIError('Подтвердите, что AFARA оказывает эту услугу',400)
       if(!(data.intro??originalDoc?.intro)?.trim())throw new APIError('Добавьте содержательное введение',400)
       const ids=new Set<number>()
       const add=(value:unknown)=>{if(typeof value==='number')ids.add(value);else if(value&&typeof value==='object'&&'id' in value)ids.add(Number(value.id))}

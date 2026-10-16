@@ -15,3 +15,4 @@
 
 .faq details:has(:target){outline:2px solid var(--plum);outline-offset:8px;scroll-margin-top:120px}
 .saveIdea{display:grid;gap:8px;margin-top:16px}.saveIdea span{font-size:16px;line-height:1.6}.saveIdea label{display:grid;gap:8px}.saveIdea input{max-width:100%;min-width:0;font-size:17px;padding:10px;border:1px solid var(--line);background:transparent}.contactQR{margin:28px 0;max-width:280px}.contactQR img{display:block;max-width:100%;height:auto}.contactQR figcaption{font-size:16px;line-height:1.6;margin-top:12px}.contactPage>.button{margin:22px 0}.card[id^="idea-"]{scroll-margin-top:110px}
+.servicePanel{width:320px;left:0;padding:20px}.servicePanel a{display:block;padding:12px 0;line-height:1.5}.desktopNav{gap:20px}.desktopNav>a,.desktopNav>.dropdown>a{white-space:nowrap}

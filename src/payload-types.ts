@@ -227,7 +227,7 @@ export interface Page {
   id: number;
   title: string;
   path: string;
-  type: 'home' | 'overview' | 'direction' | 'contacts';
+  type: 'home' | 'overview' | 'direction' | 'contacts' | 'service';
   /**
    * Для новых направлений обязательно перед публикацией. Существующие страницы не перезаписываются.
    */

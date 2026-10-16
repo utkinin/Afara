@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "images": [
+    {
+      "id": "edge",
+      "tool": "image_gen.imagegen",
+      "date": "2026-10-16",
+      "resultId": "exec-7cb81876-9707-4bef-985c-cdf9f28fb79b.png",
+      "prompt": "A single original AFARA editorial concept still life of meticulous plum drapery edge and ivory lining, refined cord piping and deep folds, macro textile craft details, warm daylight. No labels, writing, tools that imply a documented factory, no people. Landscape 3:2, tactile warm refined architectural visualization, generous calm composition with subject centred for mobile crop. Consistent AFARA ivory/plum/taupe/walnut palette. Avoid watermarks and product markings.",
+      "desktop": {
+        "file": "edge-desktop.webp",
+        "sha256": "aea26cc1995cbee882ed13a248ef0ce3350a32117692a13d52760802fe2532a8",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "edge-mobile.webp",
+        "sha256": "e45087b5393737422bb7b38b87cbf5d4fed14aeae0433da1316a32c49ebf06dc",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "palette",
+      "tool": "image_gen.imagegen",
+      "date": "2026-10-16",
+      "resultId": "exec-33895fa2-49d4-4905-89c8-58d05c62e770.png",
+      "prompt": "A single original AFARA textile design concept still life: carefully arranged ivory sheer, taupe linen-like swatches, deep plum velvet-like folds and an unlabelled minimal architectural window sketch on warm walnut table. No text, letters, brand logos, people or claims about specific real materials. Landscape 3:2, tactile warm refined architectural visualization, generous calm composition with subject centred for mobile crop. Consistent AFARA ivory/plum/taupe/walnut palette. Avoid watermarks and product markings.",
+      "desktop": {
+        "file": "palette-desktop.webp",
+        "sha256": "6897f4453a83435c0f88d2d62623f6af4f920f4860d609744687903e01d5fa07",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "palette-mobile.webp",
+        "sha256": "f9f8cb6ad5f4191d894b64d157abcc7c99c75f3477fbf7d17668e8c81b52aa4e",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "partners",
+      "tool": "image_gen.imagegen",
+      "date": "2026-10-16",
+      "resultId": "exec-82856110-1bbc-43f4-9fa6-1da63711a172.png",
+      "prompt": "A single original AFARA editorial architectural collaboration concept: a quiet design table by tall windows, unlabelled window elevation drawings with simple line work, rolled fabrics in ivory and deep plum, taupe swatches, restrained bronze objects. No people, logos or legible text. This is a conceptual illustration, not a documented project or real atelier photograph. Landscape 3:2, tactile warm refined architectural visualization, generous calm composition with subject centred for mobile crop. Consistent AFARA ivory/plum/taupe/walnut palette. Avoid watermarks and product markings.",
+      "desktop": {
+        "file": "partners-desktop.webp",
+        "sha256": "e3da62a9ddf7a47293a883f5082fc9e5475befc30ecae9c83d7c8618f788de55",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "partners-mobile.webp",
+        "sha256": "c006d9c5d278714bce31519d6924728f082cb493b13f1835a011232f4fd809c2",
+        "width": 768,
+        "height": 1024
+      }
+    }
+  ]
+}
