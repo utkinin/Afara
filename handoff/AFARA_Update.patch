@@ -1,0 +1,1490 @@
+diff --git a/.env.example b/.env.example
+index 9078a46..f91a6f4 100644
+--- a/.env.example
++++ b/.env.example
+@@ -2,6 +2,9 @@ DATABASE_URL=postgresql://postgres@127.0.0.1:5432/afara
+ # Generate a unique value with: openssl rand -hex 32
+ PAYLOAD_SECRET=
+ APP_URL=http://localhost:3000
++# Canonical public base for the contacts QR, including a path prefix if used.
++# Leave empty until a real HTTPS address is chosen. No localhost QR is published.
++AFARA_PUBLIC_URL=
+ AFARA_STAGE=development
+ MEDIA_DIR=./media
+ # Optional local SMTP. Production requires an authenticated TLS SMTP service.
+diff --git a/ADMIN_GUIDE.md b/ADMIN_GUIDE.md
+index 0381161..95e3223 100644
+--- a/ADMIN_GUIDE.md
++++ b/ADMIN_GUIDE.md
+@@ -52,3 +52,13 @@ ADMIN открывает «Короткие ссылки», задаёт имя
+ 
+ 
+ Служебная запись знаний с ключом `contacts` берёт факты из опубликованных «Сайта и контактов». Публикация телефона, почты, географии или режима синхронно обновляет её; черновик не меняет ответ. Не копируйте контактные значения в другие FAQ и не редактируйте эту запись вручную в обход общего источника. После удаления всех контактных сведений материал снимается с публикации; повторное одобрение выполняет ADMIN. При снятии публичных настроек сайта с публикации консультант и отправка формы закрываются, а посетитель не получает черновые контакты.
++# Визуальная коллекция и переписка
++
++Новый комплект изображений, разбор задач по помещениям, источники производителей и порядок импорта описаны в [EDITORIAL_RESEARCH.md](docs/EDITORIAL_RESEARCH.md).
++
++- Подготовка: `npm run content:visuals` — план; `npm run content:visuals -- --apply-drafts` — явная подготовка CMS-черновиков. Существующие опубликованные версии не заменяются.
++- Проверить медиа и опубликовать их, затем проверить и опубликовать страницы. Доступность новых услуг подтверждается отдельно. Ответы консультанта требуют одобрения.
++- Telegram: «Сайт и контакты → Подтверждённые мессенджеры». Добавьте название и настоящий адрес `https://t.me/…`. До настройки канал не выдумывается: вход ведёт к форме сообщения.
++- Форма предлагает переписку первой. Для ответа в Telegram клиент указывает username; телефон не обязателен.
++- QR контактов появляется на компьютере при заданном публичном HTTPS-адресе `AFARA_PUBLIC_URL` или `APP_URL`. После изменения домена нужен перезапуск приложения. Код ведёт на актуальную страницу контактов, сторонний QR-сервис не используется.
++- База консультанта обновляется после утверждения и публикации материала. Сообщения посетителей сами не становятся ответами. Если посетитель передаст вопрос через форму, подготовьте проверенный ответ и добавьте его в «Публичную базу знаний».
+diff --git a/QA_REPORT.md b/QA_REPORT.md
+index 9fbcfdb..f788b9c 100644
+--- a/QA_REPORT.md
++++ b/QA_REPORT.md
+@@ -69,3 +69,16 @@ GitHub подтвердил успешную публикацию снимка `
+ Проверка единого источника дополнена синхронизацией опубликованных контактов с материалом консультанта `contacts`. Отдельно проверяются сохранение черновой географии без изменения ответа и закрытие сайта/консультанта при снятии глобальных настроек с публикации; публикация возвращает актуальные контакты.
+ 
+ CI-рецепт обновлён: отдельная *_acceptance БД, явные миграции, test-only добавления и переносимый путь Chromium. Генератор env отдельно выполнен и проверен в временном каталоге. Такой bootstrap не применяется к существующей CMS и отказывается заменять данные. Сам workflow Validate AFARA на GitHub не запускался; его команды проверяются локально на свежей отдельной БД. Публикация GitHub Pages подтверждена отдельным workflow.
++# Визуальная коллекция и переписка — 16.10.2026
++
++Изменение подготовлено в отдельной ветке; рабочая CMS и публичное размещение этим отчётом не считаются обновлёнными.
++
++Выполнено:
++
++- `npm run lint`, проверка TypeScript и сборка приложения.
++- Семь изолированных тестов `tests/editorial.test.ts` и `tests/consultant.test.ts`: 7/7. Проверены Telegram без телефона, отклонение неверных контактов и ложных Telegram-адресов, формирование URL контактов с префиксом, комплектность и размеры изображений, границы ответов консультанта.
++- Браузерная проверка действительных компонентов `Website`, `InquiryForm`, `ConsultantPanel` на локальных визуальных данных: 360/390/768/1440 px без горизонтального переполнения. Проверены ненавязчивое открытие по нажатию, немодальное окно на компьютере, модальное на телефоне, Escape, готовый вопрос, копирование ссылки на композицию, Telegram в форме, QR контактов и изображение яхты.
++- В этой браузерной проверке медиа отдавались локально, ответ API консультанта был подменён контролируемым публичным ответом. Это проверка интерфейса; не интеграционный тест ИИ-провайдера или PostgreSQL. Временный маршрут проверки удалён из поставки.
++- 16 разных оригинальных концепций и 16 мобильных вариантов: WebP, без EXIF, каждый файл меньше 600 КБ. Полный набор около 5 МБ; он не загружается целиком при открытии страницы. Полевые LCP/INP этим тестом не измерялись.
++
++В этой среде не выполнялись: импорт в рабочую PostgreSQL, публикация CMS-черновиков, отправка реальных заявок в Telegram/SMTP, запросы к оплачиваемому ИИ-провайдеру и размещение новой версии. Реквизиты Telegram должен указать владелец. Содержательные материалы требуют редакционного одобрения перед публикацией.
+diff --git a/package-lock.json b/package-lock.json
+index f07bbc6..69e7b11 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -19,6 +19,7 @@
+         "next": "16.4.1",
+         "nodemailer": "10.1.1",
+         "payload": "3.90.2",
++        "qrcode": "1.5.4",
+         "react": "19.2.7",
+         "react-dom": "19.2.7",
+         "sharp": "0.35.5",
+@@ -29,6 +30,7 @@
+         "@playwright/test": "1.58.2",
+         "@types/node": "24.10.1",
+         "@types/nodemailer": "7.0.11",
++        "@types/qrcode": "1.5.6",
+         "@types/react": "19.2.14",
+         "@types/react-dom": "19.2.3",
+         "eslint": "9.39.2",
+@@ -3609,6 +3611,16 @@
+         "pg-types": "^2.2.0"
+       }
+     },
++    "node_modules/@types/qrcode": {
++      "version": "1.5.6",
++      "resolved": "https://registry.npmjs.org/@types/qrcode/-/qrcode-1.5.6.tgz",
++      "integrity": "sha512-te7NQcV2BOvdj2b1hCAHzAoMNuj65kNBMz0KBaxM6c3VGBOhU0dURQKOtH8CFNI/dsKkwlv32p26qYQTWoB5bw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@types/node": "*"
++      }
++    },
+     "node_modules/@types/react": {
+       "version": "19.2.14",
+       "resolved": "https://registry.npmjs.org/@types/react/-/react-19.2.14.tgz",
+@@ -4304,11 +4316,19 @@
+         "url": "https://github.com/sponsors/epoberezkin"
+       }
+     },
++    "node_modules/ansi-regex": {
++      "version": "5.0.1",
++      "resolved": "https://registry.npmjs.org/ansi-regex/-/ansi-regex-5.0.1.tgz",
++      "integrity": "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=8"
++      }
++    },
+     "node_modules/ansi-styles": {
+       "version": "4.3.0",
+       "resolved": "https://registry.npmjs.org/ansi-styles/-/ansi-styles-4.3.0.tgz",
+       "integrity": "sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==",
+-      "dev": true,
+       "license": "MIT",
+       "dependencies": {
+         "color-convert": "^2.0.1"
+@@ -4759,6 +4779,15 @@
+         "node": ">=6"
+       }
+     },
++    "node_modules/camelcase": {
++      "version": "5.3.1",
++      "resolved": "https://registry.npmjs.org/camelcase/-/camelcase-5.3.1.tgz",
++      "integrity": "sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=6"
++      }
++    },
+     "node_modules/caniuse-lite": {
+       "version": "1.0.30001816",
+       "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001816.tgz",
+@@ -4841,6 +4870,17 @@
+       "integrity": "sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==",
+       "license": "MIT"
+     },
++    "node_modules/cliui": {
++      "version": "6.0.0",
++      "resolved": "https://registry.npmjs.org/cliui/-/cliui-6.0.0.tgz",
++      "integrity": "sha512-t6wbgtoCXvAzst7QgXxJYqPt0usEfbgQdftEPbLL/cvv6HPE5VgvqCuAIDR0NgU52ds6rFwqrgakNLrHEjCbrQ==",
++      "license": "ISC",
++      "dependencies": {
++        "string-width": "^4.2.0",
++        "strip-ansi": "^6.0.0",
++        "wrap-ansi": "^6.2.0"
++      }
++    },
+     "node_modules/clsx": {
+       "version": "2.1.1",
+       "resolved": "https://registry.npmjs.org/clsx/-/clsx-2.1.1.tgz",
+@@ -4854,7 +4894,6 @@
+       "version": "2.0.1",
+       "resolved": "https://registry.npmjs.org/color-convert/-/color-convert-2.0.1.tgz",
+       "integrity": "sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==",
+-      "dev": true,
+       "license": "MIT",
+       "dependencies": {
+         "color-name": "~1.1.4"
+@@ -4867,7 +4906,6 @@
+       "version": "1.1.4",
+       "resolved": "https://registry.npmjs.org/color-name/-/color-name-1.1.4.tgz",
+       "integrity": "sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==",
+-      "dev": true,
+       "license": "MIT"
+     },
+     "node_modules/colorette": {
+@@ -5079,6 +5117,15 @@
+         }
+       }
+     },
++    "node_modules/decamelize": {
++      "version": "1.2.0",
++      "resolved": "https://registry.npmjs.org/decamelize/-/decamelize-1.2.0.tgz",
++      "integrity": "sha512-z2S+W9X73hAUUki+N+9Za2lBlun89zigOyGrsax+KUQ6wKW4ZoWpEYBkGhQjwAjjDCkWxhY0VKEhk8wzY7F5cA==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=0.10.0"
++      }
++    },
+     "node_modules/deep-is": {
+       "version": "0.1.4",
+       "resolved": "https://registry.npmjs.org/deep-is/-/deep-is-0.1.4.tgz",
+@@ -5149,6 +5196,12 @@
+         "node": ">=8"
+       }
+     },
++    "node_modules/dijkstrajs": {
++      "version": "1.0.3",
++      "resolved": "https://registry.npmjs.org/dijkstrajs/-/dijkstrajs-1.0.3.tgz",
++      "integrity": "sha512-qiSlmBq9+BCdCA/L46dw8Uy93mloxsPSbwnm5yrKn2vMPiy8KyAskTF6zuV/j5BMsmOGZDPs7KjU+mjb670kfA==",
++      "license": "MIT"
++    },
+     "node_modules/doctrine": {
+       "version": "2.1.0",
+       "resolved": "https://registry.npmjs.org/doctrine/-/doctrine-2.1.0.tgz",
+@@ -6327,6 +6380,15 @@
+         "node": ">=6.9.0"
+       }
+     },
++    "node_modules/get-caller-file": {
++      "version": "2.0.5",
++      "resolved": "https://registry.npmjs.org/get-caller-file/-/get-caller-file-2.0.5.tgz",
++      "integrity": "sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==",
++      "license": "ISC",
++      "engines": {
++        "node": "6.* || 8.* || >= 10.*"
++      }
++    },
+     "node_modules/get-intrinsic": {
+       "version": "1.3.0",
+       "resolved": "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.3.0.tgz",
+@@ -6945,6 +7007,15 @@
+         "url": "https://github.com/sponsors/ljharb"
+       }
+     },
++    "node_modules/is-fullwidth-code-point": {
++      "version": "3.0.0",
++      "resolved": "https://registry.npmjs.org/is-fullwidth-code-point/-/is-fullwidth-code-point-3.0.0.tgz",
++      "integrity": "sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=8"
++      }
++    },
+     "node_modules/is-generator-function": {
+       "version": "1.1.2",
+       "resolved": "https://registry.npmjs.org/is-generator-function/-/is-generator-function-1.1.2.tgz",
+@@ -7911,6 +7982,15 @@
+         "url": "https://github.com/sponsors/sindresorhus"
+       }
+     },
++    "node_modules/p-try": {
++      "version": "2.2.0",
++      "resolved": "https://registry.npmjs.org/p-try/-/p-try-2.2.0.tgz",
++      "integrity": "sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=6"
++      }
++    },
+     "node_modules/parent-module": {
+       "version": "1.0.1",
+       "resolved": "https://registry.npmjs.org/parent-module/-/parent-module-1.0.1.tgz",
+@@ -7945,7 +8025,6 @@
+       "version": "4.0.0",
+       "resolved": "https://registry.npmjs.org/path-exists/-/path-exists-4.0.0.tgz",
+       "integrity": "sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==",
+-      "dev": true,
+       "license": "MIT",
+       "engines": {
+         "node": ">=8"
+@@ -8791,6 +8870,15 @@
+         "node": ">=4"
+       }
+     },
++    "node_modules/pngjs": {
++      "version": "5.0.0",
++      "resolved": "https://registry.npmjs.org/pngjs/-/pngjs-5.0.0.tgz",
++      "integrity": "sha512-40QW5YalBNfQo5yRYmiw7Yz6TKKVr3h6970B2YE+3fQpsWcrbj1PzJgxeJ19DRQjhMbKPIuMY8rFaXc8moolVw==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=10.13.0"
++      }
++    },
+     "node_modules/possible-typed-array-names": {
+       "version": "1.1.0",
+       "resolved": "https://registry.npmjs.org/possible-typed-array-names/-/possible-typed-array-names-1.1.0.tgz",
+@@ -8953,6 +9041,23 @@
+         "node": ">=6"
+       }
+     },
++    "node_modules/qrcode": {
++      "version": "1.5.4",
++      "resolved": "https://registry.npmjs.org/qrcode/-/qrcode-1.5.4.tgz",
++      "integrity": "sha512-1ca71Zgiu6ORjHqFBDpnSMTR2ReToX4l1Au1VFLyVeBTFavzQnv5JxMFr3ukHVKpSrSA2MCk0lNJSykjUfz7Zg==",
++      "license": "MIT",
++      "dependencies": {
++        "dijkstrajs": "^1.0.1",
++        "pngjs": "^5.0.0",
++        "yargs": "^15.3.1"
++      },
++      "bin": {
++        "qrcode": "bin/qrcode"
++      },
++      "engines": {
++        "node": ">=10.13.0"
++      }
++    },
+     "node_modules/qs-esm": {
+       "version": "8.0.1",
+       "resolved": "https://registry.npmjs.org/qs-esm/-/qs-esm-8.0.1.tgz",
+@@ -9171,6 +9276,15 @@
+         "url": "https://github.com/sponsors/ljharb"
+       }
+     },
++    "node_modules/require-directory": {
++      "version": "2.1.1",
++      "resolved": "https://registry.npmjs.org/require-directory/-/require-directory-2.1.1.tgz",
++      "integrity": "sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=0.10.0"
++      }
++    },
+     "node_modules/require-from-string": {
+       "version": "2.0.2",
+       "resolved": "https://registry.npmjs.org/require-from-string/-/require-from-string-2.0.2.tgz",
+@@ -9180,6 +9294,12 @@
+         "node": ">=0.10.0"
+       }
+     },
++    "node_modules/require-main-filename": {
++      "version": "2.0.0",
++      "resolved": "https://registry.npmjs.org/require-main-filename/-/require-main-filename-2.0.0.tgz",
++      "integrity": "sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==",
++      "license": "ISC"
++    },
+     "node_modules/resolve": {
+       "version": "2.0.0-next.7",
+       "resolved": "https://registry.npmjs.org/resolve/-/resolve-2.0.0-next.7.tgz",
+@@ -9391,6 +9511,12 @@
+         "semver": "bin/semver.js"
+       }
+     },
++    "node_modules/set-blocking": {
++      "version": "2.0.0",
++      "resolved": "https://registry.npmjs.org/set-blocking/-/set-blocking-2.0.0.tgz",
++      "integrity": "sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==",
++      "license": "ISC"
++    },
+     "node_modules/set-function-length": {
+       "version": "1.2.2",
+       "resolved": "https://registry.npmjs.org/set-function-length/-/set-function-length-1.2.2.tgz",
+@@ -9712,6 +9838,26 @@
+         "node": ">=10.0.0"
+       }
+     },
++    "node_modules/string-width": {
++      "version": "4.2.3",
++      "resolved": "https://registry.npmjs.org/string-width/-/string-width-4.2.3.tgz",
++      "integrity": "sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==",
++      "license": "MIT",
++      "dependencies": {
++        "emoji-regex": "^8.0.0",
++        "is-fullwidth-code-point": "^3.0.0",
++        "strip-ansi": "^6.0.1"
++      },
++      "engines": {
++        "node": ">=8"
++      }
++    },
++    "node_modules/string-width/node_modules/emoji-regex": {
++      "version": "8.0.0",
++      "resolved": "https://registry.npmjs.org/emoji-regex/-/emoji-regex-8.0.0.tgz",
++      "integrity": "sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==",
++      "license": "MIT"
++    },
+     "node_modules/string.prototype.includes": {
+       "version": "2.0.1",
+       "resolved": "https://registry.npmjs.org/string.prototype.includes/-/string.prototype.includes-2.0.1.tgz",
+@@ -9826,6 +9972,18 @@
+         "url": "https://github.com/sponsors/ljharb"
+       }
+     },
++    "node_modules/strip-ansi": {
++      "version": "6.0.1",
++      "resolved": "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz",
++      "integrity": "sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==",
++      "license": "MIT",
++      "dependencies": {
++        "ansi-regex": "^5.0.1"
++      },
++      "engines": {
++        "node": ">=8"
++      }
++    },
+     "node_modules/strip-bom": {
+       "version": "3.0.0",
+       "resolved": "https://registry.npmjs.org/strip-bom/-/strip-bom-3.0.0.tgz",
+@@ -10971,6 +11129,12 @@
+         "url": "https://github.com/sponsors/ljharb"
+       }
+     },
++    "node_modules/which-module": {
++      "version": "2.0.1",
++      "resolved": "https://registry.npmjs.org/which-module/-/which-module-2.0.1.tgz",
++      "integrity": "sha512-iBdZ57RDvnOR9AGBhML2vFZf7h8vmBjhoaZqODJBFWHVtKkDmKuHai3cx5PgVMrX5YDNp27AofYbAwctSS+vhQ==",
++      "license": "ISC"
++    },
+     "node_modules/which-typed-array": {
+       "version": "1.1.24",
+       "resolved": "https://registry.npmjs.org/which-typed-array/-/which-typed-array-1.1.24.tgz",
+@@ -11003,6 +11167,20 @@
+         "node": ">=0.10.0"
+       }
+     },
++    "node_modules/wrap-ansi": {
++      "version": "6.2.0",
++      "resolved": "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-6.2.0.tgz",
++      "integrity": "sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==",
++      "license": "MIT",
++      "dependencies": {
++        "ansi-styles": "^4.0.0",
++        "string-width": "^4.1.0",
++        "strip-ansi": "^6.0.0"
++      },
++      "engines": {
++        "node": ">=8"
++      }
++    },
+     "node_modules/wrappy": {
+       "version": "1.0.2",
+       "resolved": "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz",
+@@ -11055,6 +11233,12 @@
+         "node": ">=0.4"
+       }
+     },
++    "node_modules/y18n": {
++      "version": "4.0.3",
++      "resolved": "https://registry.npmjs.org/y18n/-/y18n-4.0.3.tgz",
++      "integrity": "sha512-JKhqTOwSrqNA1NY5lSztJ1GrBiUodLMmIZuLiDaMRJ+itFd+ABVE8XBjOvIWL+rSqNDC74LCSFmlb/U4UZ4hJQ==",
++      "license": "ISC"
++    },
+     "node_modules/yallist": {
+       "version": "3.1.1",
+       "resolved": "https://registry.npmjs.org/yallist/-/yallist-3.1.1.tgz",
+@@ -11071,6 +11255,93 @@
+         "node": ">= 6"
+       }
+     },
++    "node_modules/yargs": {
++      "version": "15.4.1",
++      "resolved": "https://registry.npmjs.org/yargs/-/yargs-15.4.1.tgz",
++      "integrity": "sha512-aePbxDmcYW++PaqBsJ+HYUFwCdv4LVvdnhBy78E57PIor8/OVvhMrADFFEDh8DHDFRv/O9i3lPhsENjO7QX0+A==",
++      "license": "MIT",
++      "dependencies": {
++        "cliui": "^6.0.0",
++        "decamelize": "^1.2.0",
++        "find-up": "^4.1.0",
++        "get-caller-file": "^2.0.1",
++        "require-directory": "^2.1.1",
++        "require-main-filename": "^2.0.0",
++        "set-blocking": "^2.0.0",
++        "string-width": "^4.2.0",
++        "which-module": "^2.0.0",
++        "y18n": "^4.0.0",
++        "yargs-parser": "^18.1.2"
++      },
++      "engines": {
++        "node": ">=8"
++      }
++    },
++    "node_modules/yargs-parser": {
++      "version": "18.1.3",
++      "resolved": "https://registry.npmjs.org/yargs-parser/-/yargs-parser-18.1.3.tgz",
++      "integrity": "sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ==",
++      "license": "ISC",
++      "dependencies": {
++        "camelcase": "^5.0.0",
++        "decamelize": "^1.2.0"
++      },
++      "engines": {
++        "node": ">=6"
++      }
++    },
++    "node_modules/yargs/node_modules/find-up": {
++      "version": "4.1.0",
++      "resolved": "https://registry.npmjs.org/find-up/-/find-up-4.1.0.tgz",
++      "integrity": "sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw==",
++      "license": "MIT",
++      "dependencies": {
++        "locate-path": "^5.0.0",
++        "path-exists": "^4.0.0"
++      },
++      "engines": {
++        "node": ">=8"
++      }
++    },
++    "node_modules/yargs/node_modules/locate-path": {
++      "version": "5.0.0",
++      "resolved": "https://registry.npmjs.org/locate-path/-/locate-path-5.0.0.tgz",
++      "integrity": "sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==",
++      "license": "MIT",
++      "dependencies": {
++        "p-locate": "^4.1.0"
++      },
++      "engines": {
++        "node": ">=8"
++      }
++    },
++    "node_modules/yargs/node_modules/p-limit": {
++      "version": "2.3.0",
++      "resolved": "https://registry.npmjs.org/p-limit/-/p-limit-2.3.0.tgz",
++      "integrity": "sha512-//88mFWSJx8lxCzwdAABTJL2MyWB12+eIY7MDL2SqLmAkeKU9qxRvWuSyTjm3FUmpBEMuFfckAIqEaVGUDxb6w==",
++      "license": "MIT",
++      "dependencies": {
++        "p-try": "^2.0.0"
++      },
++      "engines": {
++        "node": ">=6"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/sindresorhus"
++      }
++    },
++    "node_modules/yargs/node_modules/p-locate": {
++      "version": "4.1.0",
++      "resolved": "https://registry.npmjs.org/p-locate/-/p-locate-4.1.0.tgz",
++      "integrity": "sha512-R79ZZ/0wAxKGu3oYMlz8jy/kbhsNrS7SKZ7PxEHBgJ5+F2mtFW2fK2cOtBh1cHYkQsbzFV7I+EoRKe6Yt0oK7A==",
++      "license": "MIT",
++      "dependencies": {
++        "p-limit": "^2.2.0"
++      },
++      "engines": {
++        "node": ">=8"
++      }
++    },
+     "node_modules/yocto-queue": {
+       "version": "0.1.0",
+       "resolved": "https://registry.npmjs.org/yocto-queue/-/yocto-queue-0.1.0.tgz",
+diff --git a/package.json b/package.json
+index 7254031..29b3d1d 100644
+--- a/package.json
++++ b/package.json
+@@ -24,7 +24,8 @@
+     "worker": "tsx --env-file-if-exists=.env.local scripts/worker.ts",
+     "preview:build": "node scripts/build-preview.mjs",
+     "test:preview": "node --test tests/preview.test.mjs",
+-    "content:review": "tsx --env-file-if-exists=.env.local scripts/content-review.ts"
++    "content:review": "tsx --env-file-if-exists=.env.local scripts/content-review.ts",
++    "content:visuals": "tsx --env-file-if-exists=.env.local scripts/import-editorial.ts"
+   },
+   "dependencies": {
+     "@fontsource-variable/cormorant-garamond": "5.3.0",
+@@ -38,16 +39,18 @@
+     "next": "16.4.1",
+     "nodemailer": "10.1.1",
+     "payload": "3.90.2",
++    "qrcode": "1.5.4",
+     "react": "19.2.7",
+     "react-dom": "19.2.7",
+     "sharp": "0.35.5",
+-    "zod": "4.3.6",
+-    "tsx": "4.21.0"
++    "tsx": "4.21.0",
++    "zod": "4.3.6"
+   },
+   "devDependencies": {
+     "@playwright/test": "1.58.2",
+     "@types/node": "24.10.1",
+     "@types/nodemailer": "7.0.11",
++    "@types/qrcode": "1.5.6",
+     "@types/react": "19.2.14",
+     "@types/react-dom": "19.2.3",
+     "eslint": "9.39.2",
+diff --git a/scripts/build-preview.mjs b/scripts/build-preview.mjs
+index a88402c..9c47375 100644
+--- a/scripts/build-preview.mjs
++++ b/scripts/build-preview.mjs
+@@ -115,7 +115,29 @@ dialog?.addEventListener('click',e=>{if(e.target===dialog||e.target.closest('a')
+ const form=document.querySelector('form[data-preview]');
+ let step=1;const values={};
+ function remember(){for(const field of form.querySelectorAll('input,textarea,select'))if(field.id||field.closest('label')){const label=field.closest('label')?.childNodes[0]?.textContent||field.id;values[label]=field.type==='checkbox'?field.checked:field.value}}
+-function render(next){remember();step=next;form.innerHTML=templates[step===1?'step1':'step2'];for(const field of form.querySelectorAll('input,textarea,select')){const label=field.closest('label')?.childNodes[0]?.textContent||field.id;if(label in values){if(field.type==='checkbox')field.checked=values[label];else field.value=values[label]}}if(step===2){const submit=form.querySelector('button[type="submit"]');submit.disabled=true;const contact=form.querySelector('input[type="tel"],input[type="email"]');const channel=form.querySelector('select');channel?.addEventListener('change',()=>{contact.type=channel.value==='email'?'email':'tel';contact.autocomplete=contact.type;contact.closest('label').childNodes[0].textContent=channel.value==='email'?'Email':'Телефон';contact.value=''})}form.querySelector('input,select,textarea')?.focus()}
++function render(next){
++  remember();step=next;form.innerHTML=templates[step===1?'step1':'step2'];
++  for(const field of form.querySelectorAll('input,textarea,select')){
++    const label=field.closest('label')?.childNodes[0]?.textContent||field.id;
++    if(label in values){if(field.type==='checkbox')field.checked=values[label];else field.value=values[label]}
++  }
++  if(step===2){
++    form.querySelector('button[type="submit"]').disabled=true;
++    const channel=form.querySelector('select');
++    const contact=form.querySelector('input[placeholder="@username"],input[type="tel"],input[type="email"]');
++    const syncContact=(clear)=>{
++      const telegram=channel.value==='telegram',email=channel.value==='email';
++      contact.type=telegram?'text':email?'email':'tel';contact.autocomplete=telegram?'off':email?'email':'tel';
++      contact.closest('label').childNodes[0].textContent=telegram?'Ваш Telegram':email?'Email':'Телефон';
++      if(telegram){contact.pattern='@?[a-zA-Z][a-zA-Z0-9_]{4,31}';contact.placeholder='@username'}
++      else{contact.removeAttribute('pattern');contact.removeAttribute('placeholder')}
++      contact.minLength=email||telegram?5:7;contact.maxLength=telegram?33:200;
++      contact.value=clear?'':values[telegram?'Ваш Telegram':email?'Email':'Телефон']||'';
++    };
++    syncContact(false);channel?.addEventListener('change',()=>syncContact(true));
++  }
++  form.querySelector('input,select,textarea')?.focus();
++}
+ form?.addEventListener('submit',e=>{e.preventDefault();if(step===1&&form.reportValidity())render(2)});
+ form?.addEventListener('click',e=>{const button=e.target.closest('button');if(step===2&&button?.type==='button')render(1)});
+ `
+diff --git a/src/app/(frontend)/globals.css b/src/app/(frontend)/globals.css
+index cd1b3e6..7a91213 100644
+--- a/src/app/(frontend)/globals.css
++++ b/src/app/(frontend)/globals.css
+@@ -1,5 +1,26 @@
+ @import '@fontsource-variable/cormorant-garamond';
+ @import '@fontsource-variable/manrope';
+-:root{--ivory:#f7f3ea;--ink:#2e2e2e;--plum:#4a2f3f;--muted:#696057;--line:#dcd3c8;--serif:'Cormorant Garamond Variable',serif;--sans:'Manrope Variable',sans-serif;color-scheme:light}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:88px}body{margin:0;background:var(--ivory);color:var(--ink);font-family:var(--sans);font-size:16px;-webkit-font-smoothing:antialiased}a{color:inherit}button,input,textarea,select{font:inherit}button,a,input,select,textarea,summary{touch-action:manipulation}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid #80596f;outline-offset:4px}img{display:block;max-width:100%}h1,h2,h3,p,a,summary{overflow-wrap:break-word}body:has(dialog[open]){overflow:hidden}::selection{background:#dac5d0;color:#30212b}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
++:root {
++  --ivory: #f7f3ea;
++  --ink: #2e2e2e;
++  --plum: #4a2f3f;
++  --muted: #696057;
++  --line: #dcd3c8;
++  --serif: 'Cormorant Garamond Variable', serif;
++  --sans: 'Manrope Variable', sans-serif;
++  color-scheme: light;
++}
++* { box-sizing: border-box; }
++html { scroll-behavior: smooth; scroll-padding-top: 88px; }
++body { margin: 0; background: var(--ivory); color: var(--ink); font-family: var(--sans); font-size: 18px; -webkit-font-smoothing: antialiased; }
++a { color: inherit; }
++button, input, textarea, select { font: inherit; }
++button, a, input, select, textarea, summary { touch-action: manipulation; }
++:is(button, a, input, select, textarea, summary):focus-visible { outline: 2px solid #80596f; outline-offset: 4px; }
++img { display: block; max-width: 100%; }
++h1, h2, h3, p, a, summary { overflow-wrap: break-word; }
++body:has(dialog:modal) { overflow: hidden; }
++::selection { background: #dac5d0; color: #30212b; }
++@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+ 
+ body{font-size:20px;line-height:1.6}h1,h2,h3{line-height:1.15}a,summary{overflow-wrap:anywhere}@media(max-width:767px){body{font-size:18px}}
+diff --git a/src/components/ConsultantLauncher.tsx b/src/components/ConsultantLauncher.tsx
+index 5e9d772..7a762b8 100644
+--- a/src/components/ConsultantLauncher.tsx
++++ b/src/components/ConsultantLauncher.tsx
+@@ -4,8 +4,8 @@ import type { Site } from '@/payload-types'
+ import styles from './site.module.css'
+ 
+ export type ConsultantLabels = NonNullable<Site['assistant']>
+-export default function ConsultantLauncher({ labels }: { labels: ConsultantLabels }) {
+-  const [Panel, setPanel] = useState<ComponentType<{ labels: ConsultantLabels; onClose: () => void }> | null>(null)
++export default function ConsultantLauncher({ labels, telegram, questions = [] }: { labels: ConsultantLabels; telegram?: string | null; questions?: string[] }) {
++  const [Panel, setPanel] = useState<ComponentType<{ labels: ConsultantLabels; onClose: () => void; telegram?: string | null; questions: string[] }> | null>(null)
+   const [open, setOpen] = useState(false), [loading, setLoading] = useState(false), [error, setError] = useState(false)
+   const button = useRef<HTMLButtonElement>(null)
+   return <aside className={styles.consultantLauncher} aria-label={labels.title || 'Задать вопрос'} data-server-only="consultant">
+@@ -20,6 +20,7 @@ export default function ConsultantLauncher({ labels }: { labels: ConsultantLabel
+       setOpen(true)
+     }}>{loading ? 'Загружаем…' : labels.title || 'Задать вопрос'}</button>
+     {error && <p role="alert">Не удалось открыть консультанта. Повторите позже.</p>}
+-    {open && Panel && <Panel labels={labels} onClose={() => { setOpen(false); button.current?.focus() }} />}
++    {telegram && <a className={styles.launcherTelegram} href={telegram} target="_blank" rel="noopener noreferrer" aria-label="Написать специалисту в Telegram">Telegram ↗</a>}
++    {open && Panel && <Panel labels={labels} telegram={telegram} questions={questions} onClose={() => { setOpen(false); button.current?.focus() }} />}
+   </aside>
+ }
+diff --git a/src/components/ConsultantPanel.tsx b/src/components/ConsultantPanel.tsx
+index dfed0f2..9447e35 100644
+--- a/src/components/ConsultantPanel.tsx
++++ b/src/components/ConsultantPanel.tsx
+@@ -5,15 +5,24 @@ import type { ConsultantAnswer } from '@/lib/consultant'
+ import styles from './site.module.css'
+ import { ArrowIcon } from './ArrowIcon'
+ 
+-export default function ConsultantPanel({ labels, onClose }: { labels: ConsultantLabels; onClose: () => void }) {
++export default function ConsultantPanel({ labels, onClose, telegram, questions }: { labels: ConsultantLabels; onClose: () => void; telegram?: string | null; questions: string[] }) {
+   const dialog = useRef<HTMLDialogElement>(null)
+   const controller = useRef<AbortController | null>(null)
+   const [question, setQuestion] = useState(''), [answer, setAnswer] = useState<ConsultantAnswer | null>(null)
+   const [busy, setBusy] = useState(false), [error, setError] = useState('')
+   useEffect(() => {
+-    dialog.current?.showModal()
+-    return () => controller.current?.abort()
+-  }, [])
++    // Desktop remains usable while the reader asks a question. No timed opening or notification sounds.
++    if (!dialog.current?.open) {
++      if (window.matchMedia('(max-width: 767px)').matches) dialog.current?.showModal()
++      else dialog.current?.show()
++    }
++    const escape = (event: KeyboardEvent) => {
++      if (event.key !== 'Escape' || event.defaultPrevented) return
++      event.preventDefault(); dialog.current?.close(); onClose()
++    }
++    document.addEventListener('keydown', escape)
++    return () => { controller.current?.abort(); document.removeEventListener('keydown', escape) }
++  }, [onClose])
+   function close() { dialog.current?.close(); onClose() }
+   async function submit(e: FormEvent) {
+     e.preventDefault(); if (busy) return
+@@ -27,20 +36,24 @@ export default function ConsultantPanel({ labels, onClose }: { labels: Consultan
+     } catch (e) { if (!(e instanceof DOMException && e.name === 'AbortError')) setError('Не удалось получить ответ. Ваш вопрос остался на экране.') }
+     finally { setBusy(false) }
+   }
+-  return <dialog ref={dialog} className={styles.consultantDialog} aria-labelledby="consultant-title" onCancel={e => { e.preventDefault(); close() }} onClick={e => { if (e.target === e.currentTarget) close() }}>
++  return <dialog ref={dialog} className={styles.consultantDialog} aria-labelledby="consultant-title" onKeyDown={e => { if (e.key === 'Escape') { e.preventDefault(); close() } }} onCancel={e => { e.preventDefault(); close() }} onClick={e => { if (e.target === e.currentTarget) close() }}>
+     <button type="button" className={styles.close} aria-label="Закрыть консультанта" onClick={close}>×</button>
+     <h2 id="consultant-title">{labels.title || 'Задать вопрос'}</h2><p>{labels.intro}</p>
++    {!!questions.length && <div className={styles.quickQuestions} aria-label="Популярные вопросы">{questions.slice(0, 3).map(text => <button type="button" key={text} onClick={() => { setQuestion(text); dialog.current?.querySelector('textarea')?.focus() }}>{text}</button>)}</div>}
+     <form className={styles.form} onSubmit={submit}>
+       <label>Ваш вопрос<textarea autoFocus value={question} onChange={e => setQuestion(e.target.value)} required minLength={3} maxLength={500} rows={3} placeholder={labels.placeholder || ''} /></label>
+       <button className={styles.button} type="submit" disabled={busy}>{busy ? 'Ищем в материалах…' : 'Найти ответ'}</button>
+     </form>
+     <div aria-live="polite" aria-busy={busy}>
+       {error && <p role="alert">{error}</p>}
+-      {answer && <><p className={styles.answer}>{answer.answer}</p>{answer.mode === 'sources' && <p className={styles.formNote}>Найдено в опубликованных материалах. Генерация ИИ не подключена.</p>}
++      {answer && <><p className={styles.answer}>{answer.answer}</p>{answer.mode === 'sources' && <p className={styles.formNote}>Ответ найден в опубликованных материалах AFARA.</p>}
+         {answer.sources.length > 0 && <nav aria-label="Источники ответа"><p>Источники AFARA</p><ul>{answer.sources.map(source => <li key={source.url}><a href={source.url} onClick={close}>{source.title}</a></li>)}</ul></nav>}
+       </>}
+     </div>
+-    <a href="#consultation" className={styles.arrowLink} onClick={close}>Обсудить проект со специалистом <ArrowIcon/></a>
++    <a href={telegram || '#consultation'} target={telegram ? '_blank' : undefined} rel={telegram ? 'noopener noreferrer' : undefined} className={styles.arrowLink} onClick={() => {
++      if (!telegram && question.trim()) window.dispatchEvent(new CustomEvent('afara:question', { detail: question.trim() }))
++      close()
++    }}>{telegram ? 'Написать специалисту в Telegram' : 'Передать вопрос специалисту'} <ArrowIcon/></a>
+     <p className={styles.formNote}>Контактные данные отправляются только через форму заявки после вашего подтверждения.</p>
+   </dialog>
+ }
+diff --git a/src/components/ContactDetails.tsx b/src/components/ContactDetails.tsx
+index 418103b..b187ea8 100644
+--- a/src/components/ContactDetails.tsx
++++ b/src/components/ContactDetails.tsx
+@@ -3,9 +3,9 @@ import styles from './site.module.css'
+ 
+ export function ContactDetails({ site, full = false }: { site: Site; full?: boolean }) {
+   return <address className={styles.contacts}>
+-    {site.phone && <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`}>{site.phone}</a>}
+-    {site.email && <a href={`mailto:${site.email}`}>{site.email}</a>}
+     {site.messengers?.map(m => <a href={m.url} key={m.id || m.url} rel="noopener noreferrer">{m.label}</a>)}
++    {site.email && <a href={`mailto:${site.email}`}>{site.email}</a>}
++    {site.phone && <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`}>{site.phone}</a>}
+     {site.geography && <p>{site.geography}</p>}
+     {site.address && <p>{site.address}</p>}
+     {site.hours && <p>{site.hours}{site.timezone ? ` · ${site.timezone}` : ''}</p>}
+diff --git a/src/components/InquiryForm.tsx b/src/components/InquiryForm.tsx
+index 748bc80..9ef89b1 100644
+--- a/src/components/InquiryForm.tsx
++++ b/src/components/InquiryForm.tsx
+@@ -1,13 +1,23 @@
+ 'use client'
+-import { useRef, useState } from 'react'
++import { useEffect, useRef, useState } from 'react'
+ import type { Site } from '@/payload-types'
+ import styles from './site.module.css'
+ import { ArrowIcon } from './ArrowIcon'
+ type Labels=Site['form']
+ export function InquiryForm({labels,source,consent,policy}:{labels:Labels,source:string,consent:{url:string,version:string}|null,policy:string|null}){
+   const [step,setStep]=useState(1),[busy,setBusy]=useState(false),[done,setDone]=useState(false),[failure,setFailure]=useState('')
+-  const [values,setValues]=useState({space:'',city:'',description:'',budget:'',name:'',channel:'phone',contact:'',consent:false,website:''})
++  const [values,setValues]=useState({space:'',city:'',description:'',budget:'',name:'',channel:'telegram',contact:'',consent:false,website:''})
+   const key=useRef<string|null>(null), form=useRef<HTMLFormElement>(null)
++  useEffect(()=>{
++    const receive=(event:Event)=>{
++      const question=(event as CustomEvent<unknown>).detail
++      if(typeof question!=='string'||!question.trim()||question.length>500)return
++      setValues(v=>({...v,description:`Вопрос консультанту: ${question.trim()}`}));setStep(1)
++      requestAnimationFrame(()=>form.current?.querySelector('textarea')?.focus())
++    }
++    window.addEventListener('afara:question',receive)
++    return()=>window.removeEventListener('afara:question',receive)
++  },[])
+   if(!labels)return null
+   const update=(name:string,value:string|boolean)=>{setValues(v=>({...v,[name]:value}));setFailure('')}
+   const disabled=!consent||!policy
+@@ -22,7 +32,7 @@ export function InquiryForm({labels,source,consent,policy}:{labels:Labels,source
+       setDone(true)
+     }catch{setFailure(labels?.error||'Не удалось отправить. Попробуйте ещё раз.')}finally{setBusy(false)}
+   }
+-  if(done)return <div className={styles.formSuccess} role="status"><span className={styles.successMark}>✓</span><h3>{labels.success}</h3><button className={styles.textButton} type="button" onClick={()=>{setDone(false);setStep(1);setValues({space:'',city:'',description:'',budget:'',name:'',channel:'phone',contact:'',consent:false,website:''});key.current=null}}>{labels.again} <ArrowIcon/></button></div>
++  if(done)return <div className={styles.formSuccess} role="status"><span className={styles.successMark}>✓</span><h3>{labels.success}</h3><button className={styles.textButton} type="button" onClick={()=>{setDone(false);setStep(1);setValues({space:'',city:'',description:'',budget:'',name:'',channel:'telegram',contact:'',consent:false,website:''});key.current=null}}>{labels.again} <ArrowIcon/></button></div>
+   return <form ref={form} className={styles.form} onSubmit={send} onInvalid={e=>{(e.target as HTMLElement).focus()}}>
+     <div className={styles.formStep}><span>0{step} / 02</span><span>{step===1?labels.stepOne:labels.stepTwo}</span><div className={styles.stepTrack}><i style={{width:step===1?'50%':'100%'}}/></div></div>
+     {step===1?<div className={styles.formGrid}>
+@@ -32,8 +42,8 @@ export function InquiryForm({labels,source,consent,policy}:{labels:Labels,source
+       <label className={styles.full}>{labels.budget}<input maxLength={120} value={values.budget} onChange={e=>update('budget',e.target.value)} placeholder="Пока не определён"/></label>
+     </div>:<div className={styles.formGrid}>
+       <label className={styles.full}>{labels.name}<input id="inquiry-name" required autoComplete="name" minLength={2} maxLength={100} value={values.name} onChange={e=>update('name',e.target.value)}/></label>
+-      <label>{labels.channel}<select value={values.channel} onChange={e=>{update('channel',e.target.value);update('contact','')}}><option value="phone">{labels.phone}</option><option value="email">{labels.email}</option></select></label>
+-      <label>{values.channel==='phone'?labels.phone:labels.email}<input required autoComplete={values.channel==='phone'?'tel':'email'} type={values.channel==='phone'?'tel':'email'} minLength={values.channel==='phone'?7:5} maxLength={200} value={values.contact} onChange={e=>update('contact',e.target.value)}/></label>
++      <label>{labels.channel}<select value={values.channel} onChange={e=>{update('channel',e.target.value);update('contact','')}}><option value="telegram">Telegram — переписка</option><option value="email">{labels.email} — переписка</option><option value="phone">{labels.phone} — звонок</option></select></label>
++      <label>{values.channel==='telegram'?'Ваш Telegram':values.channel==='phone'?labels.phone:labels.email}<input required autoComplete={values.channel==='telegram'?'off':values.channel==='phone'?'tel':'email'} type={values.channel==='telegram'?'text':values.channel==='phone'?'tel':'email'} placeholder={values.channel==='telegram'?'@username':undefined} pattern={values.channel==='telegram'?'@?[a-zA-Z][a-zA-Z0-9_]{4,31}':undefined} minLength={values.channel==='phone'?7:5} maxLength={values.channel==='telegram'?33:200} value={values.contact} onChange={e=>update('contact',e.target.value)}/></label>
+       <label className={`${styles.full} ${styles.consent}`}><input required type="checkbox" checked={values.consent} onChange={e=>update('consent',e.target.checked)}/><span>{labels.consentLabel} {consent&&<a href={consent.url} target="_blank" rel="noreferrer">Согласие</a>}{policy&&<> и <a href={policy} target="_blank" rel="noreferrer">политика обработки данных</a></>}.</span></label>
+     </div>}
+     <div className={styles.honeypot} aria-hidden="true"><label>Website<input tabIndex={-1} autoComplete="off" value={values.website} onChange={e=>update('website',e.target.value)}/></label></div>
+diff --git a/src/components/Photo.tsx b/src/components/Photo.tsx
+index aa3ab03..299527d 100644
+--- a/src/components/Photo.tsx
++++ b/src/components/Photo.tsx
+@@ -3,12 +3,14 @@ import styles from './site.module.css'
+ export function Photo({image,priority=false,position=65,mobile,hero=false,alt}:{image:Media|null,priority?:boolean,position?:number,mobile?:Media|null,hero?:boolean,alt?:string|null}){
+   if(!image?.url)return <div className={styles.fabric} aria-hidden="true"/>
+   // A tall mobile cover uses much more of the source height than a normal card.
+-  const sizes=hero?'(max-width:767px) 1400px, 100vw':'(max-width:767px) calc(100vw - 40px), (max-width:1023px) 48vw, 45vw'
++  const sizes=hero?'100vw':'(max-width:767px) calc(100vw - 40px), (max-width:1023px) 48vw, 45vw'
+   // The sanitized master is a valid last candidate when a smaller source has no 1600px derivative.
+   const candidates=[image.sizes?.thumb,image.sizes?.tablet,image.sizes?.wide,{url:image.url,width:image.width}].filter(s=>s?.url&&s.width)
+   const srcSet=[...new Map(candidates.map(s=>[s!.width!,s!.url!])).entries()].sort(([a],[b])=>a-b).map(([width,url])=>`${url} ${width}w`).join(', ')
+-  return <picture>{mobile?.url&&<source media="(max-width: 767px)" srcSet={mobile.sizes?.tablet?.url||mobile.url}/>}
++  const mobileCandidates=mobile?[mobile.sizes?.thumb,mobile.sizes?.tablet,{url:mobile.url,width:mobile.width}].filter(s=>s?.url&&s.width):[]
++  const mobileSet=[...new Map(mobileCandidates.map(s=>[s!.width!,s!.url!])).entries()].sort(([a],[b])=>a-b).map(([width,url])=>`${url} ${width}w`).join(', ')
++  return <picture>{mobile?.url&&<source media="(max-width: 767px)" srcSet={mobileSet||mobile.url} sizes="100vw"/>}
+     {/* The CMS generates sanitized WebP sizes once; serving them avoids a second optimizer. */}
+-    <img src={image.sizes?.wide?.url||image.url} srcSet={mobile?.url?undefined:srcSet||undefined} sizes={sizes} width={image.width||1600} height={image.height||1067} alt={alt||image.alt} loading={priority?'eager':'lazy'} fetchPriority={priority?'high':'auto'} style={{objectPosition:`${position}% center`}}/>
++    <img src={image.sizes?.wide?.url||image.url} srcSet={srcSet||undefined} sizes={sizes} width={image.width||1600} height={image.height||1067} alt={alt||image.alt} decoding="async" loading={priority?'eager':'lazy'} fetchPriority={priority?'high':'auto'} style={{objectPosition:`${position}% center`}}/>
+   </picture>
+ }
+diff --git a/src/components/Website.tsx b/src/components/Website.tsx
+index 0f6be72..50aed66 100644
+--- a/src/components/Website.tsx
++++ b/src/components/Website.tsx
+@@ -8,6 +8,10 @@ import { ContactDetails } from './ContactDetails'
+ import ConsultantLauncher from './ConsultantLauncher'
+ import styles from './site.module.css'
+ import { ArrowIcon } from './ArrowIcon'
++import { ShareIdea } from './ShareIdea'
++import { ContactsQR } from './ContactsQR'
++import { telegramURL } from '@/lib/contact-links'
++import { AnswerText } from './AnswerText'
+ 
+ type Section = NonNullable<Page['sections']>[number]
+ function ContentSection({ section, pages }: { section: Section; pages: Page[] }) {
+@@ -20,10 +24,12 @@ function ContentSection({ section, pages }: { section: Section; pages: Page[] })
+         const targetId = typeof card.page === 'object' ? card.page?.id : card.page
+         const target = pages.find(p => p.id === targetId)
+         if (kind === 'faq') return <details key={card.id || j}><summary>{card.title}<span aria-hidden="true">+</span></summary><p>{card.body}</p></details>
+-        return <article className={kind === 'spaces' ? styles.spaceCard : styles.card} key={card.id || j}>
++        const ideaAnchor = `${section.anchor || 'section'}-idea-${card.id || j}`
++        return <article id={ideaAnchor} className={kind === 'spaces' ? styles.spaceCard : styles.card} key={card.id || j}>
+           {card.image && <div className={styles.cardImage}><Photo image={media(card.image)} alt={card.imageAlt} /></div>}
+           {kind === 'process' && <span className={styles.processNumber}>0{j + 1}</span>}
+           <div className={styles.cardText}><h3>{card.title}</h3>{card.body && <p>{card.body}</p>}{target && <Link prefetch={false} className={styles.arrowLink} href={pageURL(target)}>{card.linkLabel || card.title}<span aria-hidden="true"><ArrowIcon/></span></Link>}</div>
++          {card.image && kind === 'compositions' && <ShareIdea anchor={ideaAnchor} title={card.title} />}
+         </article>
+       })}
+     </div>}
+@@ -38,32 +44,36 @@ export function Website({ page, pages, site, documents, knowledge = [], works =
+   const answers = knowledge.filter(k => (typeof k.page === 'object' ? k.page.id : k.page) === page.id)
+   const children = pages.filter(p => (typeof p.parent === 'object' ? p.parent?.id : p.parent) === page.id)
+   const studio = site.studio
++  const telegram = telegramURL(site.messengers)
+   const homeSections = pages.find(p => p.type === 'home')?.sections?.filter(s => s.visible !== false) || []
+   // Only small navigation records enter the client component; page bodies and CMS settings remain server-side.
+   const navigationPages = pages.map(p => ({ id: p.id, title: p.title, path: p.path, type: p.type, parent: typeof p.parent === 'object' ? p.parent?.id : p.parent, navOrder: p.navOrder }))
+   return <><Header site={{ brand: site.brand, tagline: site.tagline, menu: site.menu, contactsLabel: site.contactsLabel }} pages={navigationPages} cta={page.cta} anchors={(page.type === 'home' ? sections : homeSections).map(s => s.anchor || '')} />
+     <main id="main">{preview && <div className={styles.previewBanner}>Предпросмотр черновика · не опубликовано</div>}
+       {page.type !== 'home' && <nav aria-label="Хлебные крошки" className={`${styles.container} ${styles.breadcrumbs}`}><Link prefetch={false} href="/">AFARA</Link><span>/</span>{parent && <><Link prefetch={false} href={pageURL(parent)}>{parent.title}</Link><span>/</span></>}<span>{page.title}</span></nav>}
+-      {page.type === 'contacts' ? <section className={`${styles.container} ${styles.contactPage}`}><h1>{page.h1}</h1><p>{page.intro}</p><ContactDetails site={site} full /></section> : <section className={`${styles.hero} ${page.type !== 'home' ? styles.innerHero : ''}`}>
++      {page.type === 'contacts' ? <section className={`${styles.container} ${styles.contactPage}`}><h1>{page.h1}</h1><p>{page.intro}</p><div className={styles.contactPageGrid}><div><ContactDetails site={site} full /><a className={styles.button} href={telegram || '#consultation'}>{telegram ? 'Написать в Telegram' : 'Оставить сообщение'} <ArrowIcon/></a><p className={styles.formNote}>Выберите переписку в Telegram или по почте. Звонок — по вашему желанию.</p></div><ContactsQR path={page.path}/></div></section> : <section className={`${styles.hero} ${page.type !== 'home' ? styles.innerHero : ''}`}>
+         <div className={styles.heroImage}><Photo image={media(page.hero)} mobile={media(page.heroMobile)} priority hero alt={page.heroAlt} position={page.heroPosition ?? 65} /></div>
+-        <div className={`${styles.container} ${styles.heroContent}`}><p className={styles.heroEyebrow}>{site.brand} · {site.tagline}</p><h1>{page.h1}</h1><p className={styles.heroIntro}>{page.intro}</p><a className={styles.button} href="#consultation">{page.cta}<span aria-hidden="true"><ArrowIcon/></span></a><a className={styles.detailsLink} href={`#${sections.find(s => s.kind === 'details')?.anchor || sections[0]?.anchor || 'consultation'}`}>{page.detailsLabel}<span aria-hidden="true">↓</span></a></div>
+-        {page.conceptLabel && <span className={styles.heroCaption}>{page.conceptLabel}</span>}
++        <div className={`${styles.container} ${styles.heroContent}`}><p className={styles.heroEyebrow}>{site.brand} · {site.tagline}</p><h1>{page.h1}</h1><p className={styles.heroIntro}>{page.intro}</p><a className={styles.button} href={telegram || '#consultation'}>{telegram ? 'Обсудить в переписке' : page.cta}<span aria-hidden="true"><ArrowIcon/></span></a><a className={styles.detailsLink} href={`#${sections.find(s => s.kind === 'details')?.anchor || sections[0]?.anchor || 'consultation'}`}>{page.detailsLabel}<span aria-hidden="true">↓</span></a></div>
+       </section>}
+       {sections.map((section, i) => {
+         if (section.kind !== 'spaces') return <ContentSection key={section.id || i} section={section} pages={pages} />
+         const candidates = page.type === 'home' ? pages.filter(p => p.type === 'overview' || p.type === 'direction' && !p.parent) : children
+         const existing = section.cards || []
+         const missing = candidates.filter(p => !existing.some(c => (typeof c.page === 'object' ? c.page?.id : c.page) === p.id))
+-        return <ContentSection key={section.id || i} pages={pages} section={{ ...section, cards: [...existing, ...missing.map(p => ({ title: p.title, body: p.intro, page: p.id }))] }} />
++        const enriched = existing.map(card => {
++          const linked = pages.find(p => p.id === (typeof card.page === 'object' ? card.page?.id : card.page))
++          return linked && !card.image ? { ...card, image: linked.hero, imageAlt: linked.heroAlt } : card
++        })
++        return <ContentSection key={section.id || i} pages={pages} section={{ ...section, cards: [...enriched, ...missing.map(p => ({ title: p.title, body: p.intro, page: p.id, image: p.hero, imageAlt: p.heroAlt }))] }} />
+       })}
+       {page.type === 'home' && <>
+         {studio?.verified && studio.body && <section id="studio" className={styles.section}><div className={styles.container}><h2>{studio.heading}</h2><div className={styles.studioGrid}><div><p className={styles.sectionBody}>{studio.body}</p>{studio.name && <h3>{studio.name}</h3>}{studio.role && <p>{studio.role}</p>}</div>{media(studio.photo) && <div className={styles.materialImage}><Photo image={media(studio.photo)} /></div>}</div></div></section>}
+         {works.length > 0 && <section id="works" className={styles.section}><div className={styles.container}><h2>{site.worksHeading}</h2><div className={styles.spaces}>{works.map(work => <article key={work.id} className={styles.card}><h3>{work.title}</h3><p>{work.task}</p><p>{work.space}</p><p>{work.solution}</p>{work.photos?.map(photo => <div className={styles.cardImage} key={photo.id}><Photo image={media(photo.image)} /></div>)}</article>)}</div></div></section>}
+         {site.trust?.filter(s => s.visible !== false && !(s.kind === 'faq' && answers.length)).map((s, i) => <ContentSection key={s.id || `trust-${i}`} section={s} pages={pages} />)}
+       </>}
+-      {answers.length > 0 && <section className={styles.section} aria-label="Публичные материалы AFARA"><div className={`${styles.container} ${styles.faq}`}>{page.type === 'home' && <h2>{site.trust?.find(s => s.kind === 'faq')?.heading}</h2>}{answers.map(k => <details key={k.id}><summary>{k.question}<span aria-hidden="true">+</span></summary><p id={`answer-${k.id}`}>{k.answer}</p></details>)}</div></section>}
++      {answers.length > 0 && <section className={styles.section} aria-label="Публичные материалы AFARA"><div className={`${styles.container} ${styles.faq}`}><h2>{page.type === 'home' ? site.trust?.find(s => s.kind === 'faq')?.heading || 'Вопросы перед заказом' : 'Что важно знать'}</h2>{answers.map(k => <details key={k.id}><summary>{k.question}<span aria-hidden="true">+</span></summary><p id={`answer-${k.id}`}><AnswerText text={k.answer}/></p></details>)}</div></section>}
+       <section id="consultation" className={`${styles.section} ${styles.consultation}`}><div className={`${styles.container} ${styles.consultationGrid}`}><div><p className={styles.kicker}>/ Консультация</p><h2>{site.form?.heading}</h2><p className={styles.sectionBody}>{site.form?.intro}</p><ContactDetails site={site} />{contacts && page.id !== contacts.id && <Link prefetch={false} className={styles.arrowLink} href={pageURL(contacts)}>{site.contactsLabel || contacts.title} <ArrowIcon/></Link>}</div>
+         <InquiryForm labels={site.form} source={page.path} consent={consent ? { url: `/documents/${consent.slug}/`, version: consent.version } : null} policy={privacy ? `/documents/${privacy.slug}/` : null} /></div></section>
+-      {site.assistant?.enabled && !preview && <ConsultantLauncher labels={site.assistant} />}
++      {site.assistant?.enabled && !preview ? <ConsultantLauncher labels={site.assistant} telegram={telegram} questions={answers.slice(0, 3).map(k => k.question)} /> : !preview && <aside className={styles.consultantLauncher}><a className={styles.button} href={telegram || '#consultation'}>{telegram ? 'Написать в Telegram' : 'Написать'}</a></aside>}
+     </main><footer className={styles.footer}><div className={`${styles.container} ${styles.footerInner}`}><Link prefetch={false} className={styles.logo} href="/">{site.brand}<small>{site.tagline}</small></Link><ContactDetails site={site} /><nav aria-label="Контакты и документы">{contacts && <Link prefetch={false} href={pageURL(contacts)}>{site.contactsLabel || contacts.title}</Link>}{documents.map(d => <Link prefetch={false} key={d.id} href={`/documents/${d.slug}/`}>{d.title}</Link>)}</nav><p>{site.footerText}</p></div></footer></>
+ }
+diff --git a/src/components/site.module.css b/src/components/site.module.css
+index 506e382..b6609bc 100644
+--- a/src/components/site.module.css
++++ b/src/components/site.module.css
+@@ -14,3 +14,24 @@
+ .card h3,.process h3{font-family:var(--sans)}.heroCaption{background:#30251fcc}
+ 
+ .faq details:has(:target){outline:2px solid var(--plum);outline-offset:8px;scroll-margin-top:120px}
++
++/* A small, reader-controlled contact entry; no automatic modal or animations. */
++.consultantLauncher{position:fixed;right:24px;bottom:max(20px,env(safe-area-inset-bottom));z-index:30;display:flex;align-items:center;gap:12px;padding:0;border:0;text-align:left;max-width:calc(100% - 32px)}
++.consultantLauncher>.button{border-radius:4px;box-shadow:0 8px 28px #30212b24;padding:14px 20px;min-height:52px}
++.launcherTelegram{background:var(--ivory);border:1px solid var(--line);padding:14px 18px;font-size:16px;text-decoration:none;border-radius:4px;min-height:52px}
++.consultantDialog[open]{position:fixed;inset:auto 24px 90px auto;z-index:40;width:min(440px,calc(100% - 32px));max-height:calc(100dvh - 120px);margin:0;border-radius:4px;padding:28px;box-shadow:0 16px 64px #30212b24}
++.consultantDialog h2{font-size:36px;margin-top:8px}.consultantDialog>.close{margin-top:-12px;margin-right:-12px}
++.consultantDialog::backdrop{background:#1e172138}
++.quickQuestions{display:flex;flex-wrap:wrap;gap:8px;margin-block:20px}
++.quickQuestions button{font:inherit;font-size:15px;line-height:1.5;text-align:left;color:var(--plum);background:transparent;border:1px solid var(--line);border-radius:3px;padding:10px 12px;cursor:pointer;min-height:44px}
++.quickQuestions button:hover{background:#eee6df}
++.shareIdea{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;margin-top:8px}.shareIdea span{font-size:14px;color:var(--muted)}.shareIdea input{max-width:100%;width:100%;padding:10px;font-size:16px;border:1px solid var(--line)}
++.contactPageGrid{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:48px;align-items:start}
++.contactPageGrid .button{margin-top:28px}.contactQR{margin:32px 0 0;padding:16px;border:1px solid var(--line);background:#fff;max-width:220px}
++.contactQR svg{display:block;max-width:100%;height:auto}.contactQR figcaption{font-size:15px;line-height:1.5;margin-top:12px}.contactQR a{display:block;overflow-wrap:anywhere;font-size:12px;margin-top:8px}
++.card[id]{scroll-margin-top:112px}.card:target{outline:1px solid var(--plum);outline-offset:12px}
++.footer{padding-bottom:104px}.cardImage{border-radius:2px}.cardImage img{transition:transform .25s ease}.cardImage:hover img{transform:scale(1.015)}
++@media(max-width:767px){.consultantLauncher{right:16px;gap:8px}.consultantLauncher>.button{font-size:16px;padding:12px 16px}.launcherTelegram{font-size:14px;padding:14px 12px}.consultantDialog[open]{inset:auto 0 0;width:100%;max-height:85dvh;padding:24px 20px max(24px,env(safe-area-inset-bottom));border-radius:8px 8px 0 0}.contactPageGrid{grid-template-columns:1fr;gap:12px}.contactQR{display:none}.card[id]{scroll-margin-top:88px}}
++@media(prefers-reduced-motion:reduce){.cardImage img{transition:none}.cardImage:hover img{transform:none}}
++
++@media(max-width:767px){.heroContent{padding-bottom:88px}.consultantDialog[open]{max-width:100%}}
+diff --git a/src/lib/inquiry-schema.ts b/src/lib/inquiry-schema.ts
+index 5963bdd..f85b295 100644
+--- a/src/lib/inquiry-schema.ts
++++ b/src/lib/inquiry-schema.ts
+@@ -1,10 +1,10 @@
+ import { z } from 'zod'
+ export const inquirySchema=z.object({
+   space:z.string().trim().min(2).max(100),city:z.string().trim().min(2).max(120),description:z.string().trim().min(10).max(3000),
+-  budget:z.string().trim().max(120).default(''),name:z.string().trim().min(2).max(100),channel:z.enum(['phone','email']),contact:z.string().trim().max(200),
++  budget:z.string().trim().max(120).default(''),name:z.string().trim().min(2).max(100),channel:z.enum(['phone','email','telegram']),contact:z.string().trim().max(200),
+   consent:z.literal(true),consentVersion:z.string().max(80),source:z.string().max(200),website:z.literal('').default(''),
+ }).strict().superRefine((v,c)=>{
+-  const valid=v.channel==='email'?z.email().safeParse(v.contact).success:/^[+()\d\s.-]+$/.test(v.contact)&&v.contact.replace(/\D/g,'').length>=7&&v.contact.replace(/\D/g,'').length<=15
++  const valid=v.channel==='email'?z.email().safeParse(v.contact).success:v.channel==='telegram'?/^@?[a-zA-Z][a-zA-Z0-9_]{4,31}$/.test(v.contact):/^[+()\d\s.-]+$/.test(v.contact)&&v.contact.replace(/\D/g,'').length>=7&&v.contact.replace(/\D/g,'').length<=15
+   if(!valid)c.addIssue({code:'custom',path:['contact'],message:'Проверьте контакт'})
+ })
+ export type Inquiry=z.infer<typeof inquirySchema>
+diff --git a/content/editorial-knowledge.json b/content/editorial-knowledge.json
+new file mode 100644
+index 0000000..b35e3f8
+--- /dev/null
++++ b/content/editorial-knowledge.json
+@@ -0,0 +1,64 @@
++[
++  {
++    "topic": "acoustic-absorption",
++    "page": "obshchestvennye-prostranstva/restorany",
++    "question": "Могут ли шторы сделать разговор в ресторане комфортнее?",
++    "answer": "Акустические ткани могут уменьшать отражения звука внутри помещения. Их подбирают под зал и проверяют по результатам испытаний выбранного материала. Это не равнозначно звукоизоляции от улицы или соседнего помещения.",
++    "keywords": "акустические шторы ресторан эхо разговор звукопоглощение",
++    "source": "https://creationbaumann.com/en/acoustics/acoustic-fabrics/"
++  },
++  {
++    "topic": "light-and-glare",
++    "page": "chastnye-interery/kabinety",
++    "question": "Как сохранить дневной свет и уменьшить блики на рабочем месте?",
++    "answer": "Прозрачность ткани и положение рабочего места рассматриваются вместе. В проекте частной резиденции и кабинета в Штарнберге Création Baumann показывает применение текстиля для работы со светом и бликами. Для вашего кабинета свойства и оттенок проверяются по образцу в условиях помещения. Это пример международной практики, не работа AFARA.",
++    "keywords": "шторы кабинет блики монитор дневной свет солнце",
++    "source": "https://creationbaumann.com/en/reference/private-residence-and-office-starnberg/"
++  },
++  {
++    "topic": "hotel-light-control",
++    "page": "obshchestvennye-prostranstva/oteli",
++    "question": "Что обсудить при выборе штор для гостиничного номера?",
++    "answer": "Помимо внешнего вида, важно согласовать приватность, дневной свет и управление. Somfy рассматривает эти сценарии в материалах для гостиниц. Нужные функции, обслуживание и совместимость системы уточняются для конкретного номера; универсальную экономию или бесшумность заранее обещать нельзя.",
++    "keywords": "шторы отель гостиница номер моторизация приватность",
++    "source": "https://www.somfy.com/projects/building-types/hospitality"
++  },
++  {
++    "topic": "lightfastness-and-care",
++    "page": "chastnye-interery/gostinye",
++    "question": "Как понять, подходит ли ткань для солнечной гостиной?",
++    "answer": "В технических данных проверяют светостойкость и рекомендации по уходу. Kvadrat описывает светостойкость как способность ткани сохранять цвет при воздействии света. Этот показатель относится к определённому материалу и не означает, что любые портьеры никогда не выцветут.",
++    "keywords": "шторы гостиная солнце выцветание светостойкость уход",
++    "source": "https://www.kvadrat.dk/en/products/curtains/5506-volume"
++  },
++  {
++    "topic": "commercial-material-documents",
++    "page": "obshchestvennye-prostranstva/sceny",
++    "question": "Можно ли определить свойства сценической ткани по фотографии?",
++    "answer": "Фотография показывает цвет и характер драпировки, но не подтверждает технические свойства. Например, Dedar публикует для Lightfall отдельные сведения о составе, применении, уходе и испытаниях. Для одежды сцены документы проверяются по выбранному артикулу и требованиям объекта, а не по внешнему сходству ткани.",
++    "keywords": "одежда сцены ткани документы испытания уход",
++    "source": "https://dedar.com/lightfall/"
++  },
++  {
++    "topic": "office-curtain-zoning",
++    "page": "obshchestvennye-prostranstva/ofisy",
++    "question": "Где посмотреть пример текстильного зонирования офиса?",
++    "answer": "В опубликованном проекте Volvo Car Switzerland в Регенсдорфе Création Baumann описывает сочетание прозрачных и плотных акустических штор для рабочих и общих зон. Концепция проекта — Bellton AG. Это сторонний пример международной практики, не выполненная работа AFARA.",
++    "keywords": "шторы офис переговорная зонирование акустические международный пример",
++    "source": "https://creationbaumann.com/en/reference/volvo-regensdorf/"
++  },
++  {
++    "topic": "yacht-material-brief",
++    "page": "chastnye-yahty",
++    "question": "Что передать для обсуждения текстиля частной яхты?",
++    "answer": "Планы или фотографии остекления, назначение зон, пожелания к свету и приватности, условия эксплуатации и требования представителя заказчика. Для штор на яхту отдельно согласуются геометрия, фиксация, управление и документы выбранных материалов. По визуальной концепции нельзя подтверждать пригодность ткани для конкретного судна.",
++    "keywords": "шторы яхта текстиль частная яхта остекление приватность"
++  },
++  {
++    "topic": "two-tone-curtain-design",
++    "page": "home",
++    "question": "Как обсудить двухцветные портьеры для моего интерьера?",
++    "answer": "Выберите близкую по настроению композицию и сохраните ссылку на неё. Два цвета позволяют подчеркнуть край полотна, пропорции окна или связь с отделкой. Оттенки, ширина отделки и сочетание слоёв согласуются на образцах; фотография не заменяет проверки ткани при вашем освещении.",
++    "keywords": "двухцветные портьеры сложные шторы два цвета кант многослойные"
++  }
++]
+diff --git a/content/visual-collection.ts b/content/visual-collection.ts
+new file mode 100644
+index 0000000..516b889
+--- /dev/null
++++ b/content/visual-collection.ts
+@@ -0,0 +1,19 @@
++// Editorial proposals imported into CMS. These records are not a second runtime content store.
++export const visualCollection = [
++  { path: 'chastnye-interery/zagorodnye-doma', parent: 'chastnye-interery', title: 'Загородные дома', asset: 'residence', h1: 'Сложные портьеры для загородного дома', intro: 'Второй свет, высокие окна и несколько оконных осей требуют единой композиции. Обсудим масштаб портьер, дневной свет и удобное управление.', pain: 'Как оформить высокое окно и сохранить лёгкость?', answer: 'Сначала рассматриваем архитектуру и свет, затем — слои, пропорции и управление. Подбор ткани и способ установки согласуются как одно решение.', alt: 'Двухцветные сливовые и светлые портьеры на высоких окнах загородной резиденции' },
++  { path: 'chastnye-interery/kvartiry', parent: 'chastnye-interery', title: 'Квартиры', asset: 'apartment', h1: 'Индивидуальные шторы для квартиры', intro: 'Текстиль связывает окна, отделку и мебель в целый интерьер. Согласуем цвет, плотность и объём портьер для каждой комнаты.', pain: 'Как связать разные комнаты одним замыслом?', answer: 'Сохраняем общую палитру, но учитываем назначение комнат. Один и тот же уровень прозрачности и объём ткани не обязательно подходят всем помещениям.', alt: 'Тёплые двухцветные портьеры и прозрачный слой у высоких окон городской квартиры' },
++  { path: 'chastnye-interery/gostinye', parent: 'chastnye-interery', title: 'Гостиные', asset: 'living', h1: 'Многослойные шторы для гостиной', intro: 'Красивый вид днём и приватность вечером — разные сценарии. Композиция для гостиной объединяет их в согласованных слоях.', pain: 'Как сохранить вид и закрыть комнату от взглядов вечером?', answer: 'Прозрачный и плотный слои рассматриваем отдельно: дневной свет, вечернее освещение и положение мебели влияют на выбор. Полупрозрачная ткань сама по себе не гарантирует вечернюю приватность.', alt: 'Угловое остекление гостиной с многослойными двухцветными портьерами' },
++  { path: 'chastnye-interery/spalni', parent: 'chastnye-interery', title: 'Спальни', asset: 'bedroom', h1: 'Шторы для спальни с учётом света и приватности', intro: 'Текстиль для спокойной спальни: мягкий дневной свет, желаемое затемнение и удобный способ управления.', pain: 'Почему плотная ткань не всегда даёт нужную темноту?', answer: 'Свет может проходить по краям и через верх окна. При обсуждении blackout-штор учитываем не только ткань, но и всю композицию с условиями установки.', alt: 'Спокойная спальня с прозрачным слоем и светлыми портьерами со сливовым краем' },
++  { path: 'chastnye-interery/kuhni-i-stolovye', parent: 'chastnye-interery', title: 'Кухни и столовые', asset: 'dining', h1: 'Шторы для кухни и столовой', intro: 'Выразительный текстиль должен оставаться удобным каждый день. Учитываем расположение мебели, доступ к окну и условия ухода.', pain: 'Как совместить красивую ткань с ежедневным использованием?', answer: 'Расположение окна относительно рабочей зоны и стола задаёт ограничения. Длину, объём и уход согласуем под реальное пользование помещением.', alt: 'Римская штора и двухцветные боковые портьеры у окна частной столовой' },
++  { path: 'chastnye-interery/detskie', parent: 'chastnye-interery', title: 'Детские', asset: 'children', h1: 'Шторы для детской комнаты', intro: 'Свет для занятий, условия для отдыха и понятное управление. Спокойную композицию согласуем с режимом комнаты и возрастом ребёнка.', pain: 'Как учесть сон, дневной свет и удобство пользования?', answer: 'Обсуждаем разные сценарии дня, доступ к окну и особенности управления. Требования к безопасности материалов и системы проверяем для выбранной комплектации.', alt: 'Светлая детская с мягкими сливовыми портьерами и прозрачным слоем без свисающих шнуров' },
++  { path: 'chastnye-interery/kabinety', parent: 'chastnye-interery', title: 'Домашние кабинеты', asset: 'study', h1: 'Шторы для домашнего кабинета', intro: 'Свет на рабочем месте, приватность и спокойный фон для общения. Свяжем оформление окна с отделкой и обстановкой кабинета.', pain: 'Как уменьшить блики и не закрыться от дневного света?', answer: 'Учитываем положение стола, экранов и окна. Прозрачность слоёв и управление согласуем под работу днём и пользование комнатой вечером.', alt: 'Домашний кабинет с ореховой отделкой и многослойными портьерами у окна' },
++  { path: 'chastnye-interery/vannye', parent: 'chastnye-interery', title: 'Ванные с окном', asset: 'bathroom', h1: 'Текстиль для окна в ванной комнате', intro: 'Приватность и мягкий свет в ванной с окном. Возможное текстильное решение зависит от влажности и расположения окна относительно воды.', pain: 'Где уместен текстиль в ванной?', answer: 'Рассматриваем именно окно, а не душевую шторку. Влажность, брызги, проветривание и документы материала определяют, допустима ли выбранная композиция.', alt: 'Окно в сухой зоне ванной с римской шторой и боковой портьерой' },
++  { path: 'obshchestvennye-prostranstva/oteli', parent: 'obshchestvennye-prostranstva', title: 'Отели', asset: 'hotel', h1: 'Шторы и текстильное оформление отелей', intro: 'Гостиничный номер, лобби и ресторан требуют разных текстильных решений. Учитываем свет, приватность, повторяемость комплектации и обслуживание.', pain: 'Как согласовать образ номера и требования эксплуатации?', answer: 'Композицию рассматриваем вместе со сценариями гостя и обслуживанием. Материалы, управление, состав поставки и документы уточняем в задании объекта.', alt: 'Гостиничный номер в вечернем свете с плотными портьерами и прозрачным слоем' },
++  { path: 'obshchestvennye-prostranstva/restorany', parent: 'obshchestvennye-prostranstva', title: 'Рестораны', asset: 'restaurant', h1: 'Шторы и текстильное зонирование ресторанов', intro: 'Текстиль помогает задать камерность, характер света и границы отдельных зон. Решение рассматриваем вместе с посадкой и режимом работы зала.', pain: 'Как сделать зал камернее без тяжёлого впечатления?', answer: 'Сопоставляем прозрачность, объём и расположение портьер с движением гостей. Если важна акустика, свойства выбранного материала проверяем отдельно.', alt: 'Камерный ресторан с двухцветными портьерами и текстильным разделением столов' },
++  { path: 'obshchestvennye-prostranstva/ofisy', parent: 'obshchestvennye-prostranstva', title: 'Офисы и кабинеты', asset: 'office', h1: 'Шторы для офисов и переговорных', intro: 'Блики на экранах, приватность переговорной и зонирование приёмной — разные задачи. Подбираем текстиль под функцию каждой зоны.', pain: 'Как совместить открытость и приватность?', answer: 'Определяем, где важен вид, а где требуется закрыть пространство. Положение текстильных границ и управление согласуем с реальным использованием офиса.', alt: 'Переговорная с мягким дневным светом и портьерой для текстильного зонирования' },
++  { path: 'obshchestvennye-prostranstva/sceny', parent: 'obshchestvennye-prostranstva', title: 'Одежда сцены', asset: 'stage', h1: 'Одежда сцены и текстиль зрительных залов', intro: 'Главный занавес, кулисы и согласованная отделка формируют образ сцены. Состав комплекта определяется назначением зала и заданием заказчика.', pain: 'Как собрать сценический текстиль в цельную композицию?', answer: 'Согласуем видимые элементы, движение текстиля и взаимодействие с оборудованием. Требования объекта и документы на ткани рассматриваем до комплектации.', alt: 'Сценический занавес глубокого сливового оттенка со светлой контрастной отделкой' },
++  { path: 'obshchestvennye-prostranstva/shkoly-i-detskie-sady', parent: 'obshchestvennye-prostranstva', title: 'Школы и детские сады', asset: 'school', h1: 'Текстильное оформление школ и детских садов', intro: 'Класс, спальня и актовый зал требуют разных решений по свету, пользованию и уходу. Текстиль подбирается под конкретное помещение.', pain: 'Как сохранить уют и учесть требования учреждения?', answer: 'Назначение комнаты и режим пользования определяют состав решения. Уход, материалы и необходимые документы согласуем с ответственным представителем объекта.', alt: 'Светлый учебный зал с текстильными перегородками и шторами у высоких окон' },
++  { path: 'chastnye-yahty', parent: null, title: 'Текстиль для частных яхт', asset: 'yacht', h1: 'Индивидуальный текстиль для частных яхт', intro: 'Сохранить вид на море, обеспечить приватность и учесть сложную геометрию остекления. Композиция согласуется с дизайнером и представителем заказчика.', pain: 'Как оформить остекление яхты и сохранить открытый вид?', answer: 'Уточняем геометрию, фиксацию, движение полотен, доступ к остеклению и условия эксплуатации. Материалы и документы проверяем по заданию конкретной яхты.', alt: 'Салон частной яхты с панорамным видом на море и индивидуальными многослойными шторами' },
++] as const
++
++export const collectionNote = 'Визуальная коллекция AFARA — концепции для обсуждения цвета, света и композиции. Материалы и конструкция согласуются для вашего объекта.'
+diff --git a/docs/EDITORIAL_RESEARCH.md b/docs/EDITORIAL_RESEARCH.md
+new file mode 100644
+index 0000000..aa988f7
+--- /dev/null
++++ b/docs/EDITORIAL_RESEARCH.md
+@@ -0,0 +1,69 @@
++# AFARA: визуальная коллекция и содержание
++
++Дата: 16 октября 2026. Это оригинальная редакционная разработка для AFARA. Исследованные проекты не являются работами AFARA; изображения производителей не скачивались для публикации.
++
++## Что исследовано
++
++| Источник | Полезный вывод для содержания | Где применено |
++| --- | --- | --- |
++| [Création Baumann: акустические ткани](https://creationbaumann.com/en/acoustics/acoustic-fabrics/) | Уменьшение отражений звука необходимо отделять от звукоизоляции; результат зависит от выбранного решения | Рестораны, вопросы о комфорте разговора |
++| [Création Baumann: резиденция и кабинет, Штарнберг](https://creationbaumann.com/en/reference/private-residence-and-office-starnberg/) | Свет, блики и оформление окна стоит рассматривать вместе | Домашние кабинеты |
++| [Création Baumann: Volvo, Регенсдорф](https://creationbaumann.com/en/reference/volvo-regensdorf/) | Прозрачные и плотные текстильные границы могут выполнять разные задачи в офисе. Сторонняя концепция Bellton AG | Офисы, отдельный ответ с явным указанием стороннего проекта |
++| [Kvadrat: Volume](https://www.kvadrat.dk/en/products/curtains/5506-volume) | Карточка артикула содержит сведения о светостойкости, уходе и испытаниях. Характеристики нельзя переносить на всю категорию | Гостиные, FAQ о солнечной стороне |
++| [Dedar: Lightfall](https://dedar.com/lightfall/) | Применение, состав, уход и результаты испытаний относятся к определённому артикулу | Сцены, согласование документов |
++| [Somfy: гостиницы](https://www.somfy.com/projects/building-types/hospitality) | Для гостиницы важны разные сценарии света, приватности и управления | Отели |
++| [Silent Gliss: системы карнизов](https://www.silentgliss.co.uk/engb/products/view/curtain-systems/curtain-track-systems/) | Геометрия проёма и способ управления входят в обсуждение системы | Проверка общей архитектуры подачи; обещания совместимости не публикуются |
++
++Численные классы звукопоглощения Volume не переносились: на просмотренной странице описание и таблица содержат разные обозначения. Нужна проверка актуального протокола выбранной конфигурации. Сертификат на ткань не является подтверждением всей смонтированной композиции. Заявления об экономии, «полной тишине», огнестойкости и пригодности для любого судна не добавлялись.
++
++## Визуальная концепция
++
++16 самостоятельных оригинальных изображений и 16 мобильных вариантов. Идентификаторы, дата и сведения о генерации сохранены в `fixtures/editorial/manifest.json`; происхождение остаётся в CMS. Рисунки не имитируют документальную съёмку выполненных заказов. Публичная фраза «ИИ-визуализация» и отдельная плашка на hero убраны. В галерее один раз поясняется: «Визуальная коллекция AFARA — концепции для обсуждения цвета, света и композиции».
++
++Общая палитра: ivory, сливовый, тёплый taupe, орех, сдержанный бронзовый акцент. Премиальное впечатление строится на масштабе, фактуре, точности и свободном пространстве. Готовые фотографии не подтверждают свойства ткани или наличие конкретных артикулов на складе.
++
++| Пространство | Задача посетителя | Сюжет |
++| --- | --- | --- |
++| Загородный дом | Оформить второй свет без тяжёлого впечатления | Высокие двухцветные портьеры и сад за остеклением |
++| Квартира | Связать текстиль с отделкой и мебелью | Городские окна, спокойные пропорции |
++| Гостиная | Сохранить вид днём и приватность вечером | Угловое остекление, независимые слои |
++| Спальня | Обсудить затемнение и отдых | Мягкий свет, плотный и прозрачный слои |
++| Кухня и столовая | Совместить выразительность и ежедневное использование | Окно в стороне от рабочей зоны |
++| Детская | Учесть режим и управление | Спокойная палитра без свисающих шнуров |
++| Кабинет | Свет на рабочем месте | Окно, рабочий стол и мягкий прозрачный слой |
++| Ванная с окном | Приватность с учётом влажности | Текстиль в сухой зоне окна |
++| Отель | Образ номера и удобство эксплуатации | Номер в вечернем свете |
++| Ресторан | Камерность и зонирование | Текстильные границы между столами |
++| Офис | Блики, приватность, открытость | Переговорная и подвижная текстильная граница |
++| Сцена | Цельная одежда сцены | Главный занавес и отделка |
++| Школа/детский сад | Разные сценарии помещений | Многофункциональный зал и текстильные зоны |
++| Частная яхта | Сохранить море в интерьере | Панорамное остекление, криволинейная геометрия |
++
++## Поведение и вовлечение
++
++Рабочая гипотеза: посетителю проще продолжить знакомство, когда он узнаёт свою задачу и понимает следующий шаг. Это не измеренный результат и не обещание конверсии.
++
++- Вопрос о конкретном пространстве рядом с изображением снижает неопределённость.
++- «Сохранить идею» копирует ссылку на композицию: её можно отправить дизайнеру или специалисту.
++- Переписка предложена раньше звонка. Проценты предпочтений аудитории не выдумываются.
++- Один понятный вход в консультанта. Нет звуков, таймеров открытия, мигания и повторных приглашений.
++- Для корпоративного заказчика важны согласование состава, документы, эксплуатация и ответственность. Для частного — свет, цвет, приватность и спокойный процесс выбора. Это вопросы для обсуждения, не психологические утверждения обо всех состоятельных людях.
++- Не добавлены квизы с обязательным телефоном, ложный дефицит, скидочные счётчики, тяжёлые видео, автокарусели и конструктор «сшейте сами».
++
++## Наполнение и консультант
++
++`content/editorial-knowledge.json` содержит восемь самостоятельных коротких ответов. Ключевые фразы распределены по назначению страниц; нет требования повторять их заданное количество раз. Для производственных утверждений есть явные источники. Доступность услуги, сроки, стоимость и документы AFARA подтверждает владелец.
++
++Консультант использует только одобренную опубликованную базу. Новая публикация доступна следующему поиску. Это обновление знаний, а не самостоятельное обучение на сообщениях посетителей. Посетитель может передать свой вопрос специалисту через форму; без отправки формы вопрос не становится заявкой. Полезный проверенный ответ владелец затем добавляет в базу. Приватные расчёты, заявки, переписка и черновики не используются в публичных ответах.
++
++## Подключение
++
++1. Проверить подготовленные CMS-черновики. Команда `npm run content:visuals` показывает план. `npm run content:visuals -- --apply-drafts` создаёт/дополняет черновики, не заменяя опубликованные версии.
++2. Проверить изображения и опубликовать их. Затем подтвердить доступность направлений и опубликовать страницы. Убедиться, что существующие черновики редактора согласованы перед массовой операцией.
++3. В «Сайт и контакты → Подтверждённые мессенджеры» добавить настоящий HTTPS-адрес Telegram. Пока его нет, кнопки ведут к внутренней форме сообщения. Владелец может указать username; раскрывать телефон на сайте необязательно.
++4. Для QR задать реальный публичный HTTPS-адрес в `AFARA_PUBLIC_URL` либо использовать `APP_URL`. Префикс `/Afara/` сохраняется. QR генерируется локально, без внешнего сервиса, и ведёт на контакты. При отсутствии корректного адреса QR скрыт.
++5. ИИ-провайдера включать серверными настройками после задания ключа и лимита. Без ключа работает поиск опубликованных ответов с честным указанием режима. Нельзя обещать отсутствие любых ошибок.
++
++## Граница готовности
++
++Код и файлы подготовлены отдельно от опубликованного сайта. Импорт в рабочую PostgreSQL, реальные Telegram-реквизиты и публикация CMS не выполнялись в этой среде. Результаты реально выполненных проверок приведены в описании изменения; отсутствие инфраструктурной проверки не должно называться успешным тестом.
+diff --git a/fixtures/editorial/manifest.json b/fixtures/editorial/manifest.json
+new file mode 100644
+index 0000000..2a844c1
+--- /dev/null
++++ b/fixtures/editorial/manifest.json
+@@ -0,0 +1,146 @@
++[
++  {
++    "id": "residence",
++    "file": "residence.webp",
++    "mobile": "residence-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Original AFARA editorial concept: residence. Ivory / muted plum / taupe. Two-tone layered bespoke curtains. Generated with built-in imagegen on 2026-10-16; not a completed AFARA project."
++  },
++  {
++    "id": "yacht",
++    "file": "yacht.webp",
++    "mobile": "yacht-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Original AFARA editorial concept: yacht. Ivory / muted plum / taupe. Two-tone layered bespoke curtains. Generated with built-in imagegen on 2026-10-16; not a completed AFARA project."
++  },
++  {
++    "id": "hotel",
++    "file": "hotel.webp",
++    "mobile": "hotel-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Original AFARA editorial concept: hotel. Ivory / muted plum / taupe. Two-tone layered bespoke curtains. Generated with built-in imagegen on 2026-10-16; not a completed AFARA project."
++  },
++  {
++    "id": "curtain-detail",
++    "file": "curtain-detail.webp",
++    "mobile": "curtain-detail-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Original AFARA editorial concept: curtain-detail. Ivory / muted plum / taupe. Two-tone layered bespoke curtains. Generated with built-in imagegen on 2026-10-16; not a completed AFARA project."
++  },
++  {
++    "id": "apartment",
++    "file": "apartment.webp",
++    "mobile": "apartment-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Create ONE original landscape 3:2 high-resolution photorealistic editorial architectural photograph for AFARA bespoke textile atelier. Quiet luxury with tactile curtains as the main subject, warm ivory, muted plum, taupe, walnut, restrained bronze, realistic graceful fabric folds, plausible room geometry, daylight, authentic material texture. No text, labels, logos, watermark, people, or collage. Entirely original interior, do not copy a recognizable project. Elegant city apartment with tall but normal-height windows, contemporary French-influenced proportions and broad pale stone jambs, layered ivory sheers and sculptural taupe curtains with deep plum vertical contrast borders; cream chaise, walnut console, softly visible urban roofs. Framing shows the whole window composition, furniture secondary."
++  },
++  {
++    "id": "living",
++    "file": "living.webp",
++    "mobile": "living-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Create ONE original landscape 3:2 high-resolution photorealistic editorial architectural photograph for AFARA bespoke textile atelier. Quiet luxury with tactile curtains as the main subject, warm ivory, muted plum, taupe, walnut, restrained bronze, realistic graceful fabric folds, plausible room geometry, daylight, authentic material texture. No text, labels, logos, watermark, people, or collage. Entirely original interior, do not copy a recognizable project. Light spacious living room at evening transition, floor-to-ceiling corner glazing framed by sumptuous two-colour drapes: broad ivory fabric panels and deep muted plum sides with a fine tailored border, transparent ivory inner layer. Central glazing remains open to a tranquil garden; low cream sofa, sculptural walnut coffee table, soft filtered daylight, exceptionally beautiful layered curtains."
++  },
++  {
++    "id": "children",
++    "file": "children.webp",
++    "mobile": "children-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Create ONE original landscape 3:2 high-resolution photorealistic editorial architectural photograph for AFARA bespoke textile atelier. Quiet luxury with tactile curtains as the main subject, warm ivory, muted plum, taupe, walnut, restrained bronze, realistic graceful fabric folds, plausible room geometry, daylight, authentic material texture. No text, labels, logos, watermark, people, or collage. Entirely original interior, do not copy a recognizable project. Architect-designed refined child's bedroom with a low ivory bed, walnut shelving, subtle age-neutral art without letters, a generous window dressed with ivory translucent layer and warm muted plum/stone outer drapes, clean ceiling-mounted system with NO cords or dangling ties. Soft calm daylight, no child, no baby staged in bed, elegant tactile fabrics dominate the window."
++  },
++  {
++    "id": "bedroom",
++    "file": "bedroom.webp",
++    "mobile": "bedroom-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Create ONE original landscape 3:2 high-resolution photorealistic editorial architectural photograph for AFARA bespoke textile atelier. Quiet luxury with tactile curtains as the main subject, warm ivory, muted plum, taupe, walnut, restrained bronze, realistic graceful fabric folds, plausible room geometry, daylight, authentic material texture. No text, labels, logos, watermark, people, or collage. Entirely original interior, do not copy a recognizable project. Private serene bedroom in soft morning light, generous tailored two-tone full-height drapes in warm ivory with plum leading edges and an independent ivory sheer layer, partly closed to soften the daylight at the window. Bed visible to one side with pale linen and a single muted plum accent, walnut bedside table; atmosphere restorative, not artificially dark or theatrical."
++  },
++  {
++    "id": "study",
++    "file": "study.webp",
++    "mobile": "study-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Create ONE original landscape 3:2 high-resolution photorealistic editorial architectural photograph for AFARA bespoke textile atelier. Quiet luxury with tactile curtains as the main subject, warm ivory, muted plum, taupe, walnut, restrained bronze, realistic graceful fabric folds, plausible room geometry, daylight, authentic material texture. No text, labels, logos, watermark, people, or collage. Entirely original interior, do not copy a recognizable project. Private walnut-lined home study, elegant desk perpendicular to a tall window rather than blocking it. Warm ivory sheer filters daylight and deep plum lined drapes with taupe leading border frame the window. Book spines without readable titles, single low bronze lamp, rich calm scholarly atmosphere, curtain detailing and useful daylight central."
++  },
++  {
++    "id": "bathroom",
++    "file": "bathroom.webp",
++    "mobile": "bathroom-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Create ONE original landscape 3:2 high-resolution photorealistic editorial architectural photograph for AFARA bespoke textile atelier. Quiet luxury with tactile curtains as the main subject, warm ivory, muted plum, taupe, walnut, restrained bronze, realistic graceful fabric folds, plausible room geometry, daylight, authentic material texture. No text, labels, logos, watermark, people, or collage. Entirely original interior, do not copy a recognizable project. Private spa-like bathroom in ivory travertine with a large window on a dry wall well away from freestanding bath and shower, fine ivory translucent Roman shade at the window and a tailored taupe/plum curtain on its dry side. Beautiful soft daylight, greenery softly visible outside, towels and fittings minimal, NO shower curtain and no fabric touching water."
++  },
++  {
++    "id": "restaurant",
++    "file": "restaurant.webp",
++    "mobile": "restaurant-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Create ONE original landscape 3:2 high-resolution photorealistic editorial architectural photograph for AFARA bespoke textile atelier. Quiet luxury with tactile curtains as the main subject, warm ivory, muted plum, taupe, walnut, restrained bronze, realistic graceful fabric folds, plausible room geometry, daylight, authentic material texture. No text, labels, logos, watermark, people, or collage. Entirely original interior, do not copy a recognizable project. Understated fine dining restaurant with tall windows and intimate niches defined by sweeping ceiling-mounted warm plum and taupe curtains with light ivory sheers at windows, small round tables with no logos, walnut chairs, limestone floor and restrained bronze lamps. Architecture communicates comfortable conversation and flexible privacy; editorial photo, no patrons or staff."
++  },
++  {
++    "id": "dining",
++    "file": "dining.webp",
++    "mobile": "dining-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Create ONE original landscape 3:2 high-resolution photorealistic editorial architectural photograph for AFARA bespoke textile atelier. Quiet luxury with tactile curtains as the main subject, warm ivory, muted plum, taupe, walnut, restrained bronze, realistic graceful fabric folds, plausible room geometry, daylight, authentic material texture. No text, labels, logos, watermark, people, or collage. Entirely original interior, do not copy a recognizable project. Refined private kitchen and dining room: walnut and ivory kitchen far in background, beautifully dressed large window safely away from the hob and sink, warm taupe Roman blind over glazing framed by full-height ivory linen-look side curtains with narrow plum borders, round pale-stone dining table. Unobstructed circulation and elegant practical textile choices, no curtains close to flame."
++  },
++  {
++    "id": "office",
++    "file": "office.webp",
++    "mobile": "office-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Create ONE original landscape 3:2 high-resolution photorealistic editorial architectural photograph for AFARA bespoke textile atelier. Quiet luxury with tactile curtains as the main subject, warm ivory, muted plum, taupe, walnut, restrained bronze, realistic graceful fabric folds, plausible room geometry, daylight, authentic material texture. No text, labels, logos, watermark, people, or collage. Entirely original interior, do not copy a recognizable project. Premium corporate meeting room and adjacent reception, tall glazed facade, a translucent ivory curtain gently filtering daytime light while muted plum/taupe heavy curtain on a curved ceiling track defines a more private meeting zone. Walnut table positioned perpendicular to windows, dark blank monitor without glare, refined credible workplace not residential; no logos or people."
++  },
++  {
++    "id": "stage",
++    "file": "stage.webp",
++    "mobile": "stage-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Create ONE original landscape 3:2 high-resolution photorealistic editorial architectural photograph for AFARA bespoke textile atelier. Quiet luxury with tactile curtains as the main subject, warm ivory, muted plum, taupe, walnut, restrained bronze, realistic graceful fabric folds, plausible room geometry, daylight, authentic material texture. No text, labels, logos, watermark, people, or collage. Entirely original interior, do not copy a recognizable project. Intimate prestigious theatre auditorium with rows of a few visible muted plum upholstered seats, proscenium framed by exceptionally tailored deep plum velvet main curtain, warm ivory/gold narrow inner leading borders, elegant side legs and valance. Curtain partly drawn to an empty softly lit stage with warm walnut floor; plausible theatre architecture, no performance, no visible branding."
++  },
++  {
++    "id": "school",
++    "file": "school.webp",
++    "mobile": "school-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Create ONE original landscape 3:2 high-resolution photorealistic editorial architectural photograph for AFARA bespoke textile atelier. Quiet luxury with tactile curtains as the main subject, warm ivory, muted plum, taupe, walnut, restrained bronze, realistic graceful fabric folds, plausible room geometry, daylight, authentic material texture. No text, labels, logos, watermark, people, or collage. Entirely original interior, do not copy a recognizable project. Beautiful contemporary school multi-purpose music and reading room, daylight from high windows softened with ivory sheers, flexible zones formed by full-height warm taupe curtains with muted plum accents and recessed ceiling tracks. Small well-made wood chairs and age-appropriate low shelves, sophisticated warm public interior, no dangling cords, no people, no letters."
++  },
++  {
++    "id": "materials",
++    "file": "materials.webp",
++    "mobile": "materials-mobile.webp",
++    "origin": "ai",
++    "generatedAt": "2026-10-16",
++    "generator": "Built-in imagegen; model identifier not exposed",
++    "prompt": "Create ONE original landscape 3:2 high-resolution photorealistic editorial architectural photograph for AFARA bespoke textile atelier. Quiet luxury with tactile curtains as the main subject, warm ivory, muted plum, taupe, walnut, restrained bronze, realistic graceful fabric folds, plausible room geometry, daylight, authentic material texture. No text, labels, logos, watermark, people, or collage. Entirely original interior, do not copy a recognizable project. Tactile macro editorial still life of a considered curtain palette laid neatly on warm ivory stone: deep muted plum matte velvet, softly luminous ivory heavy woven fabric, warm taupe linen-look cloth, translucent sheer, and one perfectly stitched two-tone seam sample. Soft raking natural light reveals weave, sewn edges and drape; no charts, brands, tags, labels, hands or tools."
++  }
++]
+diff --git a/scripts/import-editorial.ts b/scripts/import-editorial.ts
+new file mode 100644
+index 0000000..067c872
+--- /dev/null
++++ b/scripts/import-editorial.ts
+@@ -0,0 +1,88 @@
++import { readFile } from 'node:fs/promises'
++import path from 'node:path'
++import { cms } from '../src/lib/payload'
++import { visualCollection, collectionNote } from '../content/visual-collection'
++import type { Page } from '../src/payload-types'
++
++// Explicit opt-in operation. Never run from migrations, app startup or an ordinary seed.
++const apply = process.argv.includes('--apply-drafts')
++const p = await cms()
++try {
++  const entries = JSON.parse(await readFile('fixtures/editorial/manifest.json', 'utf8')) as { id: string; file: string; mobile: string; prompt: string }[]
++  if (!apply) {
++    console.log(`Plan only: ${entries.length * 2} media records; ${visualCollection.length} directions; 2 overviews; home gallery; knowledge drafts. Existing texts and real works are retained. Add --apply-drafts to prepare CMS drafts.`)
++    process.exitCode = 0
++  } else {
++    const images = new Map<string, { image: number; mobile: number }>()
++    for (const entry of entries) {
++      const ids: number[] = []
++      for (const [variant, file] of [['desktop', entry.file], ['mobile', entry.mobile]]) {
++        const marker = `AFARA_EDITORIAL_20261016:${entry.id}:${variant}`
++        const existing = await p.find({ collection: 'media', where: { source: { contains: marker } }, depth: 0, limit: 1, draft: true })
++        const alt = visualCollection.find(d => d.asset === entry.id)?.alt || (entry.id === 'materials' ? 'Фактуры сливового бархата, светлой ткани и прозрачного слоя' : 'Двухцветные портьеры со светлой контрастной отделкой')
++        const record = existing.docs[0] || await p.create({ collection: 'media', draft: true, filePath: path.resolve('fixtures/editorial', file), data: {
++          alt, caption: 'Концепция текстильной композиции', origin: 'ai', rightsConfirmed: true,
++          source: `${marker}\nOriginal concept generated with built-in imagegen on 2026-10-16. Not a completed AFARA project.\n${entry.prompt}`, _status: 'draft',
++        } })
++        ids.push(record.id)
++      }
++      images.set(entry.id, { image: ids[0], mobile: ids[1] })
++    }
++    const all = await p.find({ collection: 'pages', draft: true, depth: 1, limit: 200 })
++    const pages = new Map(all.docs.map(page => [page.path, page]))
++    for (const [pagePath, title, asset] of [['chastnye-interery', 'Частные интерьеры', 'living'], ['obshchestvennye-prostranstva', 'Общественные пространства', 'restaurant']]) {
++      if (!pages.has(pagePath)) pages.set(pagePath, await p.create({ collection: 'pages', draft: true, data: { title, path: pagePath, type: 'overview', h1: title, intro: collectionNote, cta: 'Написать о проекте', sections: [], _status: 'draft' } }))
++      const image = images.get(asset)!
++      const page = pages.get(pagePath)!
++      await p.update({ collection: 'pages', id: page.id, draft: true, data: { hero: image.image, heroMobile: image.mobile, conceptLabel: '', _status: 'draft' } })
++    }
++    for (const [index, direction] of visualCollection.entries()) {
++      const image = images.get(direction.asset)!
++      let page = pages.get(direction.path)
++      if (!page) page = await p.create({ collection: 'pages', draft: true, data: {
++        title: direction.title, path: direction.path, parent: direction.parent ? pages.get(direction.parent)?.id : undefined,
++        type: 'direction', h1: direction.h1, intro: direction.intro, cta: 'Написать о проекте', serviceConfirmed: false, navOrder: 20 + index, _status: 'draft',
++      } })
++      const sections: NonNullable<Page['sections']> = (page.sections || []).map(section => ({ ...section,
++        image: section.image ? images.get('materials')!.image : section.image,
++        cards: section.cards?.map(card => ({ ...card, image: card.image ? image.image : undefined })),
++      }))
++      if (!sections.some(section => section.anchor === 'visual-collection')) sections.unshift({
++        kind: 'compositions', anchor: 'visual-collection', heading: 'Коллекция решений для вашего пространства', body: collectionNote,
++        cards: [{ title: direction.pain, body: direction.answer, image: image.image, imageAlt: direction.alt }, { title: 'Цвет и отделка крупным планом', body: 'Сочетание сливового и светлого оттенков, объём складки и контрастный край помогают обсудить характер композиции. Деталь — стилистический пример, не фрагмент сфотографированного объекта.', image: images.get('curtain-detail')!.image }],
++      })
++      pages.set(direction.path, await p.update({ collection: 'pages', id: page.id, draft: true, data: { hero: image.image, heroMobile: image.mobile, heroAlt: direction.alt, conceptLabel: '', sections, _status: 'draft' } }))
++    }
++    // Resolve overview cards from their target page, instead of reusing one demo photo everywhere.
++    for (const pagePath of ['chastnye-interery', 'obshchestvennye-prostranstva', 'home']) {
++      const page = pages.get(pagePath)
++      if (!page) continue
++      const sections: NonNullable<Page['sections']> = (page.sections || []).map(section => ({ ...section,
++        kicker: section.kind === 'details' ? 'Разбор текстильной композиции' : section.kicker,
++        image: section.image ? images.get('materials')!.image : section.image,
++        cards: section.cards?.map((card, index) => {
++          const targetId = typeof card.page === 'object' ? card.page?.id : card.page
++          const target = [...pages.values()].find(page => page.id === targetId)
++          const direction = visualCollection.find(d => d.path === target?.path)
++          const asset = direction?.asset || (target?.path === 'chastnye-interery' ? 'living' : target?.path === 'obshchestvennye-prostranstva' ? 'restaurant' : section.kind === 'details' ? ['residence', 'living', 'curtain-detail'][index % 3] : ['living', 'curtain-detail', 'residence'][index % 3])
++          return { ...card, image: card.image || section.kind === 'spaces' ? images.get(asset)!.image : undefined }
++        }),
++      }))
++      if (pagePath === 'home' && !sections.some(s => s.anchor === 'visual-collection')) sections.splice(1, 0, {
++        kind: 'compositions', anchor: 'visual-collection', heading: 'Два цвета. Один замысел.', body: collectionNote,
++        cards: [{ title: 'Высокие окна и второй свет', body: 'Выразительный масштаб без случайных деталей.', image: images.get('residence')!.image }, { title: 'Контрастный край и пластика', body: 'Сохраните близкую по настроению идею и отправьте её специалисту.', image: images.get('curtain-detail')!.image }, { title: 'Открытый вид и приватность', body: 'Многослойные шторы для частной яхты.', image: images.get('yacht')!.image, page: pages.get('chastnye-yahty')?.id }],
++      })
++      const hero = images.get(pagePath === 'home' ? 'residence' : pagePath === 'chastnye-interery' ? 'living' : 'restaurant')!
++      await p.update({ collection: 'pages', id: page.id, draft: true, data: { sections, hero: hero.image, heroMobile: hero.mobile, conceptLabel: '', _status: 'draft' } })
++    }
++    const knowledge = JSON.parse(await readFile('content/editorial-knowledge.json', 'utf8')) as { topic: string; page: string; question: string; answer: string; keywords: string; source?: string }[]
++    for (const item of knowledge) {
++      if ((await p.find({ collection: 'knowledge', draft: true, where: { topic: { equals: item.topic } }, limit: 1 })).totalDocs) continue
++      const page = pages.get(item.page)
++      if (!page) continue
++      await p.create({ collection: 'knowledge', draft: true, data: { topic: item.topic, question: item.question, answer: `${item.answer}${item.source ? `\nИсточник: ${item.source}` : ''}`, keywords: item.keywords, page: page.id, approved: false, _status: 'draft' } })
++    }
++    console.log('CMS drafts prepared. Published versions, existing copy, studio identity, contacts and real works were not overwritten. Review media, services and sourced answers before publication.')
++  }
++} finally { await p.destroy() }
++process.exit(0)
+diff --git a/scripts/prepare-editorial-assets.mjs b/scripts/prepare-editorial-assets.mjs
+new file mode 100644
+index 0000000..3e13a64
+--- /dev/null
++++ b/scripts/prepare-editorial-assets.mjs
+@@ -0,0 +1,21 @@
++import { writeFile, mkdir } from 'node:fs/promises'
++import { fileURLToPath } from 'node:url'
++import sharp from 'sharp'
++
++// Input is a local map produced after generation. Nothing is fetched from third-party image sites.
++let stdin = ''
++for await (const chunk of process.stdin) stdin += chunk
++const input = JSON.parse(stdin)
++const directory = new URL('../fixtures/editorial/', import.meta.url)
++await mkdir(directory, { recursive: true })
++const output = []
++for (const item of input) {
++  if (!/^[a-z-]+$/.test(item.id)) throw new Error('Unsafe asset name')
++  const original = sharp(item.source, { limitInputPixels: 50_000_000, failOn: 'error' }).rotate()
++  const file = `${item.id}.webp`, mobile = `${item.id}-mobile.webp`
++  await original.clone().resize({ width: 1800, withoutEnlargement: true }).webp({ quality: 84, effort: 5 }).toFile(fileURLToPath(new URL(file, directory)))
++  await original.clone().resize(900, 1200, { fit: 'cover', position: item.id === 'curtain-detail' ? 'right' : 'centre' }).webp({ quality: 82, effort: 5 }).toFile(fileURLToPath(new URL(mobile, directory)))
++  output.push({ id: item.id, file, mobile, origin: 'ai', generatedAt: '2026-10-16', generator: 'Built-in imagegen; model identifier not exposed', prompt: item.prompt })
++}
++await writeFile(new URL('manifest.json', directory), JSON.stringify(output, null, 2) + '\n')
++console.log(`Prepared ${output.length} original concepts and mobile variants. Publication requires the explicit CMS import.`)
+diff --git a/src/components/AnswerText.tsx b/src/components/AnswerText.tsx
+new file mode 100644
+index 0000000..bf7e1a1
+--- /dev/null
++++ b/src/components/AnswerText.tsx
+@@ -0,0 +1,9 @@
++export function AnswerText({ text }: { text: string }) {
++  const marker = '\nИсточник: '
++  const index = text.lastIndexOf(marker)
++  if (index < 0) return <>{text}</>
++  let url: URL | null = null
++  try { url = new URL(text.slice(index + marker.length).trim()) } catch { /* Keep malformed editorial text visible. */ }
++  if (!url || url.protocol !== 'https:' || url.username || url.password) return <>{text}</>
++  return <>{text.slice(0, index)}<br/><a href={url.href} target="_blank" rel="noopener noreferrer">Источник: {url.hostname.replace(/^www\./, '')} ↗</a></>
++}
+diff --git a/src/components/ContactsQR.tsx b/src/components/ContactsQR.tsx
+new file mode 100644
+index 0000000..c899fca
+--- /dev/null
++++ b/src/components/ContactsQR.tsx
+@@ -0,0 +1,20 @@
++import QRCode from 'qrcode'
++import { publicContactsURL } from '@/lib/contact-links'
++import styles from './site.module.css'
++
++export function ContactsQR({ path }: { path: string }) {
++  const url = publicContactsURL(process.env.AFARA_PUBLIC_URL || process.env.APP_URL, path)
++  if (!url) return null
++  const { modules } = QRCode.create(url, { errorCorrectionLevel: 'M' })
++  const margin = 4, size = modules.size + margin * 2
++  const dots: string[] = []
++  for (let y = 0; y < modules.size; y++) for (let x = 0; x < modules.size; x++) {
++    if (modules.get(y, x)) dots.push(`M${x + margin} ${y + margin}h1v1h-1z`)
++  }
++  return <figure className={styles.contactQR}>
++    <svg viewBox={`0 0 ${size} ${size}`} width="176" height="176" role="img" aria-label="QR-код страницы контактов AFARA" shapeRendering="crispEdges">
++      <rect width={size} height={size} fill="#fff"/><path d={dots.join('')} fill="#1e1b1d"/>
++    </svg>
++    <figcaption>Открыть контакты на телефоне<a href={url}>{url}</a></figcaption>
++  </figure>
++}
+diff --git a/src/components/ShareIdea.tsx b/src/components/ShareIdea.tsx
+new file mode 100644
+index 0000000..e3b792d
+--- /dev/null
++++ b/src/components/ShareIdea.tsx
+@@ -0,0 +1,17 @@
++'use client'
++import { useState } from 'react'
++import styles from './site.module.css'
++
++export function ShareIdea({ anchor, title }: { anchor: string; title: string }) {
++  const [message, setMessage] = useState('')
++  const [fallback, setFallback] = useState('')
++  return <div className={styles.shareIdea} data-server-only="share-idea">
++    <button className={styles.textButton} type="button" aria-label={`Скопировать ссылку: ${title}`} onClick={async () => {
++      const url = new URL(window.location.href); url.hash = anchor; url.search = ''
++      try { await navigator.clipboard.writeText(url.href); setMessage('Ссылка скопирована'); setFallback('') }
++      catch { setFallback(url.href); setMessage('Скопируйте ссылку из поля') }
++    }}>Сохранить идею ↗</button>
++    <span role="status">{message}</span>
++    {fallback && <input aria-label="Ссылка на идею" readOnly value={fallback} onFocus={e => e.currentTarget.select()} />}
++  </div>
++}
+diff --git a/src/lib/contact-links.ts b/src/lib/contact-links.ts
+new file mode 100644
+index 0000000..c2436fc
+--- /dev/null
++++ b/src/lib/contact-links.ts
+@@ -0,0 +1,19 @@
++export function telegramURL(messengers: { url: string }[] | null | undefined): string | null {
++  for (const messenger of messengers || []) {
++    try {
++      const url = new URL(messenger.url)
++      if (url.protocol === 'https:' && url.hostname === 't.me' && !url.username && !url.password && /^\/[a-zA-Z0-9_+][a-zA-Z0-9_+/-]*$/.test(url.pathname)) return url.href
++    } catch { /* Ignore an unconfigured channel; never publish a placeholder destination. */ }
++  }
++  return null
++}
++
++export function publicContactsURL(base: string | undefined, path: string): string | null {
++  try {
++    const url = new URL(base || '')
++    if (url.protocol !== 'https:' || url.username || url.password || url.hostname === 'localhost') return null
++    url.hash = ''; url.search = ''
++    url.pathname = `${url.pathname.replace(/\/$/, '')}/${path.replace(/^\/+|\/+$/g, '')}/`
++    return url.href
++  } catch { return null }
++}
+diff --git a/tests/editorial.test.ts b/tests/editorial.test.ts
+new file mode 100644
+index 0000000..ab4b424
+--- /dev/null
++++ b/tests/editorial.test.ts
+@@ -0,0 +1,44 @@
++import test from 'node:test'
++import assert from 'node:assert/strict'
++import { readFile, stat } from 'node:fs/promises'
++import { createHash } from 'node:crypto'
++import sharp from 'sharp'
++import { inquirySchema } from '../src/lib/inquiry-schema'
++import { telegramURL, publicContactsURL } from '../src/lib/contact-links'
++import { visualCollection } from '../content/visual-collection'
++
++test('messaging can receive a lead without requiring a telephone number', () => {
++  const lead = { space: 'Частная яхта', city: 'Санкт-Петербург', description: 'Обсудить текстиль для салона яхты', budget: '', name: 'Тест', channel: 'telegram', contact: '@afara_test', consent: true, consentVersion: 'test', source: 'chastnye-yahty', website: '' }
++  assert.equal(inquirySchema.safeParse(lead).success, true)
++  for (const contact of ['https://evil.example/name', '@x', '@name with spaces', '<script>']) assert.equal(inquirySchema.safeParse({ ...lead, contact }).success, false)
++})
++
++test('contact buttons reject deceptive Telegram destinations and QR preserves a real public base path', () => {
++  assert.equal(telegramURL([{ url: 'https://t.me/afara_studio' }]), 'https://t.me/afara_studio')
++  for (const url of ['https://t.me.evil.example/afara', 'javascript:alert(1)', 'https://t.me@evil.example/a', 'https://evil@t.me/name', '']) assert.equal(telegramURL([{ url }]), null)
++  assert.equal(publicContactsURL('https://utkinin.github.io/Afara/', 'kontakty'), 'https://utkinin.github.io/Afara/kontakty/')
++  assert.equal(publicContactsURL('https://example.test', 'kontakty'), 'https://example.test/kontakty/')
++  assert.equal(publicContactsURL('http://localhost:3000', 'kontakty'), null)
++  assert.equal(publicContactsURL('', 'kontakty'), null)
++})
++
++test('all fourteen directions have distinct, compressed desktop assets and tall mobile variants', async () => {
++  const manifest = JSON.parse(await readFile('fixtures/editorial/manifest.json', 'utf8')) as { id: string; file: string; mobile: string }[]
++  assert.equal(visualCollection.length, 14)
++  assert.equal(new Set(visualCollection.map(d => d.asset)).size, 14)
++  const hashes = new Set<string>()
++  for (const asset of manifest) {
++    for (const [file, mobile] of [[asset.file, false], [asset.mobile, true]] as const) {
++      const path = `fixtures/editorial/${file}`
++      assert.ok((await stat(path)).size < 600_000, `Oversized image: ${file}`)
++      const meta = await sharp(path).metadata()
++      assert.equal(meta.format, 'webp')
++      assert.ok(!meta.exif, 'Location and camera metadata must not be published')
++      if (mobile) assert.equal(meta.width! / meta.height!, 0.75)
++    }
++    const hash = createHash('sha256').update(await readFile(`fixtures/editorial/${asset.file}`)).digest('hex')
++    assert.ok(!hashes.has(hash), 'Different spaces must not silently reuse one source photo')
++    hashes.add(hash)
++  }
++  for (const direction of visualCollection) assert.ok(manifest.some(a => a.id === direction.asset), direction.path)
++})

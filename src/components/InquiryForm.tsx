@@ -1,13 +1,23 @@
 'use client'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Site } from '@/payload-types'
 import styles from './site.module.css'
 import { ArrowIcon } from './ArrowIcon'
 type Labels=Site['form']
 export function InquiryForm({labels,source,consent,policy}:{labels:Labels,source:string,consent:{url:string,version:string}|null,policy:string|null}){
   const [step,setStep]=useState(1),[busy,setBusy]=useState(false),[done,setDone]=useState(false),[failure,setFailure]=useState('')
-  const [values,setValues]=useState({space:'',city:'',description:'',budget:'',name:'',channel:'phone',contact:'',consent:false,website:''})
+  const [values,setValues]=useState({space:'',city:'',description:'',budget:'',name:'',channel:'telegram',contact:'',consent:false,website:''})
   const key=useRef<string|null>(null), form=useRef<HTMLFormElement>(null)
+  useEffect(()=>{
+    const receive=(event:Event)=>{
+      const question=(event as CustomEvent<unknown>).detail
+      if(typeof question!=='string'||!question.trim()||question.length>500)return
+      setValues(v=>({...v,description:`Вопрос консультанту: ${question.trim()}`}));setStep(1)
+      requestAnimationFrame(()=>form.current?.querySelector('textarea')?.focus())
+    }
+    window.addEventListener('afara:question',receive)
+    return()=>window.removeEventListener('afara:question',receive)
+  },[])
   if(!labels)return null
   const update=(name:string,value:string|boolean)=>{setValues(v=>({...v,[name]:value}));setFailure('')}
   const disabled=!consent||!policy
@@ -22,7 +32,7 @@ export function InquiryForm({labels,source,consent,policy}:{labels:Labels,source
       setDone(true)
     }catch{setFailure(labels?.error||'Не удалось отправить. Попробуйте ещё раз.')}finally{setBusy(false)}
   }
-  if(done)return <div className={styles.formSuccess} role="status"><span className={styles.successMark}>✓</span><h3>{labels.success}</h3><button className={styles.textButton} type="button" onClick={()=>{setDone(false);setStep(1);setValues({space:'',city:'',description:'',budget:'',name:'',channel:'phone',contact:'',consent:false,website:''});key.current=null}}>{labels.again} <ArrowIcon/></button></div>
+  if(done)return <div className={styles.formSuccess} role="status"><span className={styles.successMark}>✓</span><h3>{labels.success}</h3><button className={styles.textButton} type="button" onClick={()=>{setDone(false);setStep(1);setValues({space:'',city:'',description:'',budget:'',name:'',channel:'telegram',contact:'',consent:false,website:''});key.current=null}}>{labels.again} <ArrowIcon/></button></div>
   return <form ref={form} className={styles.form} onSubmit={send} onInvalid={e=>{(e.target as HTMLElement).focus()}}>
     <div className={styles.formStep}><span>0{step} / 02</span><span>{step===1?labels.stepOne:labels.stepTwo}</span><div className={styles.stepTrack}><i style={{width:step===1?'50%':'100%'}}/></div></div>
     {step===1?<div className={styles.formGrid}>
@@ -32,8 +42,8 @@ export function InquiryForm({labels,source,consent,policy}:{labels:Labels,source
       <label className={styles.full}>{labels.budget}<input maxLength={120} value={values.budget} onChange={e=>update('budget',e.target.value)} placeholder="Пока не определён"/></label>
     </div>:<div className={styles.formGrid}>
       <label className={styles.full}>{labels.name}<input id="inquiry-name" required autoComplete="name" minLength={2} maxLength={100} value={values.name} onChange={e=>update('name',e.target.value)}/></label>
-      <label>{labels.channel}<select value={values.channel} onChange={e=>{update('channel',e.target.value);update('contact','')}}><option value="phone">{labels.phone}</option><option value="email">{labels.email}</option></select></label>
-      <label>{values.channel==='phone'?labels.phone:labels.email}<input required autoComplete={values.channel==='phone'?'tel':'email'} type={values.channel==='phone'?'tel':'email'} minLength={values.channel==='phone'?7:5} maxLength={200} value={values.contact} onChange={e=>update('contact',e.target.value)}/></label>
+      <label>{labels.channel}<select value={values.channel} onChange={e=>{update('channel',e.target.value);update('contact','')}}><option value="telegram">Telegram — переписка</option><option value="email">{labels.email} — переписка</option><option value="phone">{labels.phone} — звонок</option></select></label>
+      <label>{values.channel==='telegram'?'Ваш Telegram':values.channel==='phone'?labels.phone:labels.email}<input required autoComplete={values.channel==='telegram'?'off':values.channel==='phone'?'tel':'email'} type={values.channel==='telegram'?'text':values.channel==='phone'?'tel':'email'} placeholder={values.channel==='telegram'?'@username':undefined} pattern={values.channel==='telegram'?'@?[a-zA-Z][a-zA-Z0-9_]{4,31}':undefined} minLength={values.channel==='phone'?7:5} maxLength={values.channel==='telegram'?33:200} value={values.contact} onChange={e=>update('contact',e.target.value)}/></label>
       <label className={`${styles.full} ${styles.consent}`}><input required type="checkbox" checked={values.consent} onChange={e=>update('consent',e.target.checked)}/><span>{labels.consentLabel} {consent&&<a href={consent.url} target="_blank" rel="noreferrer">Согласие</a>}{policy&&<> и <a href={policy} target="_blank" rel="noreferrer">политика обработки данных</a></>}.</span></label>
     </div>}
     <div className={styles.honeypot} aria-hidden="true"><label>Website<input tabIndex={-1} autoComplete="off" value={values.website} onChange={e=>update('website',e.target.value)}/></label></div>

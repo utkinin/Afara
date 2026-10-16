@@ -115,7 +115,29 @@ dialog?.addEventListener('click',e=>{if(e.target===dialog||e.target.closest('a')
 const form=document.querySelector('form[data-preview]');
 let step=1;const values={};
 function remember(){for(const field of form.querySelectorAll('input,textarea,select'))if(field.id||field.closest('label')){const label=field.closest('label')?.childNodes[0]?.textContent||field.id;values[label]=field.type==='checkbox'?field.checked:field.value}}
-function render(next){remember();step=next;form.innerHTML=templates[step===1?'step1':'step2'];for(const field of form.querySelectorAll('input,textarea,select')){const label=field.closest('label')?.childNodes[0]?.textContent||field.id;if(label in values){if(field.type==='checkbox')field.checked=values[label];else field.value=values[label]}}if(step===2){const submit=form.querySelector('button[type="submit"]');submit.disabled=true;const contact=form.querySelector('input[type="tel"],input[type="email"]');const channel=form.querySelector('select');channel?.addEventListener('change',()=>{contact.type=channel.value==='email'?'email':'tel';contact.autocomplete=contact.type;contact.closest('label').childNodes[0].textContent=channel.value==='email'?'Email':'Телефон';contact.value=''})}form.querySelector('input,select,textarea')?.focus()}
+function render(next){
+  remember();step=next;form.innerHTML=templates[step===1?'step1':'step2'];
+  for(const field of form.querySelectorAll('input,textarea,select')){
+    const label=field.closest('label')?.childNodes[0]?.textContent||field.id;
+    if(label in values){if(field.type==='checkbox')field.checked=values[label];else field.value=values[label]}
+  }
+  if(step===2){
+    form.querySelector('button[type="submit"]').disabled=true;
+    const channel=form.querySelector('select');
+    const contact=form.querySelector('input[placeholder="@username"],input[type="tel"],input[type="email"]');
+    const syncContact=(clear)=>{
+      const telegram=channel.value==='telegram',email=channel.value==='email';
+      contact.type=telegram?'text':email?'email':'tel';contact.autocomplete=telegram?'off':email?'email':'tel';
+      contact.closest('label').childNodes[0].textContent=telegram?'Ваш Telegram':email?'Email':'Телефон';
+      if(telegram){contact.pattern='@?[a-zA-Z][a-zA-Z0-9_]{4,31}';contact.placeholder='@username'}
+      else{contact.removeAttribute('pattern');contact.removeAttribute('placeholder')}
+      contact.minLength=email||telegram?5:7;contact.maxLength=telegram?33:200;
+      contact.value=clear?'':values[telegram?'Ваш Telegram':email?'Email':'Телефон']||'';
+    };
+    syncContact(false);channel?.addEventListener('change',()=>syncContact(true));
+  }
+  form.querySelector('input,select,textarea')?.focus();
+}
 form?.addEventListener('submit',e=>{e.preventDefault();if(step===1&&form.reportValidity())render(2)});
 form?.addEventListener('click',e=>{const button=e.target.closest('button');if(step===2&&button?.type==='button')render(1)});
 `
