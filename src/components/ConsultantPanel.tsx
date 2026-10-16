@@ -40,7 +40,8 @@ export default function ConsultantPanel({ labels, onClose }: { labels: Consultan
         {answer.sources.length > 0 && <nav aria-label="Источники ответа"><p>Источники AFARA</p><ul>{answer.sources.map(source => <li key={source.url}><a href={source.url} onClick={close}>{source.title}</a></li>)}</ul></nav>}
       </>}
     </div>
-    <a href="#consultation" className={styles.arrowLink} onClick={close}>Обсудить проект со специалистом <ArrowIcon/></a>
+    <a href="#consultation" className={styles.arrowLink} onClick={() => { window.dispatchEvent(new CustomEvent('afara:question', { detail: question })); close() }}>Передать вопрос специалисту <ArrowIcon/></a>
+    <p className={styles.formNote}>Если описание задачи ещё не заполнено, вопрос появится в форме. Заявка создаётся только после её явной отправки. Консультант не обучается на вашей переписке.</p>
     <p className={styles.formNote}>Контактные данные отправляются только через форму заявки после вашего подтверждения.</p>
   </dialog>
 }

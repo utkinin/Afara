@@ -8,6 +8,7 @@ import { cms } from '../src/lib/payload'
 import { processNotification } from '../src/lib/notifications'
 import { inquirySchema,csvCell } from '../src/lib/inquiry-schema'
 
+const testOrigin=process.env.APP_URL||'http://localhost:3000'
 test('validation rejects mass assignment and invalid contacts; CSV neutralizes formulas',()=>{
   assert.equal(inquirySchema.safeParse({status:'closed'}).success,false)
   for(const input of ['=1+1','  +SUM(A1)','@cmd','-1+1'])assert.match(csvCell(input),/^"'/)
@@ -38,11 +39,11 @@ test('real PostgreSQL: roles, drafts, private media, transactional inquiry and S
     assert.equal((await p.findByID({collection:'pages',id:page.id,draft:true,user,overrideAccess:false})).h1,'Непубличное изменение')
     const image=await p.create({collection:'media',draft:true,user,overrideAccess:false,filePath:'fixtures/afara-ai-concept.png',data:{alt:'Тест приватного изображения',origin:'ai',source:'Synthetic test',rightsConfirmed:true,_status:'draft'}})
     privateMediaId=image.id
-    const file=await fetch(new URL(image.url!, 'http://localhost:3000'));assert.ok(file.status===403||file.status===404,`private media returned ${file.status}; status=${image._status}`)
+    const file=await fetch(new URL(image.url!, testOrigin));assert.ok(file.status===403||file.status===404,`private media returned ${file.status}; status=${image._status}`)
     await assert.rejects(()=>p.create({collection:'media',user,overrideAccess:false,file:{data:Buffer.from('<script>bad()</script>'),mimetype:'image/png',name:'broken.png',size:22},data:{alt:'Bad',origin:'concept',source:'test',rightsConfirmed:false}}))
     for(const kind of ['consent','privacy'] as const){const d=await p.create({collection:'documents',data:{title:`ТЕСТОВЫЙ ${kind}`,slug:`qa-${kind}-${tag}`,body:'СИНТЕТИЧЕСКИЙ ДОКУМЕНТ ТЕСТА. Не юридический документ AFARA.',kind,version:tag,_status:'published'}});created.push({collection:'documents',id:d.id})}
     const key=randomUUID(),input={space:'Частная резиденция',city:'Test city',description:'Synthetic functional inquiry for database and SMTP verification.',budget:'',name:'Synthetic QA',channel:'email',contact:'qa@example.test',consent:true,consentVersion:tag,source:'home',website:''}
-    const send=(body:unknown=input,k=key)=>fetch('http://localhost:3000/api/inquiry',{method:'POST',headers:{origin:'http://localhost:3000','Content-Type':'application/json','Idempotency-Key':k},body:JSON.stringify(body)})
+    const send=(body:unknown=input,k=key)=>fetch(testOrigin+'/api/inquiry',{method:'POST',headers:{origin:testOrigin,'Content-Type':'application/json','Idempotency-Key':k},body:JSON.stringify(body)})
     const first=await send();assert.equal(first.status,201,await first.text())
     assert.equal((await send()).status,200)
     assert.equal((await send({...input,name:'Different'})).status,409)
@@ -75,22 +76,22 @@ test('real PostgreSQL: roles, drafts, private media, transactional inquiry and S
     try{
       const context=await browser.newContext({viewport:{width:390,height:844}}),screen=await context.newPage()
       screen.setDefaultNavigationTimeout(60000)
-      await screen.goto('http://localhost:3000/admin/login')
+      await screen.goto(testOrigin+'/admin/login')
       await screen.locator('input[name=email]').fill(admin.email)
       await screen.locator('input[name=password]').fill(password)
       await screen.locator('button[type=submit]').click()
       await screen.waitForURL(url=>url.pathname==='/admin',{timeout:45000})
-      await screen.goto(`http://localhost:3000/admin/collections/pages/${page.id}`)
+      await screen.goto(`${testOrigin}/admin/collections/pages/${page.id}`)
       await screen.locator('input[name=h1]').fill('Изменено через браузер')
       const saved=screen.waitForResponse(r=>r.url().includes(`/api/pages/${page.id}`)&&r.request().method()==='PATCH')
       await screen.getByRole('button',{name:'Сохранить черновик',exact:true}).click()
       assert.ok((await saved).ok())
       await screen.waitForFunction(()=>!document.querySelector('input[name=h1]')?.hasAttribute('disabled'))
       await screen.screenshot({path:'docs/screenshots/admin-editor-390.png',fullPage:true})
-      await screen.goto(`http://localhost:3000/preview?page=${page.id}`)
+      await screen.goto(`${testOrigin}/preview?page=${page.id}`)
       assert.equal(await screen.locator('h1').textContent(),'Изменено через браузер')
       await screen.screenshot({path:'docs/screenshots/preview-390.png',fullPage:true})
-      await screen.goto('http://localhost:3000/')
+      await screen.goto(testOrigin+'/')
       await screen.getByLabel('Тип пространства').selectOption('Частная резиденция')
       await screen.getByLabel('Город / страна').fill('QA city')
       await screen.getByLabel('Что вы хотите решить?').fill('Synthetic browser form smoke test')
@@ -115,14 +116,14 @@ test('real PostgreSQL: roles, drafts, private media, transactional inquiry and S
       await p.delete({collection:'leads',id:browserLeads.docs[0].id});created.pop()
       for(const width of [390,1440]){
         await screen.setViewportSize({width,height:900})
-        await screen.goto('http://localhost:3000/admin/collections/media')
+        await screen.goto(testOrigin+'/admin/collections/media')
         await screen.screenshot({path:`docs/screenshots/admin-media-${width}.png`,fullPage:true})
-        await screen.goto('http://localhost:3000/admin/collections/leads')
+        await screen.goto(testOrigin+'/admin/collections/leads')
         await screen.screenshot({path:`docs/screenshots/admin-leads-${width}.png`,fullPage:true})
       }
     }finally{await browser.close()}
     await p.update({collection:'pages',id:page.id,data:{path:`qa-renamed-${tag}`,_status:'published'},user:owner,overrideAccess:false})
-    const redirected=await fetch(`http://localhost:3000/qa-${tag}/`,{redirect:'manual'})
+    const redirected=await fetch(`${testOrigin}/qa-${tag}/`,{redirect:'manual'})
     assert.equal(redirected.status,308);assert.match(redirected.headers.get('location')||'',/qa-renamed-/)
     await p.update({collection:'leads',id:lead.id,data:{archived:true},user:owner,overrideAccess:false})
     assert.equal((await p.findByID({collection:'leads',id:lead.id})).archived,true)

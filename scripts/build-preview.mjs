@@ -12,6 +12,7 @@ if((await readdir(output)).length)throw new Error('PREVIEW_OUTPUT must be a new 
 await mkdir(path.join(output,'assets'),{recursive:true})
 const mapping=new Map(),pending=new Map()
 async function asset(input){
+  if(/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(input)&&input.length<150000)return input
   const url=new URL(input,origin)
   if(url.origin!==new URL(origin).origin)throw new Error('Only public assets from the local application may be exported')
   if(!url.pathname.startsWith('/_next/static/')&&!url.pathname.startsWith('/api/media/file/'))throw new Error('Unexpected asset route '+url.pathname)
@@ -78,7 +79,7 @@ try{
     for(const resource of resources)await asset(resource.value)
     const replacements=Object.fromEntries(mapping)
     await page.evaluate(({origin,base,replacements})=>{
-      const convert=input=>replacements[new URL(input,origin).href]
+      const convert=input=>input.startsWith('data:image/png;base64,')?input:replacements[new URL(input,origin).href]
       for(const e of document.querySelectorAll('[data-server-only],script,link[rel="preload"],link[rel="modulepreload"],link[rel="prefetch"],meta[http-equiv="Content-Security-Policy"],link[rel="canonical"],#next-route-announcer,#__next-route-announcer__'))e.remove()
       for(const e of document.querySelectorAll('link[rel="stylesheet"]'))e.setAttribute('href',convert(e.getAttribute('href')))
       for(const e of document.querySelectorAll('img[src]'))e.setAttribute('src',convert(e.getAttribute('src')))
@@ -118,6 +119,13 @@ function remember(){for(const field of form.querySelectorAll('input,textarea,sel
 function render(next){remember();step=next;form.innerHTML=templates[step===1?'step1':'step2'];for(const field of form.querySelectorAll('input,textarea,select')){const label=field.closest('label')?.childNodes[0]?.textContent||field.id;if(label in values){if(field.type==='checkbox')field.checked=values[label];else field.value=values[label]}}if(step===2){const submit=form.querySelector('button[type="submit"]');submit.disabled=true;const contact=form.querySelector('input[type="tel"],input[type="email"]');const channel=form.querySelector('select');channel?.addEventListener('change',()=>{contact.type=channel.value==='email'?'email':'tel';contact.autocomplete=contact.type;contact.closest('label').childNodes[0].textContent=channel.value==='email'?'Email':'Телефон';contact.value=''})}form.querySelector('input,select,textarea')?.focus()}
 form?.addEventListener('submit',e=>{e.preventDefault();if(step===1&&form.reportValidity())render(2)});
 form?.addEventListener('click',e=>{const button=e.target.closest('button');if(step===2&&button?.type==='button')render(1)});
+for(const container of document.querySelectorAll('[data-save-idea]'))container.querySelector('button')?.addEventListener('click',async()=>{
+ const url=new URL(location.href);url.search='';url.hash=container.dataset.saveIdea;
+ const status=container.querySelector('[role="status"]');
+ try{await navigator.clipboard.writeText(url.href);status.textContent='Ссылка скопирована'}
+ catch{status.textContent='Скопируйте ссылку из поля';let input=container.querySelector('input');if(!input){const label=document.createElement('label');label.textContent='Ссылка на идею';input=document.createElement('input');input.readOnly=true;label.append(input);container.append(label)}input.value=url.href;input.focus();input.select()}
+});
+
 `
 await writeFile(path.join(output,'preview-controls.js'),controls)
 await writeFile(path.join(output,'.nojekyll'),'')

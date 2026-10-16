@@ -1,5 +1,5 @@
 'use client'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Site } from '@/payload-types'
 import styles from './site.module.css'
 import { ArrowIcon } from './ArrowIcon'
@@ -8,6 +8,16 @@ export function InquiryForm({labels,source,consent,policy}:{labels:Labels,source
   const [step,setStep]=useState(1),[busy,setBusy]=useState(false),[done,setDone]=useState(false),[failure,setFailure]=useState('')
   const [values,setValues]=useState({space:'',city:'',description:'',budget:'',name:'',channel:'phone',contact:'',consent:false,website:''})
   const key=useRef<string|null>(null), form=useRef<HTMLFormElement>(null)
+  useEffect(()=>{
+    const receive=(event:Event)=>{
+      const question=(event as CustomEvent<unknown>).detail
+      if(typeof question!=='string'||!question.trim()||question.length>500)return
+      setValues(v=>({...v,description:v.description.trim()?v.description:question}));setStep(1)
+      requestAnimationFrame(()=>form.current?.querySelector('textarea')?.focus())
+    }
+    window.addEventListener('afara:question',receive)
+    return()=>window.removeEventListener('afara:question',receive)
+  },[])
   if(!labels)return null
   const update=(name:string,value:string|boolean)=>{setValues(v=>({...v,[name]:value}));setFailure('')}
   const disabled=!consent||!policy

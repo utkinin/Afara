@@ -36,6 +36,13 @@ test('static preview has real pages, local assets, keyboard menu and readonly fo
   assert.match(await page.locator('h1').textContent(),/частных интерьеров/)
   for(const pathname of routes){
    response=await page.goto(origin+pathname);assert.equal(response.status(),200);assert.equal(await page.locator('h1').count(),1)
+   if(await page.locator('[data-save-idea]').count()){
+    await page.context().grantPermissions(['clipboard-read','clipboard-write'])
+    await page.getByRole('button',{name:'Сохранить идею',exact:true}).first().click()
+    await page.waitForFunction(()=>document.querySelector('[data-save-idea] [role="status"]')?.textContent==='Ссылка скопирована')
+    const copied=await page.evaluate(()=>navigator.clipboard.readText())
+    assert.ok(copied.startsWith(origin+base+'/'));assert.ok(new URL(copied).hash.startsWith('#idea-'))
+   }
   }
   for(const pathname of ['admin/','api/leads/','api/consultant/','s/yahta/','preview/'])assert.equal((await page.request.get(origin+base+'/'+pathname)).status(),404)
   assert.deepEqual(external,[]);assert.deepEqual(errors,[])

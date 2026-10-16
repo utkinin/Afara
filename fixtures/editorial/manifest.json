@@ -1,0 +1,406 @@
+{
+  "version": 1,
+  "mobileTransform": "centre crop 768x1024; WebP quality 82; responsive derivative, not another original generation",
+  "images": [
+    {
+      "id": "home",
+      "title": "Образ пространства",
+      "question": "Как связать свет, цвет и текстиль?",
+      "description": "Отправная точка разговора — характер интерьера и сценарии пользования.",
+      "page": "home",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-397d90f7-9364-4a77-93eb-29f623b92e69",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. An inviting high-ceiling textile atelier mood interior, a sunlit living room with independent ivory sheers and plum drapery, garden view. No real project claim."
+      },
+      "desktop": {
+        "file": "home-desktop.webp",
+        "sha256": "f92896f591ed7239442d2ec42c94dc441234f74df5b512715fe0414989a9eff2",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "home-mobile.webp",
+        "sha256": "2a3914393adb701e2eebcbaf0dd0a3f2c9c82fdf7e654e3ffc83ef5098928ba7",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "residence",
+      "title": "Загородный дом",
+      "question": "Как оформить второй свет без тяжёлого впечатления?",
+      "description": "Высота, слои и движение портьер рассматриваются в масштабе всего пространства.",
+      "page": "chastnye-interery/zagorodnye-doma",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-56c36b38-40be-4e96-b6e7-d5122d8b01b7",
+        "prompt": "Create a single original AFARA interior concept illustration, landscape 3:2, no typography, no logos or watermarks. Depict a double-height country residence with 6m tall ivory sheer and deep plum draperies, walnut wall, warm taupe seating, garden through glass. Elegant architectural editorial visualization, tactile fabric, subtly illustrated rather than claiming documentary completed project. Consistent palette ivory/plum/taupe/walnut/brushed bronze. Strong drapery composition, generous quiet space, beautiful daylight. No people. This image is a concept for discussion, not a real AFARA project."
+      },
+      "desktop": {
+        "file": "residence-desktop.webp",
+        "sha256": "3fa8032d9c3de7d200fe08fa7d8746bc9e009427f286a04dcf8b8b01ced6a49c",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "residence-mobile.webp",
+        "sha256": "07ef24f25e4e198c8e2aae5031a63eb0ce73bdd9eefd4ecce5aad1879fe635a3",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "apartment",
+      "title": "Квартира",
+      "question": "Как связать текстиль с отделкой и мебелью?",
+      "description": "Пропорции окна и оттенки окружающих поверхностей помогают обсудить композицию.",
+      "page": "chastnye-interery/kvartiry",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-99c33c9e-9466-4f7e-a753-31584601c87c",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Refined urban apartment with tall city windows, walnut panelling, ivory sheer curtains, warm taupe sofa and a restrained plum fabric accent."
+      },
+      "desktop": {
+        "file": "apartment-desktop.webp",
+        "sha256": "27fd47e1c3bb161f2f4b37577c2a17a9e999e54e39927528f125019ecc875096",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "apartment-mobile.webp",
+        "sha256": "8733b950505cbe210ce01498991f07931777ed1a8532841ec4339bf1da681836",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "living",
+      "title": "Гостиная",
+      "question": "Как сохранить вид днём и приватность вечером?",
+      "description": "Независимые слои позволяют обсуждать разные сценарии света.",
+      "page": "chastnye-interery/gostinye",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-e1a70b79-c285-4e99-a026-10c0a5827412",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Quiet living room with corner glazing, a separate sheer layer preserving the garden view and sculptural plum drapes for privacy at night."
+      },
+      "desktop": {
+        "file": "living-desktop.webp",
+        "sha256": "e7538cf3ad71faec6276d5242adf866908e9e8b924822d7ea0544360796e4a9a",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "living-mobile.webp",
+        "sha256": "331538d4488cf817be180b1567a868c23730c340566cc4ca8b4958abdd1ac981",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "bedroom",
+      "title": "Спальня",
+      "question": "Как обсудить затемнение и отдых?",
+      "description": "Плотный и прозрачный слои рассматриваются отдельно; свойства проверяются для выбранного решения.",
+      "page": "chastnye-interery/spalni",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-51469413-2638-4441-a097-ecd7bad57aa9",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Calm sophisticated bedroom, soft evening light with a dense plum curtain layer and translucent ivory sheers, no claims of total darkness."
+      },
+      "desktop": {
+        "file": "bedroom-desktop.webp",
+        "sha256": "2e78dd5a6cf335e4b67a3310747b0f58fc9b7177093440e52e25206463583abc",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "bedroom-mobile.webp",
+        "sha256": "969507db922c735acb027b6be300ec1cf2db457829c0e7924cdd54284de7f39e",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "kitchen",
+      "title": "Кухня и столовая",
+      "question": "Как совместить выразительность и повседневное использование?",
+      "description": "Расположение окна относительно рабочей зоны входит в исходные данные.",
+      "page": "chastnye-interery/kuhni-i-stolovye",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-2ef09521-91c5-4c8a-9122-324a2f709234",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Elegant kitchen and dining room, textile curtains at a tall window clearly away from stove and work surfaces, walnut dining table, ivory and taupe."
+      },
+      "desktop": {
+        "file": "kitchen-desktop.webp",
+        "sha256": "297b9a630452111c6f54ff7769520e46c6af2e4375cc3d1a497f5c96fdb4671e",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "kitchen-mobile.webp",
+        "sha256": "4102ec9b95a945e50f59e50700ea61455dea7591a7e4b6f1aff1f472b89f5655",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "children",
+      "title": "Детская",
+      "question": "Как учесть режим и управление?",
+      "description": "Сценарии света, доступность механизмов и требования к безопасному пользованию обсуждаются заранее.",
+      "page": "chastnye-interery/detskie",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-a7c957ed-14c7-45bc-88b0-e217c47cfee2",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Calm child's room with soft taupe and ivory textiles, softly rounded furniture and plum detail, no dangling cords, no people, no characters or toys with logos."
+      },
+      "desktop": {
+        "file": "children-desktop.webp",
+        "sha256": "35d957289021321cbe22a42c1ed386e46f7ccc0d257ed7cb2e310eb164c8076c",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "children-mobile.webp",
+        "sha256": "7184fa2dc6ba8c0ab4fd932c9c6f3f57d1a74575bcaeaa1ee6e86561194c1fd6",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "study",
+      "title": "Домашний кабинет",
+      "question": "Как организовать свет на рабочем месте?",
+      "description": "Положение стола, экран и приватность входят в обсуждение композиции.",
+      "page": "chastnye-interery/kabinety",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-3bdc1e6d-3e8e-4f66-b22d-12eb08f428db",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Private home study with a walnut desk arranged beside a tall window, gentle diffused daylight through ivory sheer drapery and a plum side curtain."
+      },
+      "desktop": {
+        "file": "study-desktop.webp",
+        "sha256": "d2f5066b1e392c7f04967e21c32ade42d4655afecd7fda28e6c6d2a73afa122a",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "study-mobile.webp",
+        "sha256": "50ca9f3dc2fcadce5fc15b42ca8abef0d8b2526ff129fd43bfd86a73e3e8c00c",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "bathroom",
+      "title": "Ванная с окном",
+      "question": "Как сохранить приватность с учётом влажности?",
+      "description": "Сухая зона окна и реальные условия эксплуатации определяют вопросы к материалу.",
+      "page": "chastnye-interery/vannye",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-ae0900d1-26ad-470d-a830-d6aabfcf0615",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Elegant bathroom with a window in a separate dry alcove, privacy textile in that dry window zone, warm limestone, walnut and a restrained plum accent, no cloth touching water."
+      },
+      "desktop": {
+        "file": "bathroom-desktop.webp",
+        "sha256": "fd48d94b13355e7672aaed8aafaf88d3704b2ce247c8b03de9498f675cdae08a",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "bathroom-mobile.webp",
+        "sha256": "1d309f45ba9537f95d921e7e0bb669d6aa69557c71ea71066dd4d9ccff9a5877",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "hotel",
+      "title": "Отель",
+      "question": "Как совместить образ номера и эксплуатацию?",
+      "description": "Дневной и вечерний свет, управление и обслуживание рассматриваются вместе.",
+      "page": "obshchestvennye-prostranstva/oteli",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-fcfe5c43-56a3-411e-b952-27942c8e3788",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Sophisticated boutique hotel room at evening, independent sheer and dense drapery layers, warm bedside glow, plum and ivory fabrics, hotel scene without branding."
+      },
+      "desktop": {
+        "file": "hotel-desktop.webp",
+        "sha256": "e283fddc307be3f6ce49db595555acc5ec79a950d798c3216da0faa318017bbc",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "hotel-mobile.webp",
+        "sha256": "359df5401efa8c554ee095425faef6aa4febca0c28bf3c874f09c15a9d42d2dc",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "restaurant",
+      "title": "Ресторан",
+      "question": "Как создать камерность и зонирование?",
+      "description": "Текстильные границы помогают обсудить свет и разделение пространства; акустика требует отдельной проверки.",
+      "page": "obshchestvennye-prostranstva/restorany",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-726ce3a0-1979-4f86-8e01-79c9a632d956",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Intimate refined restaurant, fabric boundaries between dining tables, rich plum drapes and ivory sheers, warm walnut and bronze lighting, no people."
+      },
+      "desktop": {
+        "file": "restaurant-desktop.webp",
+        "sha256": "7d4e5e3bd6b8673b1c140667714e01e8473a045bd80bceec77807960a050e6b8",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "restaurant-mobile.webp",
+        "sha256": "addefa050fa8596fcdd218b3d63f4217dbc4a056f557880a0ef19cf0e4cee90f",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "office",
+      "title": "Офис",
+      "question": "Как согласовать открытость и приватность?",
+      "description": "Переговорные и рабочие зоны могут требовать разных слоёв и способов управления.",
+      "page": "obshchestvennye-prostranstva/ofisy",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-21af017f-ae81-4632-9354-bc5ab99afa7f",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Quiet contemporary office meeting room with a movable textile boundary, transparent ivory and dense taupe layers, walnut table, plum side drapes, no logos."
+      },
+      "desktop": {
+        "file": "office-desktop.webp",
+        "sha256": "dcff7b729cdf0a3ba3451900d887ffddc71357fd814e8e68908df903e5bc1783",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "office-mobile.webp",
+        "sha256": "e41264084bf2fe127d77234dc3c23d1bd3f20473f926de61d6f00d06c95853af",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "stage",
+      "title": "Сцена",
+      "question": "Как собрать цельную одежду сцены?",
+      "description": "Занавес, отделка, управление и документы рассматриваются по требованиям площадки.",
+      "page": "obshchestvennye-prostranstva/sceny",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-acaaf623-d3b8-4ee3-8e1d-f5d599ff64f3",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Small elegant theatre auditorium and stage with a beautifully proportioned plum main curtain and coordinated drapery, warm timber, no people or text. No implied safety certificate."
+      },
+      "desktop": {
+        "file": "stage-desktop.webp",
+        "sha256": "9c40ec469d9f7c13d2aabc8d445283ee695d9b13bce0e41905af40c26297f97b",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "stage-mobile.webp",
+        "sha256": "38840c08186257c250d399ce80455ace5aa6a2d9fcf3b66674a86a07cefe43eb",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "school",
+      "title": "Школа и детский сад",
+      "question": "Как учесть разные сценарии помещений?",
+      "description": "Зал, текстильные зоны и условия пользования требуют конкретного задания и проверки документов.",
+      "page": "obshchestvennye-prostranstva/shkoly-i-detskie-sady",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-de9be7d9-662a-44bf-9416-f66008346ca6",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Unoccupied modern school multifunction hall with soft textile zones near tall windows, tidy safe-looking uncluttered setting, ivory and taupe with muted plum accents, no dangling cords. No claims of material certification."
+      },
+      "desktop": {
+        "file": "school-desktop.webp",
+        "sha256": "f36ffe3fc80096c70f4de43475f434f8b809e5c39ea71bd4583db17a57b894a4",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "school-mobile.webp",
+        "sha256": "62a92751dfe2da6a785383936404bda4e8095b659a86a0d9d73d8fcd1d924aa3",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "yacht",
+      "title": "Частная яхта",
+      "question": "Как сохранить море в интерьере?",
+      "description": "Криволинейная геометрия согласуется с дизайнером или представителем заказчика; свойства материалов подтверждаются отдельно.",
+      "page": "chastnye-yahty",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-49881a5d-b62f-454d-b506-dc5002732b99",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Private yacht salon with curved panoramic glazing and visible calm sea, subtle ivory curtains following complex geometry, warm walnut, taupe and plum accents. No marine compliance claims."
+      },
+      "desktop": {
+        "file": "yacht-desktop.webp",
+        "sha256": "b6ff22d7b95064e0da84aad2856d262525f88cbb652fb52a08a38ab6861cccf8",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "yacht-mobile.webp",
+        "sha256": "74dd78dd6e09de97b7ffaa256bd59138e281260cd36d4b94e41133922951ddf1",
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "id": "textile",
+      "title": "Ткань и отделка",
+      "question": "Как соединить фактуры в одной композиции?",
+      "description": "Образцы помогают обсуждать сочетание слоёв, цвета и отделки; изображение не подтверждает артикулы на складе.",
+      "page": "home",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-16",
+        "resultId": "exec-cfe96c2f-2f18-449d-befa-d79434c3af33",
+        "prompt": "Create ONE original AFARA architectural editorial concept illustration in landscape 3:2. No text, logos, watermark, people or real project attribution. Elegant subtly rendered visualization, tactile textiles, clear fabric detail, quiet premium proportions and generous composition. Palette ivory, deep plum, warm taupe, walnut, restrained brushed bronze. Keep the important window/textile subject near the center so a portrait responsive crop works. Original editorial still life of ivory sheer, warm taupe woven fabric and plum drapery folds with subtle bronze trim, tactile textile composition on warm neutral background. No labels or product logos."
+      },
+      "desktop": {
+        "file": "textile-desktop.webp",
+        "sha256": "218df4e1da7e94e27c4f40dd825d482f2101abe65c17724e639fa30b5f79f98a",
+        "width": 1536,
+        "height": 1024
+      },
+      "mobile": {
+        "file": "textile-mobile.webp",
+        "sha256": "09f1eceef91eaf33f397f6f8bbf688f6d19fc852a5194669bd4fad5bfd189b07",
+        "width": 768,
+        "height": 1024
+      }
+    }
+  ]
+}

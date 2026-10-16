@@ -12,5 +12,19 @@ export default async function Preview({searchParams}:{searchParams:Promise<{page
   const id=Number((await searchParams).page);if(!Number.isSafeInteger(id))notFound()
   const page=await p.findByID({collection:'pages',id,draft:true,user:auth.user,overrideAccess:false,depth:2})
   const site=await p.findGlobal({slug:'site',draft:true,user:auth.user,overrideAccess:false,depth:0})
+  // Resolve draft uploads explicitly with the authenticated reader. Nested population may
+  // retain only IDs for unpublished media; public rendering must never use this path.
+  const images=new Map<number,ReturnType<typeof resolveImage>>()
+  async function resolveImage(id:number){return p.findByID({collection:'media',id,draft:true,user:auth.user,overrideAccess:false,depth:0}).catch(()=>null)}
+  const resolve=(value:unknown)=>{
+    const id=typeof value==='number'?value:value&&typeof value==='object'&&'id' in value?Number(value.id):0
+    if(!id)return Promise.resolve(null)
+    if(!images.has(id))images.set(id,resolveImage(id))
+    return images.get(id)!
+  }
+  page.hero=await resolve(page.hero);page.heroMobile=await resolve(page.heroMobile)
+  for(const section of page.sections||[]){section.image=await resolve(section.image);for(const card of section.cards||[])card.image=await resolve(card.image)}
+  if(site.studio)site.studio.photo=await resolve(site.studio.photo)
+  for(const section of site.trust||[]){section.image=await resolve(section.image);for(const card of section.cards||[])card.image=await resolve(card.image)}
   return <Website page={page} pages={await publicPages()} site={site} documents={await publicDocuments()} preview/>
 }
