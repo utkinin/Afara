@@ -1,7 +1,12 @@
 {
-  "sourceCommit": "08117abcd581c9b7961aacd362fef139f118e429",
+  "sourceCommit": "fe0e9b9728e91f7c5131132ed7296f01bba727ab",
+  "cmsPublishedAt": "2026-10-16T10:14:05.879Z",
   "pages": 18,
+  "editorialGalleryImages": 16,
+  "editorialPagesPublished": 15,
+  "editorialMediaPublished": 32,
+  "editorialKnowledgePublished": 8,
   "mode": "static-preview",
-  "package": "downloads/AFARA_Editorial_2026-10-16.zip",
-  "packageSHA256": "e47f8e7fa2c82e6bf7894927cf588a19ea2bd429f3028343a0448bfc1d4e6c31"
+  "package": "downloads/AFARA_Editorial_2026-10-16_v2.zip",
+  "packageSHA256": "ee81f6718fcb812137b13caf8cebe134d7c212eeaff49cb6ff0707acaa1a8f61"
 }
