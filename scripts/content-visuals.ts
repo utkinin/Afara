@@ -79,7 +79,7 @@ export async function importVisuals(p: Payload, apply = false) {
       const hero = collection.find(i => i.id === 'home') || collection[0]
       const section: NonNullable<Page['sections']>[number] = {
         kind: 'details', anchor: 'visual-collection', heading: pagePath === 'home' ? 'Найдите свою задачу в пространстве' : hero.question,
-        body: collectionDisclosure, cards: collection.map(image => ({ id: `editorial-${image.id}`, title: image.title, body: `${image.question} ${image.description}`, image: images.get(image.id)!.desktop,
+        body: collectionDisclosure, cards: collection.map(image => ({ id: `editorial-${pagePath.replaceAll('/', '-')}-${image.id}`, title: image.title, body: `${image.question} ${image.description}`, image: images.get(image.id)!.desktop,
           page: publicPages.find(p => p.path === image.page)?.id, linkLabel: 'Обсудить пространство',
         })),
       }

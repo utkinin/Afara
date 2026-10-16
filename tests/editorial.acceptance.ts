@@ -43,7 +43,9 @@ test('editorial import preserves owner drafts and public content; publication an
   const residenceDraft = await p.findByID({ collection: 'pages', id: residence.id, draft: true, depth: 0 })
   const proposed = { hero: residenceDraft.hero, heroMobile: residenceDraft.heroMobile, heroAlt: residenceDraft.heroAlt, conceptLabel: residenceDraft.conceptLabel, sections: residenceDraft.sections, _status: 'published' as const }
   await assert.rejects(() => p.update({ collection: 'pages', id: residence.id, user, data: proposed }))
-  for (const id of new Set([residenceDraft.hero, residenceDraft.heroMobile])) {
+  const editorialMedia = (await p.find({ collection: 'media', depth: 0, limit: 1000 })).docs.filter(m => m.source.startsWith('AFARA editorial v1:'))
+  assert.equal(editorialMedia.length, 32)
+  for (const id of editorialMedia.map(m => m.id)) {
     assert.equal(typeof id, 'number')
     await assert.rejects(() => p.findByID({ collection: 'media', id: id as number, overrideAccess: false }))
     const m = await p.findByID({ collection: 'media', id: id as number })
@@ -52,6 +54,13 @@ test('editorial import preserves owner drafts and public content; publication an
     await p.update({ collection: 'media', id: id as number, user, data: { rightsConfirmed: true, _status: 'published' } })
   }
   await p.update({ collection: 'pages', id: residence.id, user, data: proposed })
+  // Publish the whole collection: row IDs must also be unique across different pages.
+  const drafts = (await p.find({ collection: 'pages', draft: true, depth: 0, limit: 1000 })).docs.filter(d => d._status === 'draft' && d.sections?.some(s => s.anchor === 'visual-collection'))
+  for (const draft of drafts) {
+    const { id, createdAt, updatedAt, ...data } = draft
+    void createdAt; void updatedAt
+    await p.update({ collection: 'pages', id, user, data: { ...data, _status: 'published' } })
+  }
   const knowledgeRecord = records.find(k => k.topic === 'editorial-restaurant-acoustics')!
   await assert.rejects(() => p.update({ collection: 'knowledge', id: knowledgeRecord.id, user, data: { approved: false, _status: 'published' } }))
   await p.update({ collection: 'knowledge', id: knowledgeRecord.id, user, data: { approved: true, _status: 'published' } })
@@ -66,7 +75,7 @@ test('editorial import preserves owner drafts and public content; publication an
     await page.locator('#visual-collection').scrollIntoViewIfNeeded()
     assert.equal(await page.getByText(collectionDisclosure, { exact: true }).count(), 1)
     await page.getByRole('button', { name: 'Сохранить идею', exact: true }).click()
-    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), origin + '/chastnye-interery/zagorodnye-doma/#idea-editorial-residence')
+    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), origin + '/chastnye-interery/zagorodnye-doma/#idea-editorial-chastnye-interery-zagorodnye-doma-residence')
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
     await page.screenshot({ path: 'docs/screenshots/editorial-idea-360.png' })
     const login = await context.request.post(origin + '/api/users/login', { data: { email: admin.email, password } })
