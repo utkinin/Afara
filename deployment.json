@@ -1,12 +1,16 @@
 {
-  "sourceCommit": "fe0e9b9728e91f7c5131132ed7296f01bba727ab",
+  "sourceCommit": "c8e6b3e64e19f19b6a8b31a6ec64f0966771e683",
   "cmsPublishedAt": "2026-10-16T10:14:05.879Z",
-  "pages": 18,
+  "pages": 19,
   "editorialGalleryImages": 16,
   "editorialPagesPublished": 15,
   "editorialMediaPublished": 32,
   "editorialKnowledgePublished": 8,
   "mode": "static-preview",
   "package": "downloads/AFARA_Editorial_2026-10-16_v2.zip",
-  "packageSHA256": "ee81f6718fcb812137b13caf8cebe134d7c212eeaff49cb6ff0707acaa1a8f61"
+  "packageSHA256": "ee81f6718fcb812137b13caf8cebe134d7c212eeaff49cb6ff0707acaa1a8f61",
+  "previewUpdatedAt": "2026-10-16T13:28:07.543Z",
+  "release": "afara-partners-20261016",
+  "cmsUpdate": "pending-execution-in-existing-CMS",
+  "note": "Editorial preview overlay from prepared CMS content; prior cmsPublishedAt belongs to the previous release. No live CMS write is asserted."
 }
