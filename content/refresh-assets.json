@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "images": [
+    {
+      "id": "partners",
+      "desktop": {
+        "file": "partners-desktop.webp",
+        "sha256": "bff494bcdb18434b48b8207109131bc836a7538e23ee22bc65ec5eaec81f2bee",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 248988
+      },
+      "mobile": {
+        "file": "partners-mobile.webp",
+        "sha256": "a50ec43a709773da8e5f102853870c7eb5af9bf4dbf1e7185f6192d71fde3e0b",
+        "width": 768,
+        "height": 1024,
+        "bytes": 111012
+      },
+      "origin": "ai",
+      "date": "2026-10-16",
+      "tool": "image_gen.imagegen",
+      "resultId": "exec-f0553b2a-97ef-4805-b531-19a9f8189140",
+      "description": "Оригинальная предметная композиция тканей и архитектурного эскиза для страницы партнёров.",
+      "prompt": "Original AFARA quiet luxury textile collaboration still life: ivory limestone worktable, plum aubergine, ivory and taupe fabric folds and swatches, bronze curtain rail sample, unbranded architectural window elevation and blank sample folder. Soft northern daylight; original landscape editorial composition with central subjects for portrait crop. No people, text, brands, watermarks, fake project attribution."
+    },
+    {
+      "id": "sculptural",
+      "desktop": {
+        "file": "sculptural-desktop.webp",
+        "sha256": "b73f73d655deafef4b8e509d46a15640e414ca6665e646c5c1ab12258c4475de",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 169028
+      },
+      "mobile": {
+        "file": "sculptural-mobile.webp",
+        "sha256": "4be74a3f5e1581deb7afb856b10bbaa0210c737cd2743750fcd7136dda41ed9d",
+        "width": 900,
+        "height": 1200,
+        "bytes": 109076
+      },
+      "origin": "ai",
+      "date": "2026-10-16",
+      "tool": "image_gen.imagegen",
+      "resultId": "exec-7ebcb4dc-2fbd-4f53-b025-91a429182fd8",
+      "description": "Оригинальная двухцветная драпировка AFARA из предыдущей авторской генерации. Мобильный вариант — кадр исходного изображения.",
+      "prompt": "Original AFARA two-colour sculptural drapery concept. Cream and deep plum textile, rich tailored folds, precise contrast edging, tactile light, premium architectural editorial composition. No people, text, logos, watermark, or claim of completed work."
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import { ArrowIcon } from './ArrowIcon'
 import { SaveIdea } from './SaveIdea'
 import { ContactQR } from './ContactQR'
 import { messageURL } from '@/lib/editorial'
+import { isPartnerPage, isSpacePage } from '@/lib/navigation'
 
 type Section = NonNullable<Page['sections']>[number]
 function ContentSection({ section, pages }: { section: Section; pages: Page[] }) {
@@ -39,6 +40,7 @@ export function Website({ page, pages, site, documents, knowledge = [], works = 
   const consent = documents.find(d => d.kind === 'consent'), privacy = documents.find(d => d.kind === 'privacy')
   const parent = typeof page.parent === 'object' ? page.parent : null
   const contacts = pages.find(p => p.type === 'contacts')
+  const partner = pages.find(isPartnerPage)
   const answers = knowledge.filter(k => (typeof k.page === 'object' ? k.page.id : k.page) === page.id)
   const children = pages.filter(p => (typeof p.parent === 'object' ? p.parent?.id : p.parent) === page.id)
   const studio = site.studio
@@ -51,23 +53,28 @@ export function Website({ page, pages, site, documents, knowledge = [], works = 
       {page.type === 'contacts' ? <section className={`${styles.container} ${styles.contactPage}`}><h1>{page.h1}</h1><p>{page.intro}</p><a className={styles.button} href={messageURL(site)}>Написать о проекте <ArrowIcon/></a><ContactDetails site={site} full /><ContactQR /></section> : <section className={`${styles.hero} ${page.type !== 'home' ? styles.innerHero : ''}`}>
         <div className={styles.heroImage}><Photo image={media(page.hero)} mobile={media(page.heroMobile)} priority hero alt={page.heroAlt} position={page.heroPosition ?? 65} /></div>
         <div className={`${styles.container} ${styles.heroContent}`}><p className={styles.heroEyebrow}>{site.brand} · {site.tagline}</p><h1>{page.h1}</h1><p className={styles.heroIntro}>{page.intro}</p><a className={styles.button} href="#consultation">{page.cta}<span aria-hidden="true"><ArrowIcon/></span></a><a className={styles.detailsLink} href={`#${sections.find(s => s.kind === 'details')?.anchor || sections[0]?.anchor || 'consultation'}`}>{page.detailsLabel}<span aria-hidden="true">↓</span></a></div>
-        {page.conceptLabel && <span className={styles.heroCaption}>{page.conceptLabel}</span>}
       </section>}
       {sections.map((section, i) => {
         if (section.kind !== 'spaces') return <ContentSection key={section.id || i} section={section} pages={pages} />
-        const candidates = page.type === 'home' ? pages.filter(p => p.type === 'overview' || p.type === 'direction' && !p.parent) : children
+        const candidates = page.type === 'home' ? pages.filter(isSpacePage) : children
         const existing = section.cards || []
         const missing = candidates.filter(p => !existing.some(c => (typeof c.page === 'object' ? c.page?.id : c.page) === p.id))
-        return <ContentSection key={section.id || i} pages={pages} section={{ ...section, cards: [...existing, ...missing.map(p => ({ title: p.title, body: p.intro, page: p.id }))] }} />
+        const combined: NonNullable<Section['cards']> = [...existing, ...missing.map(p => ({ title: p.title, body: p.intro, page: p.id }))]
+        const cards = combined.map(card => {
+          const targetId = typeof card.page === 'object' ? card.page?.id : card.page
+          const target = pages.find(p => p.id === targetId)
+          return { ...card, image: card.image || target?.hero, imageAlt: card.imageAlt || target?.heroAlt }
+        })
+        return <ContentSection key={section.id || i} pages={pages} section={{ ...section, cards }} />
       })}
       {page.type === 'home' && <>
         {studio?.verified && studio.body && <section id="studio" className={styles.section}><div className={styles.container}><h2>{studio.heading}</h2><div className={styles.studioGrid}><div><p className={styles.sectionBody}>{studio.body}</p>{studio.name && <h3>{studio.name}</h3>}{studio.role && <p>{studio.role}</p>}</div>{media(studio.photo) && <div className={styles.materialImage}><Photo image={media(studio.photo)} /></div>}</div></div></section>}
         {works.length > 0 && <section id="works" className={styles.section}><div className={styles.container}><h2>{site.worksHeading}</h2><div className={styles.spaces}>{works.map(work => <article key={work.id} className={styles.card}><h3>{work.title}</h3><p>{work.task}</p><p>{work.space}</p><p>{work.solution}</p>{work.photos?.map(photo => <div className={styles.cardImage} key={photo.id}><Photo image={media(photo.image)} /></div>)}</article>)}</div></div></section>}
         {site.trust?.filter(s => s.visible !== false && !(s.kind === 'faq' && answers.length)).map((s, i) => <ContentSection key={s.id || `trust-${i}`} section={s} pages={pages} />)}
       </>}
-      {answers.length > 0 && <section className={styles.section} aria-label="Публичные материалы AFARA"><div className={`${styles.container} ${styles.faq}`}>{page.type === 'home' && <h2>{site.trust?.find(s => s.kind === 'faq')?.heading}</h2>}{answers.map(k => <details key={k.id}><summary>{k.question}<span aria-hidden="true">+</span></summary><p id={`answer-${k.id}`}>{k.answer}</p></details>)}</div></section>}
+      {answers.length > 0 && <section className={styles.section} aria-label="Публичные материалы AFARA"><div className={`${styles.container} ${styles.faq}`}><h2>{page.type === 'home' ? site.trust?.find(s => s.kind === 'faq')?.heading || 'Вопросы и ответы' : 'Вопросы и ответы'}</h2>{answers.map(k => <details key={k.id}><summary>{k.question}<span aria-hidden="true">+</span></summary><p id={`answer-${k.id}`}>{k.answer}</p></details>)}</div></section>}
       <section id="consultation" className={`${styles.section} ${styles.consultation}`}><div className={`${styles.container} ${styles.consultationGrid}`}><div><p className={styles.kicker}>/ Консультация</p><h2>{site.form?.heading}</h2><p className={styles.sectionBody}>{site.form?.intro}</p><a className={styles.arrowLink} href={messageURL(site)}>Написать о проекте <ArrowIcon/></a><ContactDetails site={site} />{contacts && page.id !== contacts.id && <Link prefetch={false} className={styles.arrowLink} href={pageURL(contacts)}>{site.contactsLabel || contacts.title} <ArrowIcon/></Link>}</div>
         <InquiryForm labels={site.form} source={page.path} consent={consent ? { url: `/documents/${consent.slug}/`, version: consent.version } : null} policy={privacy ? `/documents/${privacy.slug}/` : null} /></div></section>
       {site.assistant?.enabled && !preview && <ConsultantLauncher labels={site.assistant} />}
-    </main><footer className={styles.footer}><div className={`${styles.container} ${styles.footerInner}`}><Link prefetch={false} className={styles.logo} href="/">{site.brand}<small>{site.tagline}</small></Link><ContactDetails site={site} /><nav aria-label="Контакты и документы">{contacts && <Link prefetch={false} href={pageURL(contacts)}>{site.contactsLabel || contacts.title}</Link>}{documents.map(d => <Link prefetch={false} key={d.id} href={`/documents/${d.slug}/`}>{d.title}</Link>)}</nav><p>{site.footerText}</p></div></footer></>
+    </main><footer className={styles.footer}><div className={`${styles.container} ${styles.footerInner}`}><Link prefetch={false} className={styles.logo} href="/">{site.brand}<small>{site.tagline}</small></Link><ContactDetails site={site} /><nav aria-label="Контакты и документы">{partner && <Link prefetch={false} href={pageURL(partner)}>{partner.title}</Link>}{contacts && <Link prefetch={false} href={pageURL(contacts)}>{site.contactsLabel || contacts.title}</Link>}{documents.map(d => <Link prefetch={false} key={d.id} href={`/documents/${d.slug}/`}>{d.title}</Link>)}</nav><p>{site.footerText}</p></div></footer></>
 }
