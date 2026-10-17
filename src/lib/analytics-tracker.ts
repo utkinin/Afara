@@ -39,6 +39,10 @@ export function startAnalytics(path: string, policy: AnalyticsPolicy): () => voi
   }
   const interaction = () => { advance(); lastInput = performance.now(); if (!stopped && ready && Date.now() - lastTouch > ANALYTICS_SESSION_MS) begin(true) }
   const visibility = () => { flush(true); running = document.visibilityState === 'visible' && document.hasFocus(); tick = performance.now(); if (running) { lastInput = tick; if (!stopped && ready && Date.now() - lastTouch > ANALYTICS_SESSION_MS) begin(true) } }
+  const choice = (event: Event) => {
+    const value = (event as CustomEvent<{ granted?: boolean; version?: string } | null>).detail
+    if (!value?.granted || value.version !== policy.version) { stopped = true; context = null }
+  }
   const click = (event: MouseEvent) => {
     if (stopped || !ready || !(event.target instanceof Element)) return
     const target = event.target.closest<HTMLElement>('a,button'), href = target?.getAttribute('href') || ''
@@ -56,11 +60,13 @@ export function startAnalytics(path: string, policy: AnalyticsPolicy): () => voi
   window.addEventListener('pagehide', visibility)
   for (const name of ['pointerdown', 'keydown', 'scroll'] as const) window.addEventListener(name, interaction, { passive: true })
   document.addEventListener('click', click)
+  window.addEventListener('afara:analytics-choice', choice)
   return () => {
     flush(true); stopped = true; context = null; clearInterval(timer)
     document.removeEventListener('visibilitychange', visibility)
     window.removeEventListener('focus', visibility); window.removeEventListener('blur', visibility); window.removeEventListener('pagehide', visibility)
     for (const name of ['pointerdown', 'keydown', 'scroll'] as const) window.removeEventListener(name, interaction)
     document.removeEventListener('click', click)
+    window.removeEventListener('afara:analytics-choice', choice)
   }
 }

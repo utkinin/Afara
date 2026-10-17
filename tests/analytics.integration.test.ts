@@ -24,7 +24,7 @@ test('consented analytics: real browser, PostgreSQL, optional lead linking, ADMI
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36' })
     const page = await context.newPage(), errors: string[] = [], tracked: { viewId: string; sessionId: string }[] = []
     page.on('pageerror', e => errors.push(e.message))
-    page.on('request', r => { if (r.url().endsWith('/api/analytics/track')) { const body = r.postDataJSON(); if (body.type === 'pageview') tracked.push(body) } })
+    page.on('request', r => { if (r.method() === 'POST' && r.url().endsWith('/api/analytics/track')) { const body = r.postDataJSON(); if (body?.type === 'pageview') tracked.push(body) } })
     await page.goto(origin + '/?utm_source=qa&utm_campaign=autumn&utm_term=сложные+портьеры&email=never-store@example.test', { waitUntil: 'networkidle' })
     assert.equal(tracked.length, 0, 'No analytics request before explicit agreement')
     assert.equal((await context.cookies()).some(c => c.name === ANALYTICS_ID_COOKIE), false)
