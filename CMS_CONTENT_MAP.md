@@ -1,5 +1,7 @@
 # Карта редактирования AFARA
 
+Блок JTBD «Ваша задача»: `pages.sections[kind=details,anchor=your-task]`, штатные `heading/body/kicker/cards[].title/body/linkLabel/visible`. Одна кнопка готовит описание в существующей форме; не создаёт профиль и не отправляет заявку. Первоначальные четыре карточки — `content/customer-tasks.ts`, дальнейшая редактура — в CMS. Офлайн и презентационный смысл фиксируется в docs/SALES_CONCEPT.md и docs/PRESENTATION_BRIEF.md. Новых таблиц нет.
+
 В базе знаний добавлено `knowledge.evidence`: служебные источники, дата проверки и ограничения; чтение только сотрудникам, не публичному API и не консультанту. `content/answer-library.ts` — 32 подготовленных ответа по существующим путям; `content:answers --apply` создаёт только отсутствующие черновики. Разметка JSON-LD строится на сервере из тех же публичных полей и одобренных ответов, без второго ручного источника текста.
 
 Аналитика: ADMIN читает `/admin/analytics`; флаг включения — `site.analytics.enabled`. Условия — опубликованный документ `documents.kind=analytics` вместе с privacy. Служебные коллекции `analytics-visitors/sessions/events` закрыты для публичного чтения и EDITOR; контакты берутся только из `leads` через отдельное согласие. Поля `leads.analyticsVisitor/analyticsSession/analyticsConsentVersion/analyticsConsentText/analyticsConsentAt` создаёт сервер и не меняет обычный редактор. [Подробности](docs/ANALYTICS.md).

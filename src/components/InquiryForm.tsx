@@ -23,8 +23,14 @@ export function InquiryForm({labels,source,consent,policy,analyticsPolicy}:{labe
       setValues(v=>({...v,description:v.description.trim()?v.description:question}));setStep(1)
       requestAnimationFrame(()=>form.current?.querySelector('textarea')?.focus())
     }
+    const choose=(event:MouseEvent)=>{
+      if(event.defaultPrevented||event.button!==0||event.ctrlKey||event.metaKey||event.altKey||event.shiftKey||!(event.target instanceof Element))return
+      const question=event.target.closest<HTMLAnchorElement>('a[data-inquiry-brief]')?.dataset.inquiryBrief
+      if(question)window.dispatchEvent(new CustomEvent('afara:question',{detail:question}))
+    }
     window.addEventListener('afara:question',receive)
-    return()=>window.removeEventListener('afara:question',receive)
+    document.addEventListener('click',choose)
+    return()=>{window.removeEventListener('afara:question',receive);document.removeEventListener('click',choose)}
   },[])
   if(!labels)return null
   const update=(name:string,value:string|boolean)=>{setValues(v=>({...v,[name]:value}));setFailure('')}

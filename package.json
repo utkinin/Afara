@@ -31,7 +31,8 @@
     "content:expand": "tsx --env-file-if-exists=.env.local scripts/content-expand.ts",
     "test:services": "tsx --env-file-if-exists=.env.local --test --test-force-exit tests/services.acceptance.ts",
     "content:material-study": "tsx --env-file-if-exists=.env.local scripts/content-material-study.ts",
-    "content:answers": "node --import tsx --env-file-if-exists=.env.local scripts/content-answers.ts"
+    "content:answers": "node --import tsx --env-file-if-exists=.env.local scripts/content-answers.ts",
+    "content:tasks": "node --import tsx --env-file-if-exists=.env.local scripts/content-tasks.ts"
   },
   "dependencies": {
     "@fontsource-variable/cormorant-garamond": "5.3.0",

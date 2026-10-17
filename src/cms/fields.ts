@@ -7,7 +7,7 @@ export const sections: ArrayField = {
       {label:'Материалы',value:'materials'}, {label:'Процесс',value:'process'}, {label:'Условия',value:'conditions'}, {label:'Вопросы и ответы',value:'faq'},
     ] },
     { name: 'visible', label: 'Показывать блок', type: 'checkbox', defaultValue: true },
-    { name: 'anchor', label: 'Якорь (латиница)', type: 'text', admin: { description: 'Для интерактивного просмотра ткани: шаблон «Материалы», якорь material-study, три карточки с фото — нейтральный свет, тёплый свет, фактура. Подпись основной кнопки — в поле ссылки первой карточки.' }, validate: (v: string | null | undefined) => !v || /^[a-z][a-z0-9-]*$/.test(v) || 'Используйте латиницу и дефис' },
+    { name: 'anchor', label: 'Якорь (латиница)', type: 'text', admin: { description: 'Выбор задачи: «Разбор решения», якорь your-task, карточки без фото; их заголовок/текст переходят в форму, linkLabel — кнопка. Просмотр ткани: «Материалы», material-study, три карточки с фото — нейтральный свет, тёплый свет, фактура.' }, validate: (v: string | null | undefined) => !v || /^[a-z][a-z0-9-]*$/.test(v) || 'Используйте латиницу и дефис' },
     { name: 'kicker', label: 'Рубрика', type: 'text' },
     { name: 'heading', label: 'Заголовок', type: 'text', required: true },
     { name: 'body', label: 'Текст', type: 'textarea' }, picture,

@@ -14,15 +14,17 @@ import { messageURL } from '@/lib/editorial'
 import { MaterialStudy } from './MaterialStudy'
 import { AnalyticsConsent } from './AnalyticsConsent'
 import { StructuredData } from './StructuredData'
+import { customerTasksAnchor, customerTaskBrief } from '../../content/customer-tasks'
 
 type Section = NonNullable<Page['sections']>[number]
 function ContentSection({ section, pages }: { section: Section; pages: Page[] }) {
   if (section.kind === 'materials' && section.anchor === 'material-study') return <MaterialStudy section={section} />
   const kind = section.kind
-  return <section id={section.anchor || undefined} className={`${styles.section} ${kind === 'conditions' ? styles.conditions : ''}`}><div className={`${styles.container} ${kind === 'materials' && section.image ? styles.materials : kind === 'process' ? styles.processLayout : ''}`}>
+  const tasks = section.anchor === customerTasksAnchor && kind === 'details'
+  return <section id={section.anchor || undefined} data-customer-tasks={tasks || undefined} className={`${styles.section} ${kind === 'conditions' ? styles.conditions : ''}`}><div className={`${styles.container} ${kind === 'materials' && section.image ? styles.materials : kind === 'process' ? styles.processLayout : ''}`}>
     <div className={styles.sectionIntro}>{section.kicker && <p className={styles.kicker}>{section.kicker}</p>}<h2>{section.heading}</h2>{section.body && <p className={styles.sectionBody}>{section.body}</p>}</div>
     {section.image && <div className={styles.materialImage}><Photo image={media(section.image)} alt={section.imageAlt} /></div>}
-    {!!section.cards?.length && <div className={kind === 'spaces' ? styles.spaces : kind === 'process' ? styles.process : kind === 'faq' ? styles.faq : styles.cards}>
+    {!!section.cards?.length && <div className={tasks ? styles.taskCards : kind === 'spaces' ? styles.spaces : kind === 'process' ? styles.process : kind === 'faq' ? styles.faq : styles.cards}>
       {section.cards.map((card, j) => {
         const targetId = typeof card.page === 'object' ? card.page?.id : card.page
         const target = pages.find(p => p.id === targetId)
@@ -31,7 +33,7 @@ function ContentSection({ section, pages }: { section: Section; pages: Page[] })
         return <article id={ideaAnchor} className={kind === 'spaces' ? styles.spaceCard : styles.card} key={card.id || j}>
           {card.image && <div className={styles.cardImage}><Photo image={media(card.image)} alt={card.imageAlt} /></div>}
           {kind === 'process' && <span className={styles.processNumber}>0{j + 1}</span>}
-          <div className={styles.cardText}><h3>{card.title}</h3>{card.body && <p>{card.body}</p>}{target && <Link prefetch={false} className={styles.arrowLink} href={pageURL(target)}>{card.linkLabel || card.title}<span aria-hidden="true"><ArrowIcon/></span></Link>}{ideaAnchor && <SaveIdea anchor={ideaAnchor} />}</div>
+          <div className={styles.cardText}><h3>{card.title}</h3>{card.body && <p>{card.body}</p>}{tasks ? <a className={styles.arrowLink} href="#consultation" data-inquiry-brief={customerTaskBrief(card.title, card.body)}>{card.linkLabel || 'Обсудить задачу'}<span aria-hidden="true"><ArrowIcon/></span></a> : target && <Link prefetch={false} className={styles.arrowLink} href={pageURL(target)}>{card.linkLabel || card.title}<span aria-hidden="true"><ArrowIcon/></span></Link>}{ideaAnchor && <SaveIdea anchor={ideaAnchor} />}</div>
         </article>
       })}
     </div>}
