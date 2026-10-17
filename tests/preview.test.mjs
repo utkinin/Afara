@@ -7,6 +7,7 @@ test('static preview has real pages, local assets, keyboard menu and readonly fo
  const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||'/usr/bin/chromium',args:['--no-sandbox']})
  try{
   const page=await browser.newPage({viewport:{width:390,height:844}}),external=[],errors=[]
+  const menu=page.locator('dialog').filter({has:page.locator('button[aria-label="Закрыть меню"]')})
   page.on('request',r=>{if(new URL(r.url()).origin!==origin)external.push(r.url())})
   page.on('pageerror',e=>errors.push(e.message))
   let response=await page.goto(origin+base+'/',{waitUntil:'networkidle'})
@@ -17,9 +18,9 @@ test('static preview has real pages, local assets, keyboard menu and readonly fo
   assert.equal(await page.locator('main img').first().evaluate(e=>e.complete&&e.naturalWidth>0),true)
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true)
   await page.getByRole('button',{name:'Открыть меню'}).click()
-  assert.equal(await page.locator('dialog').evaluate(e=>e.open),true)
+  assert.equal(await menu.evaluate(e=>e.open),true)
   await page.keyboard.press('Escape')
-  assert.equal(await page.locator('dialog').evaluate(e=>e.open),false)
+  assert.equal(await menu.evaluate(e=>e.open),false)
   await page.getByLabel('Тип пространства').selectOption({index:1})
   await page.getByLabel('Город / страна').fill('Санкт-Петербург')
   await page.getByLabel('Что вы хотите решить?').fill('Проверка предпросмотра сайта AFARA')
@@ -31,7 +32,7 @@ test('static preview has real pages, local assets, keyboard menu and readonly fo
   await page.getByRole('button',{name:'Назад',exact:false}).click()
   assert.equal(await page.getByLabel('Город / страна').inputValue(),'Санкт-Петербург')
   await page.getByRole('button',{name:'Открыть меню'}).click()
-  await page.locator('dialog').getByRole('link',{name:'Все частные интерьеры'}).click()
+  await menu.getByRole('link',{name:'Все частные интерьеры'}).click()
   await page.waitForURL(origin+base+'/chastnye-interery/')
   assert.match(await page.locator('h1').textContent(),/частных интерьеров/)
   for(const pathname of routes){

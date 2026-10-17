@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "images": [
+    {
+      "id": "neutral",
+      "resultId": "exec-e596405e-9b77-4841-9940-0c76778b6241",
+      "tool": "image_gen.imagegen",
+      "date": "2026-10-17",
+      "origin": "ai",
+      "purpose": "Original illustrative textile study; not a real SKU, calibrated lighting test, measured fullness or completed project.",
+      "variants": [
+        {
+          "file": "neutral-480.webp",
+          "width": 480,
+          "height": 320,
+          "bytes": 8616,
+          "sha256": "e82371b3039f6dc194f150552768d6bec57ad530285ef207224744a2992b7643"
+        },
+        {
+          "file": "neutral-960.webp",
+          "width": 960,
+          "height": 640,
+          "bytes": 66628,
+          "sha256": "80337cad68401e9970cfbb785aa271bf517f4ce4b8d6056f6b8cf07c1d84b3ab"
+        },
+        {
+          "file": "neutral-1536.webp",
+          "width": 1536,
+          "height": 1024,
+          "bytes": 194038,
+          "sha256": "4464108d65bb3733c8c1a8ccb5cddcb5503010012d94793b1d0ee0385b77b0de"
+        }
+      ],
+      "prompt": "Use case: photorealistic-natural. Asset type: one original editorial textile concept for the AFARA website interactive fabric study, landscape 3:2. Photograph a close architectural crop of elegant floor-to-ceiling matte greige taupe-beige micro-velvet curtain folds beside a slender ivory sheer. Restrained plum contrast piping at the far edge, warm ivory plaster wall and a small sliver of oak floor. Soft neutral natural-looking light from a tall window off frame to the left, balanced white, visible tactile woven fabric and subtle short pile, convincing soft heavy folds, zero glossy synthetic sheen. Composition centers the substantial vertical folds with enough background to read texture; a calm editorial material study, not a room overview, no people. Critical: no text, no logos, no watermark, no product label, no fake manufacturer or completed AFARA project attribution. This is an illustrative material study, not proof of a real fabric SKU, measurements, fullness factor or calibrated color temperature. Create a single landscape image, not a collage."
+    },
+    {
+      "id": "warm",
+      "resultId": "exec-fabbe8dd-657e-4a95-8162-7081fd57fbe1",
+      "tool": "image_gen.imagegen",
+      "date": "2026-10-17",
+      "origin": "ai",
+      "purpose": "Original illustrative textile study; not a real SKU, calibrated lighting test, measured fullness or completed project.",
+      "variants": [
+        {
+          "file": "warm-480.webp",
+          "width": 480,
+          "height": 320,
+          "bytes": 7986,
+          "sha256": "c52a3c020e949fdb8b8be7aac5ca30814e1ff342b4fd986f1eff7b2e11013737"
+        },
+        {
+          "file": "warm-960.webp",
+          "width": 960,
+          "height": 640,
+          "bytes": 48188,
+          "sha256": "6abeb9a03be1bfd85d01de5b83d494d856a1643d28f5dbd5100580caa2e6dfe0"
+        },
+        {
+          "file": "warm-1536.webp",
+          "width": 1536,
+          "height": 1024,
+          "bytes": 129372,
+          "sha256": "6bfeccdb260d78768a2cf1993be4353b485dc0700c89dda6817fa412fea79deb"
+        }
+      ],
+      "prompt": "Edit this exact AFARA textile study image. Preserve the camera, crop, curtain geometry, every fold, same matte greige micro-velvet, same ivory sheer, plum edge, wall and floor. Change ONLY the lighting to a plausible soft warm evening interior illumination, with gentle amber warm highlights and quiet deeper shadows. Keep the subtle true material texture and zero synthetic shine. Avoid dramatic orange cast; this is a restrained warm-light comparison, not a different fabric. No text, no labels, no logos, no people. An illustrative study, not a calibrated color-temperature test.",
+      "referenceResultId": "exec-e596405e-9b77-4841-9940-0c76778b6241"
+    },
+    {
+      "id": "detail",
+      "resultId": "exec-c30c0ea8-97ca-48a5-a2cf-92d5b89f1766",
+      "tool": "image_gen.imagegen",
+      "date": "2026-10-17",
+      "origin": "ai",
+      "purpose": "Original illustrative textile study; not a real SKU, calibrated lighting test, measured fullness or completed project.",
+      "variants": [
+        {
+          "file": "detail-480.webp",
+          "width": 480,
+          "height": 320,
+          "bytes": 28198,
+          "sha256": "53b5eb4e64928566d3f0e342724bd6725e2820668212f95efa16f3ff61486a93"
+        },
+        {
+          "file": "detail-960.webp",
+          "width": 960,
+          "height": 640,
+          "bytes": 124432,
+          "sha256": "ddddc3d40794461c1e58fc00c3acea5d471899363fdb7c43b2a3617ee007ce70"
+        },
+        {
+          "file": "detail-1536.webp",
+          "width": 1536,
+          "height": 1024,
+          "bytes": 258658,
+          "sha256": "a256c786a8e4ede0c0848e88016a07934fd681873e2f92caccb22b84da59c946"
+        }
+      ],
+      "prompt": "Create a new close macro crop from the exact curtain material in this AFARA reference. Show the matte greige taupe-beige micro-velvet texture, subtle short dense pile and its direction, a soft tactile edge of a deep fold and one slender plum trim edge near the right side. Natural neutral soft directional light. Editorial textile detail photograph, no synthetic glossy highlights. Landscape 3:2, consistent palette with the reference. This is a conceptual fabric illustration and must not contain text, a scale ruler, numbers, brand labels, logos or watermarks. No people. Do not claim a real product SKU or true calibrated 1:1 magnification.",
+      "referenceResultId": "exec-e596405e-9b77-4841-9940-0c76778b6241"
+    }
+  ]
+}

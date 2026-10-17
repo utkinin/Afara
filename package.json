@@ -29,7 +29,8 @@
     "test:editorial": "tsx --env-file-if-exists=.env.local --test --test-force-exit tests/editorial.acceptance.ts",
     "db:service-pages": "tsx --env-file-if-exists=.env.local scripts/db-service-pages.ts",
     "content:expand": "tsx --env-file-if-exists=.env.local scripts/content-expand.ts",
-    "test:services": "tsx --env-file-if-exists=.env.local --test --test-force-exit tests/services.acceptance.ts"
+    "test:services": "tsx --env-file-if-exists=.env.local --test --test-force-exit tests/services.acceptance.ts",
+    "content:material-study": "tsx --env-file-if-exists=.env.local scripts/content-material-study.ts"
   },
   "dependencies": {
     "@fontsource-variable/cormorant-garamond": "5.3.0",
