@@ -88,9 +88,9 @@ test('consented analytics: real browser, PostgreSQL, optional lead linking, ADMI
     await adminPage.screenshot({ path: 'docs/screenshots/analytics-admin-390.png', fullPage: true })
     const editorContext = await browser.newContext()
     assert.equal((await editorContext.request.post(origin + '/api/users/login', { headers: { Origin: origin }, data: { email: editor.email, password } })).status(), 200)
-    // Next may have started streaming a 200 shell before notFound(); assert that no report or contacts render.
     const editorPage = await editorContext.newPage()
-    await editorPage.goto(origin + '/admin/analytics', { waitUntil: 'networkidle' })
+    await editorPage.goto(origin + '/admin/analytics', { waitUntil: 'domcontentloaded' })
+    await editorPage.getByRole('heading', { name: 'Доступ к аналитике ограничен', exact: true }).waitFor()
     assert.equal(await editorPage.locator('.afara-analytics').count(), 0)
     assert.equal(await editorPage.getByText(contact, { exact: true }).count(), 0)
     assert.ok((await editorContext.request.post(origin + '/api/analytics/erase', { headers: { Origin: origin }, data: { visitorKey: visitor.visitorKey } })).status() >= 400)

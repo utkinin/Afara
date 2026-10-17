@@ -2,15 +2,14 @@ import { createHash } from 'node:crypto'
 import { mkdir, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createLocalReq } from 'payload'
 import { answerEvidence, answerLibrary, answerLibraryVersion } from '../content/answer-library'
 import { answerImportPlan, createAnswerDrafts } from '../src/lib/answer-library'
-import { cms } from '../src/lib/payload'
 
 if (process.argv.includes('--list')) {
   console.log(JSON.stringify({ version: answerLibraryVersion, status: 'editorial-drafts', answers: answerLibrary.map(item => ({ ...item, evidence: answerEvidence(item) })) }, null, 2))
 } else {
   if (process.env.AFARA_STAGE !== 'development' || process.env.AFARA_DB_PUSH !== 'false' || !process.env.DATABASE_URL) throw new Error('Use the existing development CMS, DATABASE_URL and AFARA_DB_PUSH=false. This command never creates a database or publishes answers.')
+  const { createLocalReq } = await import('payload'), { cms } = await import('../src/lib/payload')
   const p = await cms(), apply = process.argv.includes('--apply')
   let tx: string | number | null = null
   try {
