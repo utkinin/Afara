@@ -28,6 +28,14 @@ jobs:
           AFARA_STAGE=build npm run db:migrate
           npm run seed:dev
           npx tsx --env-file-if-exists=.env.local tests/bootstrap.ts
+      - name: Validate material study in a separate acceptance database
+        run: |
+          docker compose exec -T db createdb -U postgres -T afara_ci_acceptance afara_material_study_acceptance
+          DATABASE_URL=postgresql://postgres@127.0.0.1:5432/afara_material_study_acceptance \
+          MEDIA_DIR=/tmp/afara-material-study-media \
+          AFARA_STAGE=development AFARA_DB_PUSH=false \
+          AFARA_CONTENT_BACKUP_DIR=/tmp/afara-material-study-backups \
+          node --import tsx --env-file-if-exists=.env.local tests/material-study.cms.acceptance.ts
       - run: npm run typecheck && npm run lint && npm run build
       - name: Start and validate
         run: |

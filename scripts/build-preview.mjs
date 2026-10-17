@@ -2,6 +2,7 @@ import { chromium } from '@playwright/test'
 import { mkdir, writeFile, cp, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
+import { writeMaterialStudyPreview } from './material-study-preview.mjs'
 
 const origin=process.env.PREVIEW_ORIGIN||'http://localhost:3000'
 const base=process.env.PREVIEW_BASE||'/Afara'
@@ -43,7 +44,7 @@ async function asset(input){
   try{return await work}finally{pending.delete(url.href)}
 }
 const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||'/usr/bin/chromium',args:['--no-sandbox']})
-let templates
+let templates, hasMaterialStudy=false
 const pages=new Set(['/'])
 try{
   for(const pathname of pages){
@@ -72,18 +73,26 @@ try{
     const resources=await page.evaluate(()=>{
       const resources=[]
       for(const e of document.querySelectorAll('link[rel="stylesheet"]'))resources.push({tag:'link',attr:'href',value:e.getAttribute('href')})
-      for(const e of document.querySelectorAll('img[src]'))resources.push({tag:'img',attr:'src',value:e.getAttribute('src')})
-      for(const e of document.querySelectorAll('img[srcset],source[srcset]'))for(const part of e.getAttribute('srcset').split(','))resources.push({tag:e.tagName.toLowerCase(),attr:'srcset',value:part.trim().split(/\s+/)[0]})
+      const roots=[document,...Array.from(document.querySelectorAll('template[data-ms-view]'),t=>t.content)]
+      for(const root of roots){
+        for(const e of root.querySelectorAll('img[src]'))resources.push({tag:'img',attr:'src',value:e.getAttribute('src')})
+        for(const e of root.querySelectorAll('img[srcset],source[srcset]'))for(const part of e.getAttribute('srcset').split(','))resources.push({tag:e.tagName.toLowerCase(),attr:'srcset',value:part.trim().split(/\s+/)[0]})
+      }
       return resources
     })
+    hasMaterialStudy ||= await page.locator('[data-material-study]').count()>0
     for(const resource of resources)await asset(resource.value)
     const replacements=Object.fromEntries(mapping)
     await page.evaluate(({origin,base,replacements})=>{
       const convert=input=>input.startsWith('data:image/png;base64,')?input:replacements[new URL(input,origin).href]
       for(const e of document.querySelectorAll('[data-server-only],script,link[rel="preload"],link[rel="modulepreload"],link[rel="prefetch"],meta[http-equiv="Content-Security-Policy"],link[rel="canonical"],#next-route-announcer,#__next-route-announcer__'))e.remove()
       for(const e of document.querySelectorAll('link[rel="stylesheet"]'))e.setAttribute('href',convert(e.getAttribute('href')))
-      for(const e of document.querySelectorAll('img[src]'))e.setAttribute('src',convert(e.getAttribute('src')))
-      for(const e of document.querySelectorAll('img[srcset],source[srcset]'))e.setAttribute('srcset',e.getAttribute('srcset').split(',').map(part=>{const [url,size]=part.trim().split(/\s+/);return `${convert(url)} ${size||''}`}).join(', '))
+      const roots=[document,...Array.from(document.querySelectorAll('template[data-ms-view]'),t=>t.content)]
+      for(const root of roots){
+        for(const e of root.querySelectorAll('img[src]'))e.setAttribute('src',convert(e.getAttribute('src')))
+        for(const e of root.querySelectorAll('img[srcset],source[srcset]'))e.setAttribute('srcset',e.getAttribute('srcset').split(',').map(part=>{const [url,size]=part.trim().split(/\s+/);return `${convert(url)} ${size||''}`}).join(', '))
+      }
+      for(const e of document.querySelectorAll('[data-material-study]'))e.removeAttribute('data-enhanced')
       for(const e of document.querySelectorAll('a[href]')){
         const href=e.getAttribute('href')
         if(href.startsWith('#'))continue
@@ -95,6 +104,7 @@ try{
       robots.setAttribute('content','noindex,nofollow,noarchive')
       const csp=document.createElement('meta');csp.httpEquiv='Content-Security-Policy';csp.content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'";document.head.prepend(csp)
       const script=document.createElement('script');script.src=base+'/preview-controls.js';script.defer=true;document.head.append(script)
+      if(document.querySelector('[data-material-study]')){const study=document.createElement('script');study.type='module';study.src=base+'/material-study-preview.js';document.head.append(study)}
       document.title='Предпросмотр · '+document.title
       const form=document.querySelector('#consultation form');if(form){form.dataset.preview='true';form.setAttribute('aria-label','Форма предпросмотра — отправка отключена')}
       const marker=document.createElement('p');marker.textContent='Статический предпросмотр AFARA · отправка заявок и консультант отключены';marker.style.cssText='font:12px sans-serif;text-align:center;padding:10px;margin:0;background:#4a2f3f;color:#f7f3ea';document.querySelector('footer')?.prepend(marker)
@@ -119,6 +129,13 @@ function remember(){for(const field of form.querySelectorAll('input,textarea,sel
 function render(next){remember();step=next;form.innerHTML=templates[step===1?'step1':'step2'];for(const field of form.querySelectorAll('input,textarea,select')){const label=field.closest('label')?.childNodes[0]?.textContent||field.id;if(label in values){if(field.type==='checkbox')field.checked=values[label];else field.value=values[label]}}if(step===2){const submit=form.querySelector('button[type="submit"]');submit.disabled=true;const contact=form.querySelector('input[type="tel"],input[type="email"]');const channel=form.querySelector('select');channel?.addEventListener('change',()=>{contact.type=channel.value==='email'?'email':'tel';contact.autocomplete=contact.type;contact.closest('label').childNodes[0].textContent=channel.value==='email'?'Email':'Телефон';contact.value=''})}form.querySelector('input,select,textarea')?.focus()}
 form?.addEventListener('submit',e=>{e.preventDefault();if(step===1&&form.reportValidity())render(2)});
 form?.addEventListener('click',e=>{const button=e.target.closest('button');if(step===2&&button?.type==='button')render(1)});
+window.addEventListener('afara:question',e=>{
+ if(!form||typeof e.detail!=='string'||e.detail.length>500)return;
+ if(step===2)render(1);
+ const textarea=form.querySelector('textarea');
+ if(textarea&&!textarea.value.trim()){textarea.value=e.detail;remember()}
+ textarea?.focus();
+});
 for(const container of document.querySelectorAll('[data-save-idea]'))container.querySelector('button')?.addEventListener('click',async()=>{
  const url=new URL(location.href);url.search='';url.hash=container.dataset.saveIdea;
  const status=container.querySelector('[role="status"]');
@@ -128,6 +145,7 @@ for(const container of document.querySelectorAll('[data-save-idea]'))container.q
 
 `
 await writeFile(path.join(output,'preview-controls.js'),controls)
+if(hasMaterialStudy)await writeMaterialStudyPreview(output)
 await writeFile(path.join(output,'.nojekyll'),'')
 await writeFile(path.join(output,'robots.txt'),'User-agent: *\nDisallow: /\n')
 // Keep the URL used by the earlier standalone preview. GitHub Pages has no

@@ -11,9 +11,11 @@ import { ArrowIcon } from './ArrowIcon'
 import { SaveIdea } from './SaveIdea'
 import { ContactQR } from './ContactQR'
 import { messageURL } from '@/lib/editorial'
+import { MaterialStudy } from './MaterialStudy'
 
 type Section = NonNullable<Page['sections']>[number]
 function ContentSection({ section, pages }: { section: Section; pages: Page[] }) {
+  if (section.kind === 'materials' && section.anchor === 'material-study') return <MaterialStudy section={section} />
   const kind = section.kind
   return <section id={section.anchor || undefined} className={`${styles.section} ${kind === 'conditions' ? styles.conditions : ''}`}><div className={`${styles.container} ${kind === 'materials' && section.image ? styles.materials : kind === 'process' ? styles.processLayout : ''}`}>
     <div className={styles.sectionIntro}>{section.kicker && <p className={styles.kicker}>{section.kicker}</p>}<h2>{section.heading}</h2>{section.body && <p className={styles.sectionBody}>{section.body}</p>}</div>
