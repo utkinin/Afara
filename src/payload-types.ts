@@ -75,6 +75,9 @@ export interface Config {
     leads: Lead;
     audit: Audit;
     'rate-limits': RateLimit;
+    'analytics-visitors': AnalyticsVisitor;
+    'analytics-sessions': AnalyticsSession;
+    'analytics-events': AnalyticsEvent;
     knowledge: Knowledge;
     'short-links': ShortLink;
     works: Work;
@@ -93,6 +96,9 @@ export interface Config {
     leads: LeadsSelect<false> | LeadsSelect<true>;
     audit: AuditSelect<false> | AuditSelect<true>;
     'rate-limits': RateLimitsSelect<false> | RateLimitsSelect<true>;
+    'analytics-visitors': AnalyticsVisitorsSelect<false> | AnalyticsVisitorsSelect<true>;
+    'analytics-sessions': AnalyticsSessionsSelect<false> | AnalyticsSessionsSelect<true>;
+    'analytics-events': AnalyticsEventsSelect<false> | AnalyticsEventsSelect<true>;
     knowledge: KnowledgeSelect<false> | KnowledgeSelect<true>;
     'short-links': ShortLinksSelect<false> | ShortLinksSelect<true>;
     works: WorksSelect<false> | WorksSelect<true>;
@@ -247,6 +253,9 @@ export interface Page {
     | {
         kind: 'spaces' | 'compositions' | 'details' | 'materials' | 'process' | 'conditions' | 'faq';
         visible?: boolean | null;
+        /**
+         * Для интерактивного просмотра ткани: шаблон «Материалы», якорь material-study, три карточки с фото — нейтральный свет, тёплый свет, фактура. Подпись основной кнопки — в поле ссылки первой карточки.
+         */
         anchor?: string | null;
         kicker?: string | null;
         heading: string;
@@ -296,7 +305,7 @@ export interface Document {
   title: string;
   body: string;
   version: string;
-  kind: 'privacy' | 'consent';
+  kind: 'privacy' | 'consent' | 'analytics';
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -322,12 +331,57 @@ export interface Lead {
   status?: ('new' | 'active' | 'closed' | 'spam') | null;
   archived?: boolean | null;
   notes?: string | null;
+  analyticsVisitor?: (number | null) | AnalyticsVisitor;
+  analyticsSession?: (number | null) | AnalyticsSession;
+  analyticsConsentVersion?: string | null;
+  analyticsConsentText?: string | null;
+  analyticsConsentAt?: string | null;
   deliveryStatus?: ('pending' | 'processing' | 'sent' | 'failed') | null;
   attempts?: number | null;
   retryAt?: string | null;
   leaseUntil?: string | null;
   leaseToken?: string | null;
   deliveryError?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics-visitors".
+ */
+export interface AnalyticsVisitor {
+  id: number;
+  visitorKey: string;
+  consentedAt: string;
+  consentVersion: string;
+  consentText: string;
+  expiresAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics-sessions".
+ */
+export interface AnalyticsSession {
+  id: number;
+  sessionKey: string;
+  visitor: number | AnalyticsVisitor;
+  landingPath?: string | null;
+  source?: string | null;
+  referrerHost?: string | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  utmContent?: string | null;
+  utmTerm?: string | null;
+  searchTerm?: string | null;
+  queryKind?: string | null;
+  device?: string | null;
+  browser?: string | null;
+  os?: string | null;
+  country?: string | null;
+  lastSeen: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -353,6 +407,22 @@ export interface RateLimit {
   key: string;
   count?: number | null;
   expiresAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics-events".
+ */
+export interface AnalyticsEvent {
+  id: number;
+  eventKey: string;
+  session: number | AnalyticsSession;
+  visitor: number | AnalyticsVisitor;
+  kind: string;
+  path: string;
+  label?: string | null;
+  activeMs?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -473,6 +543,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'rate-limits';
         value: number | RateLimit;
+      } | null)
+    | ({
+        relationTo: 'analytics-visitors';
+        value: number | AnalyticsVisitor;
+      } | null)
+    | ({
+        relationTo: 'analytics-sessions';
+        value: number | AnalyticsSession;
+      } | null)
+    | ({
+        relationTo: 'analytics-events';
+        value: number | AnalyticsEvent;
       } | null)
     | ({
         relationTo: 'knowledge';
@@ -708,6 +790,11 @@ export interface LeadsSelect<T extends boolean = true> {
   status?: T;
   archived?: T;
   notes?: T;
+  analyticsVisitor?: T;
+  analyticsSession?: T;
+  analyticsConsentVersion?: T;
+  analyticsConsentText?: T;
+  analyticsConsentAt?: T;
   deliveryStatus?: T;
   attempts?: T;
   retryAt?: T;
@@ -737,6 +824,59 @@ export interface RateLimitsSelect<T extends boolean = true> {
   key?: T;
   count?: T;
   expiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics-visitors_select".
+ */
+export interface AnalyticsVisitorsSelect<T extends boolean = true> {
+  visitorKey?: T;
+  consentedAt?: T;
+  consentVersion?: T;
+  consentText?: T;
+  expiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics-sessions_select".
+ */
+export interface AnalyticsSessionsSelect<T extends boolean = true> {
+  sessionKey?: T;
+  visitor?: T;
+  landingPath?: T;
+  source?: T;
+  referrerHost?: T;
+  utmSource?: T;
+  utmMedium?: T;
+  utmCampaign?: T;
+  utmContent?: T;
+  utmTerm?: T;
+  searchTerm?: T;
+  queryKind?: T;
+  device?: T;
+  browser?: T;
+  os?: T;
+  country?: T;
+  lastSeen?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics-events_select".
+ */
+export interface AnalyticsEventsSelect<T extends boolean = true> {
+  eventKey?: T;
+  session?: T;
+  visitor?: T;
+  kind?: T;
+  path?: T;
+  label?: T;
+  activeMs?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -861,6 +1001,9 @@ export interface Site {
     | {
         kind: 'spaces' | 'compositions' | 'details' | 'materials' | 'process' | 'conditions' | 'faq';
         visible?: boolean | null;
+        /**
+         * Для интерактивного просмотра ткани: шаблон «Материалы», якорь material-study, три карточки с фото — нейтральный свет, тёплый свет, фактура. Подпись основной кнопки — в поле ссылки первой карточки.
+         */
         anchor?: string | null;
         kicker?: string | null;
         heading: string;
@@ -883,6 +1026,12 @@ export interface Site {
     | null;
   worksHeading?: string | null;
   contactsLabel?: string | null;
+  analytics?: {
+    /**
+     * До включения опубликуйте документы privacy и analytics с фактическими целями обработки. История хранится до 90 дней. Контакты не перехватываются из полей.
+     */
+    enabled?: boolean | null;
+  };
   assistant?: {
     enabled?: boolean | null;
     title?: string | null;
@@ -996,6 +1145,11 @@ export interface SiteSelect<T extends boolean = true> {
       };
   worksHeading?: T;
   contactsLabel?: T;
+  analytics?:
+    | T
+    | {
+        enabled?: T;
+      };
   assistant?:
     | T
     | {

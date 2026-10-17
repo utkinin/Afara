@@ -12,6 +12,7 @@ import { SaveIdea } from './SaveIdea'
 import { ContactQR } from './ContactQR'
 import { messageURL } from '@/lib/editorial'
 import { MaterialStudy } from './MaterialStudy'
+import { AnalyticsConsent } from './AnalyticsConsent'
 
 type Section = NonNullable<Page['sections']>[number]
 function ContentSection({ section, pages }: { section: Section; pages: Page[] }) {
@@ -39,6 +40,8 @@ function ContentSection({ section, pages }: { section: Section; pages: Page[] })
 export function Website({ page, pages, site, documents, knowledge = [], works = [], preview = false }: { page: Page; pages: Page[]; site: Site; documents: Document[]; knowledge?: Knowledge[]; works?: Work[]; preview?: boolean }) {
   const sections = page.sections?.filter(s => s.visible !== false) || []
   const consent = documents.find(d => d.kind === 'consent'), privacy = documents.find(d => d.kind === 'privacy')
+  const analyticsDocument = documents.find(d => d.kind === 'analytics')
+  const analyticsPolicy = !preview && site.analytics?.enabled && privacy && analyticsDocument ? { version: `${analyticsDocument.id}:${analyticsDocument.version}`, url: `/documents/${analyticsDocument.slug}/` } : null
   const parent = typeof page.parent === 'object' ? page.parent : null
   const contacts = pages.find(p => p.type === 'contacts')
   const answers = knowledge.filter(k => (typeof k.page === 'object' ? k.page.id : k.page) === page.id)
@@ -69,7 +72,7 @@ export function Website({ page, pages, site, documents, knowledge = [], works = 
       </>}
       {answers.length > 0 && <section className={styles.section} aria-label="Публичные материалы AFARA"><div className={`${styles.container} ${styles.faq}`}>{page.type === 'home' && <h2>{site.trust?.find(s => s.kind === 'faq')?.heading}</h2>}{answers.map(k => <details key={k.id}><summary>{k.question}<span aria-hidden="true">+</span></summary><p id={`answer-${k.id}`}>{k.answer}</p></details>)}</div></section>}
       <section id="consultation" className={`${styles.section} ${styles.consultation}`}><div className={`${styles.container} ${styles.consultationGrid}`}><div><p className={styles.kicker}>/ Консультация</p><h2>{site.form?.heading}</h2><p className={styles.sectionBody}>{site.form?.intro}</p><a className={styles.arrowLink} href={messageURL(site)}>Написать о проекте <ArrowIcon/></a><ContactDetails site={site} />{contacts && page.id !== contacts.id && <Link prefetch={false} className={styles.arrowLink} href={pageURL(contacts)}>{site.contactsLabel || contacts.title} <ArrowIcon/></Link>}</div>
-        <InquiryForm labels={site.form} source={page.path} consent={consent ? { url: `/documents/${consent.slug}/`, version: consent.version } : null} policy={privacy ? `/documents/${privacy.slug}/` : null} /></div></section>
+        <InquiryForm labels={site.form} source={page.path} consent={consent ? { url: `/documents/${consent.slug}/`, version: consent.version } : null} policy={privacy ? `/documents/${privacy.slug}/` : null} analyticsPolicy={analyticsPolicy} /></div></section>
       {site.assistant?.enabled && !preview && <ConsultantLauncher labels={site.assistant} />}
-    </main><footer className={styles.footer}><div className={`${styles.container} ${styles.footerInner}`}><Link prefetch={false} className={styles.logo} href="/">{site.brand}<small>{site.tagline}</small></Link><ContactDetails site={site} /><nav aria-label="Контакты и документы">{contacts && <Link prefetch={false} href={pageURL(contacts)}>{site.contactsLabel || contacts.title}</Link>}{documents.map(d => <Link prefetch={false} key={d.id} href={`/documents/${d.slug}/`}>{d.title}</Link>)}</nav><p>{site.footerText}</p></div></footer></>
+    </main><footer className={styles.footer}><div className={`${styles.container} ${styles.footerInner}`}><Link prefetch={false} className={styles.logo} href="/">{site.brand}<small>{site.tagline}</small></Link><ContactDetails site={site} /><nav aria-label="Контакты и документы">{contacts && <Link prefetch={false} href={pageURL(contacts)}>{site.contactsLabel || contacts.title}</Link>}{documents.map(d => <Link prefetch={false} key={d.id} href={`/documents/${d.slug}/`}>{d.title}</Link>)}</nav><p>{site.footerText}</p>{!preview && <AnalyticsConsent policy={analyticsPolicy} path={pageURL(page)} />}</div></footer></>
 }

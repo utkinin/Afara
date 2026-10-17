@@ -1,5 +1,7 @@
 # Карта редактирования AFARA
 
+Аналитика: ADMIN читает `/admin/analytics`; флаг включения — `site.analytics.enabled`. Условия — опубликованный документ `documents.kind=analytics` вместе с privacy. Служебные коллекции `analytics-visitors/sessions/events` закрыты для публичного чтения и EDITOR; контакты берутся только из `leads` через отдельное согласие. Поля `leads.analyticsVisitor/analyticsSession/analyticsConsentVersion/analyticsConsentText/analyticsConsentAt` создаёт сервер и не меняет обычный редактор. [Подробности](docs/ANALYTICS.md).
+
 Блок «Свет · фактура · складка» использует существующую секцию `materials` с якорем `material-study`, без новых таблиц. Заголовок/введение — `heading/kicker/body`; первые три `cards` по порядку — нейтральный свет, тёплый свет, фактура. В каждой редактируются `title/body/image/imageAlt`; кнопка берёт `linkLabel` первой карточки. Порядок и `visible` действуют как у остальных секций. Служебные подписи выбора сборки, слоёв, увеличения и технические пояснения остаются в коде. Первичное добавление и редактирование описаны в [APPLY_MATERIAL_STUDY.md](docs/APPLY_MATERIAL_STUDY.md); наличие кода не означает, что данные уже применены в рабочей CMS.
 
 | Публичные данные | Источник Payload |

@@ -4,7 +4,7 @@ import { verifyAccess } from './lib/gateway'
 export async function proxy(req:NextRequest){
   const p=req.nextUrl.pathname
   if(p.includes('create-first-user') || p.includes('first-register') || p.includes('init')&&p.startsWith('/api/users/'))return new NextResponse('Not found',{status:404})
-  const publicAPI=p==='/api/inquiry'||p==='/api/consultant'||p==='/api/health'||p.startsWith('/api/media/file/')&&req.method==='GET'
+  const publicAPI=p==='/api/inquiry'||p==='/api/consultant'||p==='/api/health'||(p==='/api/analytics/track'||p==='/api/analytics/consent')&&req.method==='POST'||p.startsWith('/api/media/file/')&&req.method==='GET'
   if(process.env.AFARA_STAGE==='production' && (p.startsWith('/admin')||p.startsWith('/preview')||p.startsWith('/api/')&&!publicAPI) && !(await verifyAccess(req.headers))) {
     return new NextResponse('Administrative access requires a verified MFA gateway',{status:403,headers:{'Cache-Control':'no-store'}})
   }

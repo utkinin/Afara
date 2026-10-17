@@ -9,7 +9,7 @@ export default function ConsultantLauncher({ labels }: { labels: ConsultantLabel
   const [open, setOpen] = useState(false), [loading, setLoading] = useState(false), [error, setError] = useState(false)
   const button = useRef<HTMLButtonElement>(null)
   return <aside className={styles.consultantLauncher} aria-label={labels.title || 'Задать вопрос'} data-server-only="consultant">
-    <button ref={button} className={styles.button} type="button" aria-expanded={open} disabled={loading} onClick={async () => {
+    <button ref={button} data-analytics-action="assistant" className={styles.button} type="button" aria-expanded={open} disabled={loading} onClick={async () => {
       setError(false)
       if (!Panel) {
         setLoading(true)

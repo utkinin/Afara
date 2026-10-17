@@ -10,6 +10,7 @@ import { admin, staff, published, publicationGuard, globalGuard } from './cms/ac
 import { sections, seo } from './cms/fields'
 import { Knowledge, ShortLinks, Works } from './cms/public-collections'
 import { publicContactText } from './cms/contact-knowledge'
+import { AnalyticsVisitors, AnalyticsSessions, AnalyticsEvents } from './cms/analytics-collections'
 
 const drafts = { drafts: true, maxPerDoc: 30 } as const
 const preview = (data: Record<string, unknown>) => `${process.env.APP_URL || 'http://localhost:3000'}/preview?page=${data.id}`
@@ -128,7 +129,7 @@ const Documents: CollectionConfig = {
   access:{create:admin,read:published,update:admin,delete:admin},
   fields:[{name:'slug',label:'Адрес',type:'text',unique:true,required:true},{name:'title',label:'Заголовок',type:'text',required:true},
     {name:'body',label:'Текст (абзацы)',type:'textarea',required:true},{name:'version',label:'Версия документа',type:'text',required:true},
-    {name:'kind',label:'Тип',type:'select',required:true,options:['privacy','consent']},
+    {name:'kind',label:'Тип',type:'select',required:true,options:['privacy','consent','analytics']},
   ],hooks:{beforeChange:[publicationGuard,({data,originalDoc})=>{
     if(originalDoc?._status==='published' && data._status==='published' && data.body!==originalDoc.body && data.version===originalDoc.version) throw new APIError('При изменении текста обновите версию документа',400)
     return data
@@ -143,6 +144,11 @@ const Leads: CollectionConfig = {
     {name:'status',label:'Статус',type:'select',defaultValue:'new',options:[{label:'Новая',value:'new'},{label:'В работе',value:'active'},{label:'Закрыта',value:'closed'},{label:'Спам',value:'spam'}]},
     {name:'archived',label:'Архивировать заявку',type:'checkbox',defaultValue:false,index:true},
     {name:'notes',label:'Внутренние заметки',type:'textarea'},
+    {name:'analyticsVisitor',label:'История браузера с отдельным согласием',type:'relationship',relationTo:'analytics-visitors',access:{update:()=>false}},
+    {name:'analyticsSession',label:'Визит перед заявкой',type:'relationship',relationTo:'analytics-sessions',access:{update:()=>false}},
+    {name:'analyticsConsentVersion',label:'Версия отдельного согласия на связь с визитами',type:'text',access:{update:()=>false}},
+    {name:'analyticsConsentText',label:'Текст отдельного согласия на связь с визитами',type:'textarea',access:{update:()=>false}},
+    {name:'analyticsConsentAt',label:'Согласие на связь с визитами получено',type:'date',access:{update:()=>false}},
     {name:'deliveryStatus',label:'Уведомление',type:'select',defaultValue:'pending',options:['pending','processing','sent','failed'],access:{update:()=>false}},
     {name:'attempts',label:'Попытки',type:'number',defaultValue:0,access:{update:()=>false}},
     {name:'retryAt',label:'Следующая попытка',type:'date',access:{update:()=>false}},
@@ -192,6 +198,9 @@ const Site: GlobalConfig = {
     {...sections,name:'trust',label:'Содержание доверия на главной (согласования, состав, расчёт, FAQ)'},
     {name:'worksHeading',label:'Заголовок реальных работ (скрыт без опубликованных кейсов)',type:'text'},
     {name:'contactsLabel',label:'Подпись ссылки на контакты',type:'text',defaultValue:'Контакты'},
+    {name:'analytics',label:'Аналитика',type:'group',fields:[
+      {name:'enabled',label:'Включить аналитику после согласия посетителя',type:'checkbox',defaultValue:false,access:{create:admin,update:admin},admin:{description:'До включения опубликуйте документы privacy и analytics с фактическими целями обработки. История хранится до 90 дней. Контакты не перехватываются из полей.'}},
+    ]},
     {name:'assistant',label:'Консультант',type:'group',fields:[
       {name:'enabled',label:'Показывать виджет',type:'checkbox',defaultValue:false,access:{create:admin,update:admin}},
       {name:'title',label:'Заголовок и кнопка',type:'text',defaultValue:'Задать вопрос'},
@@ -211,9 +220,9 @@ const Notifications: GlobalConfig = {slug:'notifications',label:'Получат�
 ]}
 export default buildConfig({
   secret:process.env.PAYLOAD_SECRET||'', serverURL:process.env.APP_URL||'http://localhost:3000',
-  admin:{user:'users',avatar:'default',importMap:{baseDir:path.resolve('.')},meta:{titleSuffix:' — AFARA'}, livePreview:{breakpoints:[{label:'Телефон',name:'mobile',width:390,height:844},{label:'Планшет',name:'tablet',width:768,height:1024},{label:'Компьютер',name:'desktop',width:1440,height:900}]}},
+  admin:{user:'users',avatar:'default',importMap:{baseDir:path.resolve('.')},meta:{titleSuffix:' — AFARA'},components:{beforeNavLinks:['/src/cms/AnalyticsNav#default'],views:{analytics:{Component:'/src/cms/AnalyticsView#default',path:'/analytics'}}}, livePreview:{breakpoints:[{label:'Телефон',name:'mobile',width:390,height:844},{label:'Планшет',name:'tablet',width:768,height:1024},{label:'Компьютер',name:'desktop',width:1440,height:900}]}},
   i18n:{supportedLanguages:{ru},fallbackLanguage:'ru'},
-  collections:[Users,Media,Pages,Redirects,Documents,Leads,Audit,RateLimits,...[Knowledge,ShortLinks,Works].map(c=>({...c,hooks:{...c.hooks,afterChange:[...(c.hooks?.afterChange||[]),...(auditHook||[])]}}))], globals:[Site,Notifications],
+  collections:[Users,Media,Pages,Redirects,Documents,Leads,Audit,RateLimits,AnalyticsVisitors,AnalyticsSessions,AnalyticsEvents,...[Knowledge,ShortLinks,Works].map(c=>({...c,hooks:{...c.hooks,afterChange:[...(c.hooks?.afterChange||[]),...(auditHook||[])]}}))], globals:[Site,Notifications],
   db:postgresAdapter({pool:{connectionString:process.env.DATABASE_URL,connectionTimeoutMillis:3000,query_timeout:10000,max:10},push:process.env.AFARA_STAGE==='development'&&process.env.AFARA_DB_PUSH!=='false',migrationDir:path.resolve('src/migrations')}),
   typescript:{outputFile:path.resolve('src/payload-types.ts')},
   email:nodemailerAdapter({defaultFromAddress:process.env.SMTP_FROM||'afara@example.test',defaultFromName:'AFARA',skipVerify:process.env.AFARA_STAGE==='build',transport:nodemailer.createTransport({host:process.env.SMTP_HOST||'127.0.0.1',port:Number(process.env.SMTP_PORT||1025),secure:process.env.SMTP_PORT==='465',requireTLS:process.env.AFARA_STAGE==='production',auth:process.env.SMTP_USER?{user:process.env.SMTP_USER,pass:process.env.SMTP_PASSWORD}:undefined})}),
