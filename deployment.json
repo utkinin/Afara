@@ -1,13 +1,10 @@
 {
-  "release": "afara-services-20261016-73fa2c0",
-  "sourceCommit": "73fa2c0bb5cf6e41a725c0d90ed31203478eaf57",
-  "previewUpdatedAt": "2026-10-16T16:34:11.265Z",
+  "release": "afara-material-study-20261017",
+  "sourceCommit": "3608914b55d684d3ee9ef6399bdb5b66985cfb32",
+  "previewUpdatedAt": "2026-10-17T09:15:46.101Z",
   "pages": 20,
   "mode": "static-preview",
-  "cmsUpdate": "published-and-verified",
-  "cmsPublishedKnowledge": 33,
-  "cmsPreservedDraftKnowledge": 9,
-  "cmsPublishedMedia": 40,
+  "cmsUpdate": "new-material-study-pending-apply",
   "mainCardImagesDistinct": 8,
   "servicePages": [
     "/partneram/",
@@ -19,5 +16,25 @@
   "semantics": "downloads/AFARA_Semantics_2026-10-16.md",
   "historicalPackage": "downloads/AFARA_Editorial_2026-10-16_v2.zip",
   "historicalPackageSHA256": "ee81f6718fcb812137b13caf8cebe134d7c212eeaff49cb6ff0707acaa1a8f61",
-  "serverFunctions": "not-included"
+  "serverFunctions": "not-included",
+  "materialStudy": {
+    "release": "afara-material-study-20261017",
+    "mode": "editorial-preview",
+    "cmsUpdate": "pending-apply-in-existing-CMS",
+    "pages": [
+      "/",
+      "/poshiv-po-eskizam/"
+    ],
+    "extraRuntimeBytes": 7340,
+    "note": "This new interaction is a preview of the prepared CMS section. The previous release CMS publication status is unchanged.",
+    "sourceCommit": "3608914b55d684d3ee9ef6399bdb5b66985cfb32"
+  },
+  "previousCMSPublication": {
+    "release": "afara-services-20261016-73fa2c0",
+    "sourceCommit": "73fa2c0bb5cf6e41a725c0d90ed31203478eaf57",
+    "cmsUpdate": "published-and-verified",
+    "publishedKnowledge": 33,
+    "preservedDraftKnowledge": 9,
+    "publishedMedia": 40
+  }
 }

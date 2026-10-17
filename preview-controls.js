@@ -19,3 +19,5 @@ for(const container of document.querySelectorAll('[data-save-idea]'))container.q
  catch{status.textContent='Скопируйте ссылку из поля';let input=container.querySelector('input');if(!input){const label=document.createElement('label');label.textContent='Ссылка на идею';input=document.createElement('input');input.readOnly=true;label.append(input);container.append(label)}input.value=url.href;input.focus();input.select()}
 });
 
+
+window.addEventListener('afara:question',e=>{if(!form||typeof e.detail!=='string'||e.detail.length>500)return;if(step===2)render(1);const textarea=form.querySelector('textarea');if(textarea&&!textarea.value.trim()){textarea.value=e.detail;remember()}textarea?.focus()});
