@@ -136,6 +136,11 @@ window.addEventListener('afara:question',e=>{
  if(textarea&&!textarea.value.trim()){textarea.value=e.detail;remember()}
  textarea?.focus();
 });
+document.addEventListener('click',e=>{
+ if(e.defaultPrevented||e.button!==0||e.ctrlKey||e.metaKey||e.altKey||e.shiftKey)return;
+ const question=e.target.closest?.('a[data-inquiry-brief]')?.dataset.inquiryBrief;
+ if(question)window.dispatchEvent(new CustomEvent('afara:question',{detail:question}));
+});
 for(const container of document.querySelectorAll('[data-save-idea]'))container.querySelector('button')?.addEventListener('click',async()=>{
  const url=new URL(location.href);url.search='';url.hash=container.dataset.saveIdea;
  const status=container.querySelector('[role="status"]');

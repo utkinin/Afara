@@ -18,12 +18,13 @@ export const Knowledge: CollectionConfig = {
     { name: 'answer', label: 'Публичный ответ', type: 'textarea', required: true, maxLength: 2400, admin: { description: 'Служебная тема contacts обновляется из опубликованных настроек «Сайт и контакты»; не дублируйте контакты в других ответах.' } },
     { name: 'topic', label: 'Ключ темы', type: 'text', required: true, index: true, admin: { description: 'Например cost или bedroom-darkness. Разные ответы с одним ключом считаются противоречием: консультант попросит уточнить.' }, validate: (v: string | null | undefined) => Boolean(v && /^[a-z0-9-]{2,80}$/.test(v)) || 'Латиница, цифры и дефисы, 2–80 символов' },
     { name: 'keywords', label: 'Поисковые синонимы', type: 'text', maxLength: 500 },
+    { name: 'evidence', label: 'Источники и ограничения (служебно)', type: 'textarea', maxLength: 6000, access: { read: staff }, admin: { description: 'Ссылки на первоисточники, дата проверки и применимость. Не показывается клиентам или ИИ-консультанту. Не переносите свойства одного артикула на все ткани.' } },
     { name: 'page', label: 'Публичная страница-источник', type: 'relationship', relationTo: 'pages', required: true, filterOptions: { _status: { equals: 'published' } } },
     { name: 'approved', label: 'Проверено для публичной базы консультанта', type: 'checkbox', defaultValue: false, access: { create: admin, update: admin } },
   ],
   hooks: { beforeChange: [publicationGuard, async ({ data, originalDoc, req }) => {
     // Editing an approved answer requires a new explicit review, even for ADMIN.
-    const changed = ['question', 'answer', 'topic', 'keywords', 'page'].some(key => key in data && data[key] !== originalDoc?.[key])
+    const changed = ['question', 'answer', 'topic', 'keywords', 'page', 'evidence'].some(key => key in data && data[key] !== originalDoc?.[key])
     if (changed && originalDoc && data.approved !== true) data.approved = false
     if (data._status === 'published') {
       if (!(data.approved ?? originalDoc?.approved)) throw new APIError('Сначала проверьте и одобрите публичный ответ', 400)

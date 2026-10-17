@@ -1,5 +1,11 @@
 # Карта редактирования AFARA
 
+Блок JTBD «Ваша задача»: `pages.sections[kind=details,anchor=your-task]`, штатные `heading/body/kicker/cards[].title/body/linkLabel/visible`. Одна кнопка готовит описание в существующей форме; не создаёт профиль и не отправляет заявку. Первоначальные четыре карточки — `content/customer-tasks.ts`, дальнейшая редактура — в CMS. Офлайн и презентационный смысл фиксируется в docs/SALES_CONCEPT.md и docs/PRESENTATION_BRIEF.md. Новых таблиц нет.
+
+В базе знаний добавлено `knowledge.evidence`: служебные источники, дата проверки и ограничения; чтение только сотрудникам, не публичному API и не консультанту. `content/answer-library.ts` — 32 подготовленных ответа по существующим путям; `content:answers --apply` создаёт только отсутствующие черновики. Разметка JSON-LD строится на сервере из тех же публичных полей и одобренных ответов, без второго ручного источника текста.
+
+Аналитика: ADMIN читает `/admin/analytics`; флаг включения — `site.analytics.enabled`. Условия — опубликованный документ `documents.kind=analytics` вместе с privacy. Служебные коллекции `analytics-visitors/sessions/events` закрыты для публичного чтения и EDITOR; контакты берутся только из `leads` через отдельное согласие. Поля `leads.analyticsVisitor/analyticsSession/analyticsConsentVersion/analyticsConsentText/analyticsConsentAt` создаёт сервер и не меняет обычный редактор. [Подробности](docs/ANALYTICS.md).
+
 Блок «Свет · фактура · складка» использует существующую секцию `materials` с якорем `material-study`, без новых таблиц. Заголовок/введение — `heading/kicker/body`; первые три `cards` по порядку — нейтральный свет, тёплый свет, фактура. В каждой редактируются `title/body/image/imageAlt`; кнопка берёт `linkLabel` первой карточки. Порядок и `visible` действуют как у остальных секций. Служебные подписи выбора сборки, слоёв, увеличения и технические пояснения остаются в коде. Первичное добавление и редактирование описаны в [APPLY_MATERIAL_STUDY.md](docs/APPLY_MATERIAL_STUDY.md); наличие кода не означает, что данные уже применены в рабочей CMS.
 
 | Публичные данные | Источник Payload |
