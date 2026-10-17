@@ -10,7 +10,7 @@ type Consent = { id: string; version: string; at: number }
 const action = z.enum(['message', 'phone', 'email', 'inquiry', 'assistant'])
 export const analyticsEventSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('pageview'), viewId: z.uuid(), sessionId: z.uuid(), path: z.string().refine(safeAnalyticsPath), acquisition: z.object({ referrerHost: z.string().max(200).optional(), utmSource: z.string().max(120).optional(), utmMedium: z.string().max(120).optional(), utmCampaign: z.string().max(120).optional(), utmContent: z.string().max(120).optional(), utmTerm: z.string().max(120).optional(), searchTerm: z.string().max(150).optional(), queryKind: z.string().max(20).optional() }).strict().optional() }).strict(),
-  z.object({ type: z.literal('ping'), viewId: z.uuid(), activeMs: z.number().int().min(0).max(86400000) }).strict(),
+  z.object({ type: z.literal('ping'), viewId: z.uuid(), activeMs: z.number().int().min(0).max(86400000), scrollPercent: z.union([z.literal(0), z.literal(25), z.literal(50), z.literal(75), z.literal(100)]).optional() }).strict(),
   z.object({ type: z.literal('action'), viewId: z.uuid(), eventId: z.uuid(), label: action }).strict(),
 ])
 export function analyticsResponse(status: number, body: object = { ok: status < 400 }) { return Response.json(body, { status, headers: { 'Cache-Control': 'private, no-store' } }) }

@@ -31,5 +31,5 @@ export const publicWorks=cache(async()=>{
 })
 export const publicDocuments=cache(async()=>{
   const p=await cms()
-  return (await p.find({collection:'documents',where:{_status:{equals:'published'}},overrideAccess:false,depth:0,limit:20})).docs
+  return (await p.find({collection:'documents',where:{_status:{equals:'published'}},overrideAccess:false,depth:0,limit:20,sort:'-updatedAt'})).docs
 })

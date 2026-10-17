@@ -23,8 +23,9 @@ test('consented analytics: real browser, PostgreSQL, optional lead linking, ADMI
     const policyVersion = `${policy.id}:${policy.version}`
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36' })
     const page = await context.newPage(), errors: string[] = [], tracked: { viewId: string; sessionId: string }[] = []
+    let trackingRequests = 0
     page.on('pageerror', e => errors.push(e.message))
-    page.on('request', r => { if (r.method() === 'POST' && r.url().endsWith('/api/analytics/track')) { const body = r.postDataJSON(); if (body?.type === 'pageview') tracked.push(body) } })
+    page.on('request', r => { if (r.method() === 'POST' && r.url().endsWith('/api/analytics/track')) { trackingRequests++; const body = r.postDataJSON(); if (body?.type === 'pageview') tracked.push(body) } })
     await page.goto(origin + '/?utm_source=qa&utm_campaign=autumn&utm_term=сложные+портьеры&email=never-store@example.test', { waitUntil: 'networkidle' })
     assert.equal(tracked.length, 0, 'No analytics request before explicit agreement')
     assert.equal((await context.cookies()).some(c => c.name === ANALYTICS_ID_COOKIE), false)
@@ -37,6 +38,8 @@ test('consented analytics: real browser, PostgreSQL, optional lead linking, ADMI
     const cookie = (await context.cookies()).find(c => c.name === ANALYTICS_ID_COOKIE)
     assert.ok(cookie?.httpOnly); assert.equal(await page.evaluate(name => document.cookie.includes(name + '='), ANALYTICS_ID_COOKIE), false)
     await page.waitForTimeout(1100)
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await page.waitForTimeout(300)
     const second = page.waitForResponse(r => r.url().endsWith('/api/analytics/track') && r.status() === 200 && r.request().postDataJSON()?.type === 'pageview')
     await page.goto(origin + '/chastnye-interery/'); await second
     assert.equal(tracked.length, 2, 'Choice persists during navigation without another grant')
@@ -46,6 +49,7 @@ test('consented analytics: real browser, PostgreSQL, optional lead linking, ADMI
     assert.equal(session.utmSource, 'qa'); assert.equal(session.searchTerm, 'сложные портьеры'); assert.equal(session.queryKind, 'utm_term')
     const rows = (await p.find({ collection: 'analytics-events', where: { visitor: { equals: visitor.id } }, depth: 0 })).docs
     assert.ok(rows.some(row => Number(row.activeMs) > 0)); assert.ok(rows.every(row => !row.path.includes('?') && !row.path.includes('@')))
+    assert.ok(rows.some(row => Number(row.scrollPercent) === 100), 'Scroll bucket persists on navigation')
     const forbidden = await context.request.post(origin + '/api/analytics/track', { headers: { Origin: origin }, data: { type: 'ping', viewId: tracked[1].viewId, activeMs: 1000, email: 'do-not-capture@example.test' } })
     assert.equal(forbidden.status(), 400)
     assert.equal((await context.request.post(origin + '/api/analytics/consent', { headers: { Origin: 'https://external.example' }, data: { granted: true, version: policyVersion } })).status(), 403)
@@ -84,11 +88,23 @@ test('consented analytics: real browser, PostgreSQL, optional lead linking, ADMI
     await adminPage.screenshot({ path: 'docs/screenshots/analytics-admin-390.png', fullPage: true })
     const editorContext = await browser.newContext()
     assert.equal((await editorContext.request.post(origin + '/api/users/login', { headers: { Origin: origin }, data: { email: editor.email, password } })).status(), 200)
-    assert.ok((await editorContext.request.get(origin + '/admin/analytics')).status() >= 400)
+    // Next may have started streaming a 200 shell before notFound(); assert that no report or contacts render.
+    const editorPage = await editorContext.newPage()
+    await editorPage.goto(origin + '/admin/analytics', { waitUntil: 'networkidle' })
+    assert.equal(await editorPage.locator('.afara-analytics').count(), 0)
+    assert.equal(await editorPage.getByText(contact, { exact: true }).count(), 0)
     assert.ok((await editorContext.request.post(origin + '/api/analytics/erase', { headers: { Origin: origin }, data: { visitorKey: visitor.visitorKey } })).status() >= 400)
     await page.getByRole('button', { name: 'Настройки cookie', exact: true }).click()
+    await page.route('**/api/analytics/consent', route => route.abort())
+    await page.getByRole('button', { name: 'Отключить и удалить историю', exact: true }).click()
+    await page.getByRole('alert').filter({ hasText: 'Сбор остановлен' }).waitFor()
+    const afterRefusal = trackingRequests
+    await page.evaluate(() => { window.dispatchEvent(new Event('focus')); const button = document.createElement('button'); button.dataset.analyticsAction = 'assistant'; document.body.append(button); button.click(); button.remove(); window.scrollTo(0, 0) })
+    await page.waitForTimeout(300)
+    assert.equal(trackingRequests, afterRefusal, 'Local refusal immediately stops events even if server deletion fails')
+    await page.unroute('**/api/analytics/consent')
     const revoked = page.waitForResponse(r => r.url().endsWith('/api/analytics/consent') && r.status() === 200)
-    await page.getByRole('button', { name: 'Отключить и удалить историю', exact: true }).click(); await revoked
+    await page.getByRole('button', { name: 'Без аналитики', exact: true }).click(); await revoked
     assert.equal((await p.find({ collection: 'analytics-events', where: { visitor: { equals: visitor.id } } })).totalDocs, 0)
     assert.equal((await p.find({ collection: 'analytics-sessions', where: { visitor: { equals: visitor.id } } })).totalDocs, 0)
     assert.equal((await p.findByID({ collection: 'leads', id: linked.id, depth: 0 })).analyticsVisitor, null)

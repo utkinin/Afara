@@ -21,6 +21,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   	"visitor_id" integer NOT NULL,
   	"landing_path" varchar,
   	"source" varchar,
+  	"source_type" varchar,
   	"referrer_host" varchar,
   	"utm_source" varchar,
   	"utm_medium" varchar,
@@ -47,10 +48,13 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   	"path" varchar NOT NULL,
   	"label" varchar,
   	"active_ms" numeric DEFAULT 0,
+  	"scroll_percent" numeric DEFAULT 0,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
   
+  ALTER TABLE "knowledge" ADD COLUMN "evidence" varchar;
+  ALTER TABLE "_knowledge_v" ADD COLUMN "version_evidence" varchar;
   ALTER TABLE "leads" ADD COLUMN "analytics_visitor_id" integer;
   ALTER TABLE "leads" ADD COLUMN "analytics_session_id" integer;
   ALTER TABLE "leads" ADD COLUMN "analytics_consent_version" varchar;

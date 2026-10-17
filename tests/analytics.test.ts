@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { randomBytes, randomUUID } from 'node:crypto'
-import { acquisitionFromURL, sanitizeAcquisition, safeAnalyticsPath, safeAnalyticsText } from '../src/lib/analytics-shared'
+import { acquisitionFromURL, sanitizeAcquisition, safeAnalyticsPath, safeAnalyticsText, analyticsChannel, scrollBucket } from '../src/lib/analytics-shared'
 import { analyticsFilters } from '../src/lib/analytics-report'
 import { analyticsEventSchema, readAnalyticsConsent, signedAnalyticsConsent, ANALYTICS_ID_COOKIE } from '../src/lib/analytics-server'
 import { NextRequest } from 'next/server'
@@ -24,7 +24,23 @@ test('tracking has a bounded allowlist and does not accept form data or browser 
   assert.equal(analyticsEventSchema.safeParse({ type: 'ping', viewId, activeMs: 1000, email: 'private@example.test' }).success, false)
   assert.equal(analyticsEventSchema.safeParse({ type: 'action', viewId, eventId: randomUUID(), label: 'capture-all-fields' }).success, false)
   assert.equal(analyticsEventSchema.safeParse({ type: 'ping', viewId, activeMs: -1 }).success, false)
+  assert.equal(analyticsEventSchema.safeParse({ type: 'ping', viewId, activeMs: 1000, scrollPercent: 75 }).success, true)
+  assert.equal(analyticsEventSchema.safeParse({ type: 'ping', viewId, activeMs: 1000, scrollPercent: 101 }).success, false)
   assert.deepEqual(analyticsFilters({ days: '999999', source: 'private@example.test', leads: 'raw', session: '1 OR 1=1' }), { days: 30, source: '', leads: '', selected: '' })
+})
+test('source classification does not pretend to distinguish a Google AI answer from search; scrolling is only a viewport bucket', () => {
+  assert.equal(analyticsChannel({ referrerHost: 'chatgpt.com' }), 'ai_referral')
+  assert.equal(analyticsChannel({ utmSource: 'chatgpt' }), 'ai_tagged')
+  assert.equal(analyticsChannel({ referrerHost: 'perplexity.ai.evil.test' }), 'referral')
+  assert.equal(analyticsChannel({ referrerHost: 'yandex.ru' }), 'search')
+  assert.equal(analyticsChannel({ referrerHost: 'www.google.com' }), 'search')
+  assert.equal(analyticsChannel({ utmSource: 'google', utmMedium: 'cpc' }), 'paid')
+  assert.equal(analyticsChannel({}), 'direct')
+  assert.equal(scrollBucket(0, 4000, 800), 0)
+  assert.equal(scrollBucket(2400, 4000, 800), 75)
+  assert.equal(scrollBucket(3200, 4000, 800), 100)
+  assert.equal(scrollBucket(0, 800, 800), 100)
+  assert.equal(scrollBucket(NaN, 0, 800), 0)
 })
 test('an analytics cookie is purpose-signed, bounded in time and cannot select another browser', () => {
   const previous = process.env.PAYLOAD_SECRET

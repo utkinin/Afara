@@ -17,6 +17,18 @@ export function safeAnalyticsPath(value: string): boolean {
   return value.length <= 200 && /^\/(?:[a-z0-9-]+\/)*$/.test(value) && !/^\/(admin|api|preview|documents|s)(\/|$)/.test(value)
 }
 export function searchHost(host = ''): boolean { return /^(?:www\.)?(?:google\.[a-z.]{2,12}|yandex\.(?:ru|com|by|kz)|ya\.ru|bing\.com|duckduckgo\.com)$/.test(host) }
+export const analyticsChannels = { ai_referral: 'Переход из ИИ-сервиса', ai_tagged: 'ИИ указан в UTM', search: 'Поиск / organic', paid: 'Платная UTM-метка', referral: 'Другой внешний источник', direct: 'Прямой / источник не передан' } as const
+export function analyticsChannel(data: Acquisition): keyof typeof analyticsChannels {
+  if (/^(cpc|ppc|paid|paidsearch|paid-social|display|cpm)$/i.test(data.utmMedium || '')) return 'paid'
+  if (['chatgpt.com', 'chat.openai.com', 'perplexity.ai', 'www.perplexity.ai', 'claude.ai', 'gemini.google.com', 'copilot.microsoft.com'].includes(data.referrerHost || '')) return 'ai_referral'
+  if (/^(chatgpt|perplexity|claude|gemini|copilot)(\.com|\.ai)?$/i.test(data.utmSource || '')) return 'ai_tagged'
+  if (searchHost(data.referrerHost) || data.utmMedium?.toLowerCase() === 'organic') return 'search'
+  return data.referrerHost || data.utmSource ? 'referral' : 'direct'
+}
+export function scrollBucket(top: number, height: number, viewport: number): number {
+  if (![top, height, viewport].every(Number.isFinite) || height <= 0 || viewport <= 0) return 0
+  return Math.min(100, Math.max(0, Math.floor((Math.max(0, top) + viewport + 1) / height * 4) * 25))
+}
 export function sanitizeAcquisition(value: Acquisition): Acquisition {
   const clean: Acquisition = {}
   for (const key of ['utmSource', 'utmMedium', 'utmCampaign', 'utmContent', 'utmTerm'] as const) clean[key] = safeAnalyticsText(value[key])

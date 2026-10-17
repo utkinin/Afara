@@ -20,7 +20,7 @@ export async function POST(req:Request){
     const fingerprint=createHash('sha256').update(JSON.stringify(core)).digest('hex')
     const existing=await p.find({collection:'leads',where:{idempotencyKey:{equals:key}},limit:1,depth:0})
     if(existing.docs.length)return reply(existing.docs[0].requestHash===fingerprint?200:409)
-    const docs=(await p.find({collection:'documents',where:{_status:{equals:'published'}},overrideAccess:false,depth:0,limit:20})).docs
+    const docs=(await p.find({collection:'documents',where:{_status:{equals:'published'}},overrideAccess:false,depth:0,limit:20,sort:'-updatedAt'})).docs
     const consent=docs.find(d=>d.kind==='consent'),privacy=docs.find(d=>d.kind==='privacy')
     if(!consent||!privacy||consent.version!==input.consentVersion)return reply(409)
     const source=await p.find({collection:'pages',where:{and:[{path:{equals:input.source}},{_status:{equals:'published'}}]},depth:0,limit:1,overrideAccess:false})

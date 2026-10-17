@@ -381,6 +381,7 @@ export interface AnalyticsSession {
   browser?: string | null;
   os?: string | null;
   country?: string | null;
+  sourceType?: string | null;
   lastSeen: string;
   updatedAt: string;
   createdAt: string;
@@ -423,6 +424,7 @@ export interface AnalyticsEvent {
   path: string;
   label?: string | null;
   activeMs?: number | null;
+  scrollPercent?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -444,6 +446,10 @@ export interface Knowledge {
    */
   topic: string;
   keywords?: string | null;
+  /**
+   * Ссылки на первоисточники, дата проверки и применимость. Не показывается клиентам или ИИ-консультанту. Не переносите свойства одного артикула на все ткани.
+   */
+  evidence?: string | null;
   page: number | Page;
   approved?: boolean | null;
   updatedAt: string;
@@ -861,6 +867,7 @@ export interface AnalyticsSessionsSelect<T extends boolean = true> {
   browser?: T;
   os?: T;
   country?: T;
+  sourceType?: T;
   lastSeen?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -877,6 +884,7 @@ export interface AnalyticsEventsSelect<T extends boolean = true> {
   path?: T;
   label?: T;
   activeMs?: T;
+  scrollPercent?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -889,6 +897,7 @@ export interface KnowledgeSelect<T extends boolean = true> {
   answer?: T;
   topic?: T;
   keywords?: T;
+  evidence?: T;
   page?: T;
   approved?: T;
   updatedAt?: T;

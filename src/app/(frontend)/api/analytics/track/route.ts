@@ -1,5 +1,6 @@
 import { cms } from '@/lib/payload'
 import { analyticsEventSchema, analyticsPolicy, analyticsResponse, sameAnalyticsOrigin, smallJSON, readAnalyticsConsent, analyticsLimit, deviceInfo, sanitizeAcquisition } from '@/lib/analytics-server'
+import { analyticsChannel } from '@/lib/analytics-shared'
 
 export async function POST(req: Request) {
   if (!sameAnalyticsOrigin(req)) return analyticsResponse(403)
@@ -26,8 +27,8 @@ export async function POST(req: Request) {
       if (event.type === 'pageview') {
         const a = sanitizeAcquisition(event.acquisition || {}), info = deviceInfo(req.headers.get('user-agent') || '')
         const country = process.env.ANALYTICS_TRUST_CLOUDFLARE === 'true' && /^[A-Z]{2}$/.test(req.headers.get('cf-ipcountry') || '') ? req.headers.get('cf-ipcountry') : null
-        const values = [event.sessionId, visitor.id, event.path, a.utmSource || a.referrerHost || 'Прямой / источник не передан', a.referrerHost, a.utmSource, a.utmMedium, a.utmCampaign, a.utmContent, a.utmTerm, a.searchTerm, a.queryKind, info.device, info.browser, info.os, country]
-        const session = (await db.query(`INSERT INTO analytics_sessions (session_key,visitor_id,landing_path,source,referrer_host,utm_source,utm_medium,utm_campaign,utm_content,utm_term,search_term,query_kind,device,browser,os,country,last_seen,created_at,updated_at)
+        const values = [event.sessionId, visitor.id, event.path, a.utmSource || a.referrerHost || 'Прямой / источник не передан', a.referrerHost, a.utmSource, a.utmMedium, a.utmCampaign, a.utmContent, a.utmTerm, a.searchTerm, a.queryKind, info.device, info.browser, info.os, country, analyticsChannel(a)]
+        const session = (await db.query(`INSERT INTO analytics_sessions (session_key,visitor_id,landing_path,source,referrer_host,utm_source,utm_medium,utm_campaign,utm_content,utm_term,search_term,query_kind,device,browser,os,country,source_type,last_seen,created_at,updated_at)
           VALUES (${values.map((_, i) => '$' + (i + 1)).join(',')},NOW(),NOW(),NOW()) ON CONFLICT (session_key) DO UPDATE SET last_seen=NOW(),updated_at=NOW() WHERE analytics_sessions.visitor_id=$2 AND analytics_sessions.last_seen>NOW()-INTERVAL '30 minutes' RETURNING id`, values)).rows[0]
         if (!session) { await db.query('ROLLBACK'); return analyticsResponse(410) }
         await db.query("INSERT INTO analytics_events (event_key,session_id,visitor_id,kind,path,active_ms,created_at,updated_at) VALUES ($1,$2,$3,'pageview',$4,0,NOW(),NOW()) ON CONFLICT (event_key) DO NOTHING", [event.viewId, session.id, visitor.id, event.path])
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
       } else {
         const view = (await db.query("SELECT e.id,e.session_id,e.path FROM analytics_events e JOIN analytics_sessions s ON s.id=e.session_id WHERE e.event_key=$1 AND e.visitor_id=$2 AND e.kind='pageview' AND s.last_seen>NOW()-INTERVAL '30 minutes'", [event.viewId, visitor.id])).rows[0]
         if (!view) { await db.query('ROLLBACK'); return analyticsResponse(410) }
-        if (event.type === 'ping') await db.query('UPDATE analytics_events SET active_ms=GREATEST(COALESCE(active_ms,0),LEAST($1,EXTRACT(EPOCH FROM (NOW()-created_at))*1000)),updated_at=NOW() WHERE id=$2', [event.activeMs, view.id])
+        if (event.type === 'ping') await db.query('UPDATE analytics_events SET active_ms=GREATEST(COALESCE(active_ms,0),LEAST($1,EXTRACT(EPOCH FROM (NOW()-created_at))*1000)),scroll_percent=GREATEST(COALESCE(scroll_percent,0),$3),updated_at=NOW() WHERE id=$2', [event.activeMs, view.id, event.scrollPercent || 0])
         else await db.query("INSERT INTO analytics_events (event_key,session_id,visitor_id,kind,path,label,active_ms,created_at,updated_at) VALUES ($1,$2,$3,'action',$4,$5,0,NOW(),NOW()) ON CONFLICT (event_key) DO NOTHING", [event.eventId, view.session_id, visitor.id, view.path, event.label])
         await db.query('UPDATE analytics_sessions SET last_seen=NOW(),updated_at=NOW() WHERE id=$1', [view.session_id])
       }

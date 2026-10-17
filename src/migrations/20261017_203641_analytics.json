@@ -3502,6 +3502,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "source_type": {
+          "name": "source_type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
         "utm_source": {
           "name": "utm_source",
           "type": "varchar",
@@ -3740,6 +3746,13 @@
           "notNull": false,
           "default": 0
         },
+        "scroll_percent": {
+          "name": "scroll_percent",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp(3) with time zone",
@@ -3896,6 +3909,12 @@
         },
         "keywords": {
           "name": "keywords",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "evidence": {
+          "name": "evidence",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -4070,6 +4089,12 @@
         },
         "version_keywords": {
           "name": "version_keywords",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_evidence": {
+          "name": "version_evidence",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false

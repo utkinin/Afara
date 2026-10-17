@@ -19,6 +19,7 @@ export const AnalyticsSessions: CollectionConfig = {
     { name: 'sessionKey', type: 'text', required: true, unique: true },
     { name: 'visitor', type: 'relationship', relationTo: 'analytics-visitors', required: true, index: true },
     ...['landingPath', 'source', 'referrerHost', 'utmSource', 'utmMedium', 'utmCampaign', 'utmContent', 'utmTerm', 'searchTerm', 'queryKind', 'device', 'browser', 'os', 'country'].map(name => ({ name, type: 'text' as const })),
+    { name: 'sourceType', type: 'text' },
     { name: 'lastSeen', type: 'date', required: true, index: true },
   ],
 }
@@ -32,5 +33,6 @@ export const AnalyticsEvents: CollectionConfig = {
     { name: 'path', type: 'text', required: true },
     { name: 'label', type: 'text' },
     { name: 'activeMs', type: 'number', defaultValue: 0 },
+    { name: 'scrollPercent', type: 'number', defaultValue: 0, min: 0, max: 100 },
   ],
 }
