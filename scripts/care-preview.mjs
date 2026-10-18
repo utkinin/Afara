@@ -23,7 +23,7 @@ const homeHTML = await fs.readFile(path.join(input, 'index.html'), 'utf8')
 const schoolHTML = await fs.readFile(path.join(input, schoolRoute, 'index.html'), 'utf8')
 const templateHTML = await fs.readFile(path.join(input, 'partneram/index.html'), 'utf8')
 const styles = [...new Set([...homeHTML.matchAll(/class="([^"]+)"/g)].flatMap(m => m[1].split(/\s+/)))]
-const classes = Object.fromEntries(['section','container','sectionIntro','sectionBody','kicker','cards','spaces','process','processNumber','card','cardImage','cardText','arrowLink','faq'].map(stem => {
+const classes = Object.fromEntries(['section','container','sectionBody','kicker','cards','spaces','process','processNumber','card','cardImage','cardText','arrowLink','faq'].map(stem => {
   const name = styles.find(v => v.startsWith(`site_${stem}__`)); if (!name) throw new Error(`Missing existing style ${stem}`); return [stem, name]
 }))
 const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || '/usr/bin/chromium', args: ['--no-sandbox'] })
@@ -59,7 +59,7 @@ try {
       }
       function section(data) {
         const s = node('section', c.section); s.id = data.anchor
-        const container = node('div', c.container), intro = node('div', c.sectionIntro)
+        const container = node('div', c.container), intro = node('div')
         if (data.kicker) intro.append(node('p', c.kicker, data.kicker))
         intro.append(node('h2', '', data.heading)); if (data.body) intro.append(node('p', c.sectionBody, data.body)); container.append(intro)
         if (data.cards?.length) {
