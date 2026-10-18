@@ -1,10 +1,10 @@
 {
-  "release": "afara-complete-20261018",
-  "sourceCommit": "49b13e4c58c19a12d4cfb089fa020b39eed9d15d",
-  "previewUpdatedAt": "2026-10-18T09:25:20.956Z",
+  "release": "afara-care-education-20261018",
+  "sourceCommit": "707c9788220092db32997ff0a86b2ba0f57fc447",
+  "previewUpdatedAt": "2026-10-18T10:36:13.756Z",
   "mode": "static-preview",
-  "pages": 20,
-  "cmsUpdate": "published-and-verified",
+  "pages": 21,
+  "cmsUpdate": "previous-published-CMS-preserved; care-education-editorial-preview",
   "cmsPublishedKnowledge": 74,
   "cmsDraftKnowledge": 0,
   "cmsPublishedMedia": 43,
@@ -34,5 +34,15 @@
   "semantics": "downloads/AFARA_Semantics_2026-10-16.md",
   "hostingInstructions": "downloads/AFARA_Hosting_Handoff_2026-10-18.md",
   "historicalPackage": "downloads/AFARA_Editorial_2026-10-16_v2.zip",
-  "historicalPackageSHA256": "ee81f6718fcb812137b13caf8cebe134d7c212eeaff49cb6ff0707acaa1a8f61"
+  "historicalPackageSHA256": "ee81f6718fcb812137b13caf8cebe134d7c212eeaff49cb6ff0707acaa1a8f61",
+  "careEducation": {
+    "mode": "editorial-preview",
+    "cmsAppliedInThisRun": false,
+    "service": "/ukhod-za-shtorami/",
+    "education": "/obshchestvennye-prostranstva/shkoly-i-detskie-sady/",
+    "replacedPictures": 4,
+    "sourceCMSRelease": "afara-complete-20261018",
+    "newImageVariants": 6,
+    "form": "existing-readonly-preview"
+  }
 }
