@@ -107,7 +107,7 @@ try {
         const cta = hero.querySelector('a[href="#consultation"]'); cta.textContent = copy.cta; cta.dataset.inquiryBrief = copy.brief
         const details = hero.querySelector('[class*="site_detailsLink__"]'); details.href = '#care-tasks'; details.textContent = copy.detailsLabel + ' ↓'
         hero.querySelector('[class*="site_heroImage__"]').innerHTML = macroPicture
-        const heroImage = hero.querySelector('img'); heroImage.loading = 'eager'; heroImage.setAttribute('fetchpriority', 'high'); heroImage.alt = 'Фактура и отделка портьеры'
+        const heroImage = hero.querySelector('img'); heroImage.loading = 'eager'; heroImage.sizes = '100vw'; heroImage.setAttribute('fetchpriority', 'high'); heroImage.alt = 'Фактура и отделка портьеры'
         for (const data of copy.sections) form.before(section(data))
         const h2 = form.querySelector('h2'); if (h2) h2.textContent = 'Обсудим уход за вашими шторами'
         const intro = form.querySelector(`.${c.sectionBody}`); if (intro) intro.textContent = 'Укажите город, высоту окон, количество полотен и что требуется сделать. Фотографии и сведения о ткани можно передать согласованным способом в переписке.'
