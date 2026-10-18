@@ -25,7 +25,7 @@ test('care page, one-click brief, educational pictures and mobile layout', async
     for (const width of [360, 390, 768, 1440]) {
       await page.setViewportSize({ width, height: 1000 })
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
-      if (width === 390 || width === 1440) { await page.evaluate(() => { document.activeElement?.blur(); window.scrollTo(0, 0) }); await page.screenshot({ path: `docs/screenshots/care-service-${width}.png` }) }
+      if (width === 390 || width === 1440) { await page.evaluate(() => { document.activeElement?.blur(); window.scrollTo({ top: 0, behavior: 'instant' }) }); await page.waitForFunction(() => { const img = document.querySelector('main img'); return img?.complete && img.naturalWidth > 0 }); await page.screenshot({ path: `docs/screenshots/care-service-${width}.png` }) }
     }
     await page.goto(`${origin}${base}/obshchestvennye-prostranstva/shkoly-i-detskie-sady/`, { waitUntil: 'networkidle' })
     assert.match(await page.locator('main img').first().getAttribute('src'), /school-classroom/)
@@ -36,7 +36,8 @@ test('care page, one-click brief, educational pictures and mobile layout', async
     await page.waitForFunction(() => [...document.querySelectorAll('#visual-collection img')].every(img => img.complete && img.naturalWidth > 0))
     for (const img of await page.locator('#visual-collection img').all()) assert.equal(await img.evaluate(el => el.complete && el.naturalWidth > 0), true)
     for (const width of [390, 1440]) {
-      await page.setViewportSize({ width, height: 1000 }); await page.evaluate(() => { document.activeElement?.blur(); window.scrollTo(0, 0) })
+      await page.setViewportSize({ width, height: 1000 }); await page.evaluate(() => { document.activeElement?.blur(); window.scrollTo({ top: 0, behavior: 'instant' }) })
+      await page.waitForFunction(() => { const img = document.querySelector('main img'); return img?.complete && img.naturalWidth > 0 })
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
       await page.screenshot({ path: `docs/screenshots/education-${width}.png`, fullPage: true })
     }

@@ -112,6 +112,7 @@ try {
         if (crumbs) { const home = node('a', '', 'AFARA'); home.href = `${base}/`; crumbs.replaceChildren(home, node('span', '', '/'), node('span', '', copy.title)) }
         hero.querySelector('h1').textContent = copy.h1; hero.querySelector('[class*="site_heroIntro__"]').textContent = copy.intro
         const cta = hero.querySelector('a[href="#consultation"]'); cta.textContent = copy.cta; cta.dataset.inquiryBrief = copy.brief
+        for (const button of document.querySelectorAll('header a[href="#consultation"],dialog a[href="#consultation"]')) { button.childNodes[0].textContent = copy.cta; button.dataset.inquiryBrief = copy.brief }
         const details = hero.querySelector('[class*="site_detailsLink__"]'); details.href = '#care-tasks'; details.textContent = copy.detailsLabel + ' ↓'
         hero.querySelector('[class*="site_heroImage__"]').innerHTML = macroPicture
         const heroImage = hero.querySelector('img'); heroImage.loading = 'eager'; heroImage.sizes = '100vw'; heroImage.setAttribute('fetchpriority', 'high'); heroImage.alt = 'Фактура и отделка портьеры'
