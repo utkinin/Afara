@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "images": [
+    {
+      "id": "school-classroom",
+      "title": "Школьный класс",
+      "alt": "Школьный класс с партами, доской и матовыми портьерами у окон",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-18",
+        "resultId": "exec-3f0e7b9f-729a-4e5b-b7aa-0c6fa12a6e78",
+        "prompt": "Use case: photorealistic-natural. Asset type: AFARA educational-interiors website image, landscape 3:2. Create one original photorealistic architectural interior photograph-style concept of an unmistakable real modern SCHOOL CLASSROOM for ages 9–12 in Saint Petersburg, no people. Show orderly rows of realistically sized individual student desks and chairs facing a matte dark green classroom board with no legible writing, teacher desk, books and a small globe. Three large ordinary classroom windows along the side, ceiling about 3 metres, practical pale oak floor, ivory plaster walls, sensible rectangular acoustic ceiling lights. The textile subject must be clear: restrained matte taupe curtains with a narrow muted plum border on simple ceiling tracks at the windows, sheer warm-white layer, curtains neatly stacked so natural daylight reaches desks. Grounded everyday educational architecture, refined clean material quality but not a luxury lobby, no sofas, no stage, no hotel, no palace double-height glazing, no expensive chandeliers. Wide eye-level camera, straight believable perspective, realistic desk arrangement and fabric folds, windows and curtains visible near the centre for mobile cropping. Soft northern daylight. No text, no logos, no watermark, no claim of a real completed AFARA project.",
+        "mode": "built-in"
+      },
+      "desktop": {
+        "file": "school-classroom-desktop.webp",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 115758,
+        "sha256": "16784b9c7b313dd4642d691d79190f2e0462f899b3b098430d8c52a0b246b53b"
+      },
+      "mobile": {
+        "file": "school-classroom-mobile.webp",
+        "width": 768,
+        "height": 1024,
+        "bytes": 60128,
+        "sha256": "4da0955e027ac6f7c8a496adb5d5105622f37224d58294dbd593bd3cf6c805b4"
+      },
+      "thumb": {
+        "file": "school-classroom-thumb.webp",
+        "width": 768,
+        "height": 512,
+        "bytes": 39210,
+        "sha256": "782efb82d81eab4d0b6a2e265f8a575d4bf1ab45ba6cd2ab88b0d9dce99fb662"
+      }
+    },
+    {
+      "id": "kindergarten-group",
+      "title": "Группа детского сада",
+      "alt": "Группа детского сада с низкими столами, игрушками и двухцветными шторами у окон",
+      "generation": {
+        "tool": "image_gen.imagegen",
+        "date": "2026-10-18",
+        "resultId": "exec-8113a377-9773-4213-bd36-8ab6bd963b25",
+        "prompt": "Use case: photorealistic-natural. Asset type: AFARA website educational interiors gallery image, landscape 3:2. Create one original photorealistic architectural photograph-style concept of an unmistakable KINDERGARTEN GROUP PLAYROOM for preschool children aged 3–6, no people. A warm practical nursery classroom with child-height round wooden activity tables and small chairs, low open shelves of tidy wooden toys, children’s picture books, a restrained play rug and simple cubbies, with realistic scale and layout. Three ordinary large windows, ceiling about 3 metres. Curtains are the focal textile: simple matte muted plum and warm ivory colour-block side panels on ceiling tracks, layered with translucent ivory fabric, hem clearly above the floor and away from tables, no accessible dangling cords, no swags or loose ties. Palette pale oak, ivory, small muted sage and terracotta educational accents. Airy welcoming everyday preschool environment, not a residence, lounge, hotel or stage; no sofas or giant luxury windows. Eye-level wide architectural view with readable child-scale furniture and window arrangement, realistic material textures and fabric drape, soft natural daylight. No text, no logos, no watermark, no certification marks or implied actual AFARA project.",
+        "mode": "built-in"
+      },
+      "desktop": {
+        "file": "kindergarten-group-desktop.webp",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 123274,
+        "sha256": "c2072c53a6731e7a08f437d50911cbd5473a92015ef03f644d4decf68fc9bcc6"
+      },
+      "mobile": {
+        "file": "kindergarten-group-mobile.webp",
+        "width": 768,
+        "height": 1024,
+        "bytes": 58116,
+        "sha256": "25184a790a9809f47616047be8d629244dd6f1edeb47c15a50fa72476043cdc6"
+      },
+      "thumb": {
+        "file": "kindergarten-group-thumb.webp",
+        "width": 768,
+        "height": 512,
+        "bytes": 43308,
+        "sha256": "59507176d2b2828adbe83655ab7074a65f756cdf44ee22a93414449713929c99"
+      }
+    }
+  ]
+}
