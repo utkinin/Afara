@@ -30,7 +30,8 @@ const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_C
 const files = []
 async function visit(dir) { for (const entry of await fs.readdir(dir, { withFileTypes: true })) { const file = path.join(dir, entry.name); if (entry.isDirectory()) await visit(file); else if (entry.name === 'index.html') files.push(path.relative(output, file)) } }
 await visit(output)
-files.push(`${copy.path}/index.html`)
+const careAlreadyPresent = files.includes(`${copy.path}/index.html`)
+if (!careAlreadyPresent) files.push(`${copy.path}/index.html`)
 try {
   const helper = await browser.newPage()
   await helper.route('**/*', route => route.abort())
@@ -122,6 +123,7 @@ try {
   }
   if (replacements < 2) throw new Error('Expected school replacements in the published page and navigation collection')
   const previous = JSON.parse(await fs.readFile(path.join(input, 'deployment.json'), 'utf8'))
-  await fs.writeFile(path.join(output, 'deployment.json'), JSON.stringify({ ...previous, release: 'afara-care-education-20261018', sourceCommit: process.env.AFARA_SOURCE_COMMIT || 'local-unpublished', previewUpdatedAt: new Date().toISOString(), pages: previous.pages + 1, cmsUpdate: 'previous-published-CMS-preserved; care-education-editorial-preview', careEducation: { mode: 'editorial-preview', cmsAppliedInThisRun: false, service: `/${copy.path}/`, education: `/${schoolRoute}/`, replacedPictures: replacements, sourceCMSRelease: previous.release, newImageVariants: 6, form: 'existing-readonly-preview' } }, null, 2) + '\n')
-  console.log(JSON.stringify({ pages: files.length, replacedPictures: replacements, output, cmsApplied: false }))
+  const publicPages = previous.pages + (careAlreadyPresent ? 0 : 1)
+  await fs.writeFile(path.join(output, 'deployment.json'), JSON.stringify({ ...previous, release: 'afara-care-education-20261018', sourceCommit: process.env.AFARA_SOURCE_COMMIT || 'local-unpublished', previewUpdatedAt: new Date().toISOString(), pages: publicPages, cmsUpdate: 'previous-published-CMS-preserved; care-education-editorial-preview', careEducation: { mode: 'editorial-preview', cmsAppliedInThisRun: false, service: `/${copy.path}/`, education: `/${schoolRoute}/`, replacedPictures: replacements, sourceCMSRelease: previous.careEducation?.sourceCMSRelease || previous.release, newImageVariants: 6, form: 'existing-readonly-preview' } }, null, 2) + '\n')
+  console.log(JSON.stringify({ pages: publicPages, htmlFiles: files.length, replacedPictures: replacements, output, cmsApplied: false }))
 } finally { await browser.close() }
