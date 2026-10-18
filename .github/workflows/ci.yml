@@ -48,6 +48,37 @@ jobs:
           export PLAYWRIGHT_CHROMIUM_EXECUTABLE="$(node --input-type=module -e 'import {chromium} from "@playwright/test"; console.log(chromium.executablePath())')"
           npm test
           npm run test:e2e
+      - name: Validate care import in an isolated database
+        run: |
+          docker compose exec -T db createdb -U postgres afara_care_acceptance
+          export DATABASE_URL=postgresql://postgres@127.0.0.1:5432/afara_care_acceptance
+          export MEDIA_DIR=/tmp/afara-care-media
+          export AFARA_CONTENT_BACKUP_DIR=/tmp/afara-care-backups
+          AFARA_STAGE=build npm run db:migrate
+          AFARA_STAGE=development npm run seed:dev
+          node --import tsx --env-file-if-exists=.env.local tests/care.cms.acceptance.ts
+      - name: Build and validate the care and education preview
+        env:
+          AFARA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          git fetch origin gh-pages:refs/remotes/origin/gh-pages
+          mkdir -p /tmp/afara-care-base/Afara
+          git archive origin/gh-pages | tar -x -C /tmp/afara-care-base/Afara
+          export PLAYWRIGHT_CHROMIUM_EXECUTABLE="$(node --input-type=module -e 'import {chromium} from "@playwright/test"; console.log(chromium.executablePath())')"
+          AFARA_CARE_PREVIEW_INPUT=/tmp/afara-care-base/Afara AFARA_CARE_PREVIEW_OUTPUT=/tmp/afara-care-preview/Afara node scripts/care-preview.mjs
+          node scripts/serve-preview.mjs /tmp/afara-care-preview > /tmp/afara-care-static.log 2>&1 &
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://localhost:3100/Afara/ > /dev/null; then break; fi
+            sleep 1
+          done
+          PREVIEW_TEST_ORIGIN=http://localhost:3100 npm run test:preview
+          MATERIAL_STUDY_TEST_ORIGIN=http://localhost:3100 node --test tests/material-study.acceptance.mjs
+          PREVIEW_TEST_ORIGIN=http://localhost:3100 node --test tests/care-preview.acceptance.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: afara-care-preview
+          path: /tmp/afara-care-preview/Afara
+          include-hidden-files: true
       - uses: actions/upload-artifact@v4
         if: always()
         with:

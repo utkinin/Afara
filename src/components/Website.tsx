@@ -15,6 +15,7 @@ import { MaterialStudy } from './MaterialStudy'
 import { AnalyticsConsent } from './AnalyticsConsent'
 import { StructuredData } from './StructuredData'
 import { customerTasksAnchor, customerTaskBrief } from '../../content/customer-tasks'
+import careService from '../../content/care-service.json'
 
 type Section = NonNullable<Page['sections']>[number]
 function ContentSection({ section, pages }: { section: Section; pages: Page[] }) {
@@ -58,7 +59,7 @@ export function Website({ page, pages, site, documents, knowledge = [], works = 
       {page.type !== 'home' && <nav aria-label="Хлебные крошки" className={`${styles.container} ${styles.breadcrumbs}`}><Link prefetch={false} href="/">AFARA</Link><span>/</span>{parent && <><Link prefetch={false} href={pageURL(parent)}>{parent.title}</Link><span>/</span></>}<span>{page.title}</span></nav>}
       {page.type === 'contacts' ? <section className={`${styles.container} ${styles.contactPage}`}><h1>{page.h1}</h1><p>{page.intro}</p><a className={styles.button} href={messageURL(site)}>Написать о проекте <ArrowIcon/></a><ContactDetails site={site} full /><ContactQR /></section> : <section className={`${styles.hero} ${page.type !== 'home' ? styles.innerHero : ''}`}>
         <div className={styles.heroImage}><Photo image={media(page.hero)} mobile={media(page.heroMobile)} priority hero alt={page.heroAlt} position={page.heroPosition ?? 65} /></div>
-        <div className={`${styles.container} ${styles.heroContent}`}><p className={styles.heroEyebrow}>{site.brand} · {site.tagline}</p><h1>{page.h1}</h1><p className={styles.heroIntro}>{page.intro}</p><a className={styles.button} href="#consultation">{page.cta}<span aria-hidden="true"><ArrowIcon/></span></a><a className={styles.detailsLink} href={`#${sections.find(s => s.kind === 'details')?.anchor || sections[0]?.anchor || 'consultation'}`}>{page.detailsLabel}<span aria-hidden="true">↓</span></a></div>
+        <div className={`${styles.container} ${styles.heroContent}`}><p className={styles.heroEyebrow}>{site.brand} · {site.tagline}</p><h1>{page.h1}</h1><p className={styles.heroIntro}>{page.intro}</p><a className={styles.button} href="#consultation" data-inquiry-brief={page.path === careService.path ? careService.brief : undefined}>{page.cta}<span aria-hidden="true"><ArrowIcon/></span></a><a className={styles.detailsLink} href={`#${sections.find(s => s.kind === 'details')?.anchor || sections[0]?.anchor || 'consultation'}`}>{page.detailsLabel}<span aria-hidden="true">↓</span></a></div>
         {page.conceptLabel && <span className={styles.heroCaption}>{page.conceptLabel}</span>}
       </section>}
       {sections.map((section, i) => {
