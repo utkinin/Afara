@@ -1,11 +1,28 @@
 {
-  "release": "afara-material-study-20261017",
-  "sourceCommit": "3608914b55d684d3ee9ef6399bdb5b66985cfb32",
-  "previewUpdatedAt": "2026-10-17T09:15:46.101Z",
-  "pages": 20,
+  "release": "afara-complete-20261018",
+  "sourceCommit": "49b13e4c58c19a12d4cfb089fa020b39eed9d15d",
+  "previewUpdatedAt": "2026-10-18T09:25:20.956Z",
   "mode": "static-preview",
-  "cmsUpdate": "new-material-study-pending-apply",
+  "pages": 20,
+  "cmsUpdate": "published-and-verified",
+  "cmsPublishedKnowledge": 74,
+  "cmsDraftKnowledge": 0,
+  "cmsPublishedMedia": 43,
+  "previousDraftsReviewedAndPublished": 9,
   "mainCardImagesDistinct": 8,
+  "materialStudy": {
+    "mode": "published-cms",
+    "pages": [
+      "/",
+      "/poshiv-po-eskizam/"
+    ]
+  },
+  "customerTasks": {
+    "mode": "published-cms",
+    "anchor": "your-task"
+  },
+  "adminAnalytics": "installed-and-tested-server-feature",
+  "serverFunctions": "not-included-in-GitHub-Pages",
   "servicePages": [
     "/partneram/",
     "/poshiv-po-eskizam/"
@@ -13,28 +30,9 @@
   "previousPartnerURL": "/partnyoram/",
   "previousPartnerURLMode": "static-html-transition",
   "preservedPartnerFAQs": 5,
+  "scriptCacheKeys": "content-hash",
   "semantics": "downloads/AFARA_Semantics_2026-10-16.md",
+  "hostingInstructions": "downloads/AFARA_Hosting_Handoff_2026-10-18.md",
   "historicalPackage": "downloads/AFARA_Editorial_2026-10-16_v2.zip",
-  "historicalPackageSHA256": "ee81f6718fcb812137b13caf8cebe134d7c212eeaff49cb6ff0707acaa1a8f61",
-  "serverFunctions": "not-included",
-  "materialStudy": {
-    "release": "afara-material-study-20261017",
-    "mode": "editorial-preview",
-    "cmsUpdate": "pending-apply-in-existing-CMS",
-    "pages": [
-      "/",
-      "/poshiv-po-eskizam/"
-    ],
-    "extraRuntimeBytes": 7340,
-    "note": "This new interaction is a preview of the prepared CMS section. The previous release CMS publication status is unchanged.",
-    "sourceCommit": "3608914b55d684d3ee9ef6399bdb5b66985cfb32"
-  },
-  "previousCMSPublication": {
-    "release": "afara-services-20261016-73fa2c0",
-    "sourceCommit": "73fa2c0bb5cf6e41a725c0d90ed31203478eaf57",
-    "cmsUpdate": "published-and-verified",
-    "publishedKnowledge": 33,
-    "preservedDraftKnowledge": 9,
-    "publishedMedia": 40
-  }
+  "historicalPackageSHA256": "ee81f6718fcb812137b13caf8cebe134d7c212eeaff49cb6ff0707acaa1a8f61"
 }
