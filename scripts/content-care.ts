@@ -73,7 +73,7 @@ else {
           if (page.path === educationPath && (patch.hero || page.hero === schoolId)) {
             const gallery = sections.find(s => s.anchor === 'visual-collection')
             if (gallery && !gallery.cards?.some(card => card.image === kindergartenId)) { gallery.heading = 'Школьный класс и группа детского сада'; gallery.cards = [
-              { title: 'Школьный класс', body: 'Дневной свет для занятий, управление шторами и доступ к окну. Комплект и документы проверяются по конкретному заданию.', image: schoolId, imageAlt: manifest.images[0].alt },
+              { id: gallery.cards?.[0]?.id, title: 'Школьный класс', body: 'Дневной свет для занятий, управление шторами и доступ к окну. Комплект и документы проверяются по конкретному заданию.', image: schoolId, imageAlt: manifest.images[0].alt },
               { title: 'Группа детского сада', body: 'Текстиль для занятий и игр с учётом расположения детской мебели, освещения, управления и ухода.', image: kindergartenId, imageAlt: manifest.images[1].alt },
             ] }
           }

@@ -90,10 +90,16 @@ try {
       if (route === schoolRoute) {
         const gallery = document.getElementById('visual-collection')
         if (gallery) {
+          const oldShare = gallery.querySelector('[data-save-idea]'), oldAnchor = gallery.querySelector('article[id]')?.id || oldShare?.dataset.saveIdea || 'idea-school-classroom'
           const next = section({ anchor: 'visual-collection', kicker: '/ Пространства для занятий', heading: 'Школьный класс и группа детского сада', body: 'Текстиль согласуется с назначением помещения, освещением, управлением и уходом. Иллюстрации показывают варианты оформления; требования и документы проверяются по конкретному объекту.', cards: [
             { title: 'Школьный класс', body: 'Дневной свет для занятий, управление шторами и доступ к окну. Комплект и документы проверяются по конкретному заданию.', imageIndex: 0 },
             { title: 'Группа детского сада', body: 'Текстиль для занятий и игр с учётом расположения детской мебели, освещения, управления и ухода.', imageIndex: 1 },
-          ] }); next.querySelector(`.${c.cards}`).className = c.spaces; gallery.replaceWith(next)
+          ] }); next.querySelector(`.${c.cards}`).className = c.spaces
+          for (const [index, card] of [...next.querySelectorAll('article')].entries()) {
+            card.id = index === 0 ? oldAnchor : 'idea-kindergarten-group'
+            if (oldShare) { const share = oldShare.cloneNode(true); share.dataset.saveIdea = card.id; const status = share.querySelector('[role="status"]'); if (status) status.textContent = ''; card.querySelector(`.${c.cardText}`).append(share) }
+          }
+          gallery.replaceWith(next)
         }
       }
       if (isCare) {

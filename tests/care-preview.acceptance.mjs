@@ -30,6 +30,8 @@ test('care page, one-click brief, educational pictures and mobile layout', async
     await page.goto(`${origin}${base}/obshchestvennye-prostranstva/shkoly-i-detskie-sady/`, { waitUntil: 'networkidle' })
     assert.match(await page.locator('main img').first().getAttribute('src'), /school-classroom/)
     assert.equal(await page.locator('#visual-collection img[src*="kindergarten-group"]').count(), 1)
+    assert.equal(await page.locator('#visual-collection [data-save-idea]').count(), 2)
+    assert.equal(await page.locator('#idea-editorial-obshchestvennye-prostranstva-shkoly-i-detskie-sady-school').count(), 1)
     await page.locator('#visual-collection').scrollIntoViewIfNeeded()
     await page.waitForFunction(() => [...document.querySelectorAll('#visual-collection img')].every(img => img.complete && img.naturalWidth > 0))
     for (const img of await page.locator('#visual-collection img').all()) assert.equal(await img.evaluate(el => el.complete && el.naturalWidth > 0), true)
