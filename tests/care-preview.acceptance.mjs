@@ -31,6 +31,7 @@ test('care page, one-click brief, educational pictures and mobile layout', async
     assert.match(await page.locator('main img').first().getAttribute('src'), /school-classroom/)
     assert.equal(await page.locator('#visual-collection img[src*="kindergarten-group"]').count(), 1)
     await page.locator('#visual-collection').scrollIntoViewIfNeeded()
+    await page.waitForFunction(() => [...document.querySelectorAll('#visual-collection img')].every(img => img.complete && img.naturalWidth > 0))
     for (const img of await page.locator('#visual-collection img').all()) assert.equal(await img.evaluate(el => el.complete && el.naturalWidth > 0), true)
     for (const width of [390, 1440]) {
       await page.setViewportSize({ width, height: 1000 }); await page.evaluate(() => { document.activeElement?.blur(); window.scrollTo(0, 0) })
