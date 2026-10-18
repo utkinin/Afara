@@ -6,6 +6,7 @@ import { cms } from '../src/lib/payload'
 import { expansionImages, servicePages, pageUpdates, siteUpdate, newKnowledge, semanticCopy } from '../src/lib/copy-expansion'
 import { collectionDisclosure } from '../src/lib/editorial'
 import type { Page, Site, Knowledge } from '../src/payload-types'
+import { sameContent as equal } from '../src/lib/content-identity'
 
 const apply = process.argv.includes('--apply')
 if (process.env.AFARA_STAGE !== 'development' || process.env.AFARA_DB_PUSH !== 'false') throw new Error('Use development and AFARA_DB_PUSH=false')
@@ -18,8 +19,6 @@ for (const m of manifest.images) for (const variant of ['desktop', 'mobile'] as 
   const data = await readFile(path.join('fixtures/content-expansion', m[variant].file))
   if (createHash('sha256').update(data).digest('hex') !== m[variant].sha256) throw new Error('Asset hash mismatch')
 }
-const stable = (v: unknown): unknown => Array.isArray(v) ? v.map(stable) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)).map(([k, x]) => [k, stable(x)])) : v
-const equal = (a: unknown, b: unknown) => JSON.stringify(stable(a)) === JSON.stringify(stable(b))
 const p = await cms(), report: string[] = []
 const pages = (await p.find({ collection: 'pages', draft: false, depth: 0, limit: 1000 })).docs
 const latest = (await p.find({ collection: 'pages', draft: true, depth: 0, limit: 1000 })).docs

@@ -29,3 +29,6 @@ else {
   } catch (error) { if (tx) await p.db.rollbackTransaction(tx); throw error }
   finally { await p.destroy() }
 }
+// Payload's current PostgreSQL adapter retains its initial connection after
+// destroy(). All work is awaited above; flush CLI output before terminating.
+process.stdout.write('', () => process.exit(0))

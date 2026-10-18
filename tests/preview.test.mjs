@@ -31,12 +31,22 @@ test('static preview has real pages, local assets, keyboard menu and readonly fo
   assert.equal(await page.locator('input[type=email]').count(),1)
   await page.getByRole('button',{name:'Назад',exact:false}).click()
   assert.equal(await page.getByLabel('Город / страна').inputValue(),'Санкт-Петербург')
+  if(await page.locator('#your-task').count()){
+   const choice=page.locator('#your-task a[data-inquiry-brief]').first()
+   await page.getByLabel('Что вы хотите решить?').fill('')
+   await choice.click()
+   assert.match(await page.getByLabel('Что вы хотите решить?').inputValue(),/Хочу обсудить:/)
+   await page.getByLabel('Что вы хотите решить?').fill('Моя сохранённая задача')
+   await choice.click()
+   assert.equal(await page.getByLabel('Что вы хотите решить?').inputValue(),'Моя сохранённая задача')
+  }
   await page.getByRole('button',{name:'Открыть меню'}).click()
   await menu.getByRole('link',{name:'Все частные интерьеры'}).click()
   await page.waitForURL(origin+base+'/chastnye-interery/')
   assert.match(await page.locator('h1').textContent(),/частных интерьеров/)
   for(const pathname of routes){
    response=await page.goto(origin+pathname);assert.equal(response.status(),200);assert.equal(await page.locator('h1').count(),1)
+   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,pathname)
    if(await page.locator('[data-save-idea]').count()){
     await page.context().grantPermissions(['clipboard-read','clipboard-write'])
     await page.getByRole('button',{name:'Сохранить идею',exact:true}).first().click()

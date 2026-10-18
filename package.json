@@ -28,6 +28,7 @@
     "content:visuals": "tsx --env-file-if-exists=.env.local scripts/content-visuals.ts",
     "test:editorial": "tsx --env-file-if-exists=.env.local --test --test-force-exit tests/editorial.acceptance.ts",
     "db:service-pages": "tsx --env-file-if-exists=.env.local scripts/db-service-pages.ts",
+    "db:upgrade-existing": "tsx --env-file-if-exists=.env.local scripts/db-upgrade-existing.ts",
     "content:expand": "tsx --env-file-if-exists=.env.local scripts/content-expand.ts",
     "test:services": "tsx --env-file-if-exists=.env.local --test --test-force-exit tests/services.acceptance.ts",
     "content:material-study": "tsx --env-file-if-exists=.env.local scripts/content-material-study.ts",

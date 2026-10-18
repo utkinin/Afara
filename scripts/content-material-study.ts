@@ -6,11 +6,11 @@ import { createLocalReq } from 'payload'
 import { cms } from '../src/lib/payload'
 import { materialStudyAnchor, materialStudyAnswers, materialStudySection, materialStudyViews } from '../content/material-study'
 import type { Page } from '../src/payload-types'
+import { canonicalContent } from '../src/lib/content-identity'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const apply = process.argv.includes('--apply')
-const stable = (v: unknown): unknown => Array.isArray(v) ? v.map(stable) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)).map(([k, x]) => [k, stable(x)])) : v
-const digest = (v: unknown) => createHash('sha256').update(JSON.stringify(stable(v))).digest('hex')
+const digest = (v: unknown) => createHash('sha256').update(canonicalContent(v)).digest('hex')
 type Variant = { file: string; width: number; sha256: string }
 type Image = { id: string; resultId: string; prompt?: string; variants: Variant[] }
 if (process.env.AFARA_STAGE !== 'development' || process.env.AFARA_DB_PUSH !== 'false') throw new Error('Use the existing development CMS with AFARA_DB_PUSH=false; no schema changes are required')

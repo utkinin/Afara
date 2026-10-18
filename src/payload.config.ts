@@ -225,7 +225,9 @@ export default buildConfig({
   collections:[Users,Media,Pages,Redirects,Documents,Leads,Audit,RateLimits,AnalyticsVisitors,AnalyticsSessions,AnalyticsEvents,...[Knowledge,ShortLinks,Works].map(c=>({...c,hooks:{...c.hooks,afterChange:[...(c.hooks?.afterChange||[]),...(auditHook||[])]}}))], globals:[Site,Notifications],
   db:postgresAdapter({pool:{connectionString:process.env.DATABASE_URL,connectionTimeoutMillis:3000,query_timeout:10000,max:10},push:process.env.AFARA_STAGE==='development'&&process.env.AFARA_DB_PUSH!=='false',migrationDir:path.resolve('src/migrations')}),
   typescript:{outputFile:path.resolve('src/payload-types.ts')},
-  email:nodemailerAdapter({defaultFromAddress:process.env.SMTP_FROM||'afara@example.test',defaultFromName:'AFARA',skipVerify:process.env.AFARA_STAGE==='build',transport:nodemailer.createTransport({host:process.env.SMTP_HOST||'127.0.0.1',port:Number(process.env.SMTP_PORT||1025),secure:process.env.SMTP_PORT==='465',requireTLS:process.env.AFARA_STAGE==='production',auth:process.env.SMTP_USER?{user:process.env.SMTP_USER,pass:process.env.SMTP_PASSWORD}:undefined})}),
+  // SMTP is handled by the persisted outbox. An unavailable mail server must
+  // not delay public pages, CMS startup or database health checks.
+  email:nodemailerAdapter({defaultFromAddress:process.env.SMTP_FROM||'afara@example.test',defaultFromName:'AFARA',skipVerify:true,transport:nodemailer.createTransport({host:process.env.SMTP_HOST||'127.0.0.1',port:Number(process.env.SMTP_PORT||1025),secure:process.env.SMTP_PORT==='465',requireTLS:process.env.AFARA_STAGE==='production',connectionTimeout:10000,greetingTimeout:10000,socketTimeout:20000,auth:process.env.SMTP_USER?{user:process.env.SMTP_USER,pass:process.env.SMTP_PASSWORD}:undefined})}),
   sharp, graphQL:{disable:true}, cors:[],csrf:[process.env.APP_URL||'http://localhost:3000'],
   upload:{limits:{fileSize:20*1024*1024}},
 })

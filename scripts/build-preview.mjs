@@ -3,6 +3,7 @@ import { mkdir, writeFile, cp, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { writeMaterialStudyPreview } from './material-study-preview.mjs'
+import { versionPreviewAssets } from './version-preview-assets.mjs'
 
 const origin=process.env.PREVIEW_ORIGIN||'http://localhost:3000'
 const base=process.env.PREVIEW_BASE||'/Afara'
@@ -151,6 +152,7 @@ for(const container of document.querySelectorAll('[data-save-idea]'))container.q
 `
 await writeFile(path.join(output,'preview-controls.js'),controls)
 if(hasMaterialStudy)await writeMaterialStudyPreview(output)
+await versionPreviewAssets(output,base,pages,hasMaterialStudy)
 await writeFile(path.join(output,'.nojekyll'),'')
 await writeFile(path.join(output,'robots.txt'),'User-agent: *\nDisallow: /\n')
 // Keep the URL used by the earlier standalone preview. GitHub Pages has no

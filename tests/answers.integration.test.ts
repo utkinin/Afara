@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createLocalReq } from 'payload'
 import { cms } from '../src/lib/payload'
-import { answerImportPlan, createAnswerDrafts } from '../src/lib/answer-library'
+import { answerImportPlan, createAnswerDrafts, publishReviewedAnswers } from '../src/lib/answer-library'
 
 test('real CMS: answer import preserves owner drafts, is idempotent and keeps editorial evidence private', { timeout: 60000 }, async () => {
   assert.equal(process.env.AFARA_STAGE, 'development')
@@ -27,5 +27,11 @@ test('real CMS: answer import preserves owner drafts, is idempotent and keeps ed
     const publicRecord = await p.findByID({ collection: 'knowledge', id, overrideAccess: false, req, depth: 0 })
     assert.equal(publicRecord.answer, reviewed.answer)
     assert.equal(publicRecord.evidence, undefined)
+    const publication = await publishReviewedAnswers(p, req)
+    assert.equal(publication.published.length, first.created.length - 1)
+    assert.ok(publication.preserved.includes(row.item.topic))
+    assert.ok(publication.unchanged.includes(id))
+    assert.equal((await p.findByID({ collection: 'knowledge', id: owner.id, draft: true, req, depth: 0 }))._status, 'draft')
+    assert.equal((await publishReviewedAnswers(p, req)).published.length, 0)
   } finally { await p.db.rollbackTransaction(tx); await p.destroy() }
 })

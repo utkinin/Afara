@@ -254,7 +254,7 @@ export interface Page {
         kind: 'spaces' | 'compositions' | 'details' | 'materials' | 'process' | 'conditions' | 'faq';
         visible?: boolean | null;
         /**
-         * Для интерактивного просмотра ткани: шаблон «Материалы», якорь material-study, три карточки с фото — нейтральный свет, тёплый свет, фактура. Подпись основной кнопки — в поле ссылки первой карточки.
+         * Выбор задачи: «Разбор решения», якорь your-task, карточки без фото; их заголовок/текст переходят в форму, linkLabel — кнопка. Просмотр ткани: «Материалы», material-study, три карточки с фото — нейтральный свет, тёплый свет, фактура.
          */
         anchor?: string | null;
         kicker?: string | null;
@@ -1011,7 +1011,7 @@ export interface Site {
         kind: 'spaces' | 'compositions' | 'details' | 'materials' | 'process' | 'conditions' | 'faq';
         visible?: boolean | null;
         /**
-         * Для интерактивного просмотра ткани: шаблон «Материалы», якорь material-study, три карточки с фото — нейтральный свет, тёплый свет, фактура. Подпись основной кнопки — в поле ссылки первой карточки.
+         * Выбор задачи: «Разбор решения», якорь your-task, карточки без фото; их заголовок/текст переходят в форму, linkLabel — кнопка. Просмотр ткани: «Материалы», material-study, три карточки с фото — нейтральный свет, тёплый свет, фактура.
          */
         anchor?: string | null;
         kicker?: string | null;
