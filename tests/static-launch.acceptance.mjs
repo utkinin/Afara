@@ -55,6 +55,7 @@ test('AFARA static launch: responsive pages, Telegram, material draft, navigatio
     await page.goto(origin+'/',{waitUntil:'networkidle'});
     const idea=page.locator('[data-save-idea]').first();
     await idea.locator('button').click();
+    await page.waitForFunction(() => document.querySelector('[data-save-idea] [role="status"]')?.textContent.trim());
     assert.ok(await idea.locator('[role="status"]').textContent());
     const fallback=idea.locator('input');
     if(await fallback.count()) assert.ok((await fallback.inputValue()).startsWith('https://afara.ru/#'));
