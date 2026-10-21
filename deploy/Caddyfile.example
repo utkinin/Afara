@@ -1,0 +1,7 @@
+# Host-installed Caddy; replace the hostname before validation/reload.
+# Web listens only on 127.0.0.1:3000; never expose PostgreSQL or port 3000.
+# With Cloudflare, use Full (strict); an edge certificate alone is insufficient.
+afara.example.com {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:3000
+}

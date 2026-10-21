@@ -23,7 +23,10 @@ test('real CMS: service confirmation, anonymous publication, knowledge revocatio
     await p.update({ collection: 'pages', id: source.id, user: owner, overrideAccess: false, data: { serviceConfirmed: true, _status: 'published' } })
     assert.equal((await fetch(`${origin}/${source.path}/`)).status, 200)
     assert.ok((await (await fetch(origin)).text()).includes(source.title), 'A new standalone direction appears in navigation without code changes')
-    const question = `От чего зависит контрольная стоимость ${tag.replaceAll('-', '')}?`
+    // Keep the unique search token alphabetic: a hex UUID can contain a long
+    // digit sequence which correctly triggers the consultant's contact filter.
+    const searchToken = [...tag.replaceAll('-', '')].map(c => String.fromCharCode(97 + parseInt(c, 16))).join('')
+    const question = `От чего зависит контрольная стоимость ${searchToken}?`
     const answer = 'Контрольная стоимость зависит от размеров окна, материалов и условий установки. Это синтетический материал проверки.'
     const k = await p.create({ collection: 'knowledge', user, overrideAccess: false, draft: true, data: { question, answer, topic: `qa-${tag}`, page: source.id, approved: true, _status: 'draft' } })
     answers.push(k.id)

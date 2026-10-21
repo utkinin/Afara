@@ -13,7 +13,8 @@ test('care page, one-click brief, educational pictures and mobile layout', async
     const response = await page.goto(`${origin}${base}/ukhod-za-shtorami/`, { waitUntil: 'networkidle' })
     assert.equal(response.status(), 200)
     assert.equal(await page.locator('h1').textContent(), 'Снятие, чистка и обратная навеска штор')
-    assert.equal(await page.locator('#care-questions details').count(), 8)
+    const faq = page.locator('#care-questions, section[aria-label="Публичные материалы AFARA"]')
+    assert.equal(await faq.locator('details').count(), 8)
     assert.equal(await page.locator('main img').first().evaluate(img => img.complete && img.naturalWidth > 0), true)
     await page.locator('a[data-inquiry-brief]').first().click()
     const description = page.getByLabel('Что вы хотите решить?')
@@ -28,9 +29,10 @@ test('care page, one-click brief, educational pictures and mobile layout', async
       if (width === 390 || width === 1440) { await page.evaluate(() => { document.activeElement?.blur(); window.scrollTo({ top: 0, behavior: 'instant' }) }); await page.waitForFunction(() => { const img = document.querySelector('main img'); return img?.complete && img.naturalWidth > 0 }); await page.screenshot({ path: `docs/screenshots/care-service-${width}.png` }) }
     }
     await page.goto(`${origin}${base}/obshchestvennye-prostranstva/shkoly-i-detskie-sady/`, { waitUntil: 'networkidle' })
-    assert.match(await page.locator('main img').first().getAttribute('src'), /school-classroom/)
-    assert.equal(await page.locator('#visual-collection img[src*="kindergarten-group"]').count(), 1)
+    assert.match(await page.locator('main img').first().getAttribute('alt'), /Школьный класс/)
+    assert.equal(await page.locator('#visual-collection img[alt*="Группа детского сада"]').count(), 1)
     assert.equal(await page.locator('#visual-collection [data-save-idea]').count(), 2)
+    assert.equal(await page.locator('#visual-collection article[id]').count(), 2)
     assert.equal(await page.locator('#idea-editorial-obshchestvennye-prostranstva-shkoly-i-detskie-sady-school').count(), 1)
     await page.locator('#visual-collection').scrollIntoViewIfNeeded()
     await page.waitForFunction(() => [...document.querySelectorAll('#visual-collection img')].every(img => img.complete && img.naturalWidth > 0))

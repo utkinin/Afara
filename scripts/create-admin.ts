@@ -19,3 +19,6 @@ if(password.length<14||!/^\S+@\S+\.\S+$/.test(email))throw new Error('Прове
 await p.create({collection:'users',data:{email,password,role:'ADMIN'}})
 console.log('Владелец создан. Сохраните пароль в менеджере паролей.')
 await p.destroy()
+// Payload's CLI adapter can retain an idle connection after destroy(). All
+// writes are awaited above; flush the success message and finish the command.
+process.stdout.write('', () => process.exit(0))
