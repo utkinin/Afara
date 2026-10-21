@@ -1,0 +1,51 @@
+name: Validate AFARA static launch
+on:
+  pull_request:
+    paths:
+      - 'scripts/*static-launch*'
+      - 'content/static-launch.json'
+      - 'tests/static-launch*'
+      - '.github/workflows/static-launch.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  static-launch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: python -m pip install -r scripts/static-launch-requirements.txt
+      - name: Build from the pinned public CMS snapshot
+        run: |
+          SNAPSHOT_SHA=$(node -p 'require("./content/static-launch.json").snapshotCommit')
+          git fetch origin "$SNAPSHOT_SHA"
+          mkdir /tmp/afara-static-source
+          git archive FETCH_HEAD | tar -x -C /tmp/afara-static-source
+          python scripts/build-static-launch.py --input /tmp/afara-static-source --output /tmp/afara-static-dist
+          AFARA_STATIC_ROOT=/tmp/afara-static-dist python tests/static-launch.test.py
+          node --check scripts/static-launch.js
+      - run: npx playwright install --with-deps chromium
+      - name: Browser acceptance on the exact deployment package
+        run: |
+          node scripts/serve-preview.mjs /tmp/afara-static-dist > /tmp/afara-static.log 2>&1 &
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://localhost:3100/ > /dev/null; then break; fi
+            sleep 1
+          done
+          export PLAYWRIGHT_CHROMIUM_EXECUTABLE="$(node --input-type=module -e 'import {chromium} from "@playwright/test"; console.log(chromium.executablePath())')"
+          AFARA_STATIC_TEST_ORIGIN=http://localhost:3100 node --test tests/static-launch.acceptance.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: afara-ru-static
+          path: /tmp/afara-static-dist
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: afara-ru-static-screenshots
+          path: /tmp/afara-static-screenshots
