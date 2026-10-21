@@ -1,0 +1,32 @@
+{
+  "origin": "https://afara.ru",
+  "telegram": "https://t.me/Ilya_Utkin",
+  "sourceSnapshot": "bea28415a6f95502d08dca8334b14e8fce35dc3e",
+  "pages": [
+    "https://afara.ru/chastnye-interery/detskie/",
+    "https://afara.ru/chastnye-interery/gostinye/",
+    "https://afara.ru/chastnye-interery/",
+    "https://afara.ru/chastnye-interery/kabinety/",
+    "https://afara.ru/chastnye-interery/kuhni-i-stolovye/",
+    "https://afara.ru/chastnye-interery/kvartiry/",
+    "https://afara.ru/chastnye-interery/spalni/",
+    "https://afara.ru/chastnye-interery/vannye/",
+    "https://afara.ru/chastnye-interery/zagorodnye-doma/",
+    "https://afara.ru/chastnye-yahty/",
+    "https://afara.ru/",
+    "https://afara.ru/kontakty/",
+    "https://afara.ru/obshchestvennye-prostranstva/",
+    "https://afara.ru/obshchestvennye-prostranstva/ofisy/",
+    "https://afara.ru/obshchestvennye-prostranstva/oteli/",
+    "https://afara.ru/obshchestvennye-prostranstva/restorany/",
+    "https://afara.ru/obshchestvennye-prostranstva/sceny/",
+    "https://afara.ru/obshchestvennye-prostranstva/shkoly-i-detskie-sady/",
+    "https://afara.ru/partneram/",
+    "https://afara.ru/poshiv-po-eskizam/",
+    "https://afara.ru/ukhod-za-shtorami/"
+  ],
+  "mode": "static-telegram",
+  "forms": false,
+  "analytics": false,
+  "cms": false
+}

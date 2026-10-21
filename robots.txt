@@ -1,2 +1,4 @@
 User-agent: *
-Disallow: /
+Disallow: /admin
+Disallow: /api/
+Sitemap: https://afara.ru/sitemap.xml

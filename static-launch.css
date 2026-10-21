@@ -1,0 +1,9 @@
+.afara-contact-card{background:#eee8e3;border:1px solid #d6ccc7;padding:clamp(24px,4vw,48px);display:flex;flex-direction:column;align-items:flex-start;gap:20px;min-width:0}
+.afara-contact-card h3{font-size:clamp(28px,3vw,40px);line-height:1.15;margin:0}
+.afara-contact-card p{font-size:18px;line-height:1.6;margin:0;overflow-wrap:anywhere}
+.afara-contact-card a{max-width:100%;min-height:48px;white-space:normal;overflow-wrap:anywhere}
+.afara-contact-note{color:#60575b;font-size:15px!important}
+.afara-brief:empty{display:none}
+.afara-brief{padding-left:16px;border-left:2px solid #684556}
+.afara-telegram-contact{display:inline-block;min-height:44px;padding-top:10px}
+@media(max-width:767px){.afara-contact-card{padding:24px 20px}.afara-contact-card>a{width:100%;justify-content:center}}
